@@ -1,0 +1,35 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  name: "pulpplatform_axi",
+  target_dir: "pulpplatform_axi",
+
+  upstream: {
+    url: "https://github.com/pulp-platform/axi.git",
+    rev: "d74943c703fe03006e8c991994adb11f76315908",
+  },
+
+  exclude_from_upstream: [
+    ".ci",
+    ".github",
+    ".gitlab-ci.d",
+    "doc",
+    "include",
+    "scripts",
+    "src",
+    "test",
+    ".gitignore",
+    ".gitlab-ci.yml",
+    "axi.core",
+    "Bender.yml",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "ips_list.yml",
+    "LICENSE",
+    "Makefile",
+    "README.md",
+    "src_files.yml",
+    "VERSION"
+  ]
+}
