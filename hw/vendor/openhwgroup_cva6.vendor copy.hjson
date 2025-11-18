@@ -1,0 +1,50 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  name: "openhwgroup_cva6",
+  target_dir: "openhwgroup_cva6",
+
+  upstream: {
+    url: "https://github.com/openhwgroup/cva6.git",
+    rev: "89986dfe867dada9752eee19a4ed4a9d274484a6",
+  },
+
+  exclude_from_upstream: [
+    ".github",
+    ".gitlab-ci",
+    "ci",
+    "common",
+    "config",
+    "corev_apu",
+    "docs",
+    "pd",
+    "perf-model",
+    "spyglass",
+    "tutorials",
+    "util",
+    "vendor",
+    "verif",
+    ".editorconfig",
+    ".gitignore",
+    ".gitlab-ci.yml",
+    ".gitmodules",
+    ".readthedocs.yaml",
+    "ACKNOWLEDGEMENTS.md",
+    "Bender.yml",
+    "CHANGELOG.md",
+    "CITATION.cff",
+    "CODEOWNERS",
+    "CONTRIBUTING.md",
+    "Flist.ariane",
+    "LICENSE",
+    "LICENSE.Berkeley",
+    "LICENSE.SiFive",
+    "Makefile",
+    "README.md",
+    "RESOURCES.md",
+    "src_files.yml",
+    "verilator_config.vlt",
+    "ariane.core"
+  ]
+}
