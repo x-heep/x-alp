@@ -71,7 +71,7 @@ module mempory_subsystem
     assign ram_resp_o[i].rvalid = ram_valid_q[i];
   end 
 
-  */ OBI protocol END - scrapped
+  */ // OBI protocol END - scrapped
 
   // swapped the final for into the rest: inteface + ram banks modules
 
