@@ -1,4 +1,3 @@
-// Memory subsystem by AB
 // reference for axi-to-mem iterface : https://github.com/pulp-platform/axi/blob/master/src/axi_to_mem.sv
 
 /* verilator lint_off UNUSED */
