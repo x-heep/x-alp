@@ -1,0 +1,179 @@
+`verilator_config
+
+////////////////////
+// Cheshire SoC
+////////////////////
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Bit extraction of var[1:0] requires 1 bit index, not 10 bits."
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Operator OR expects 48 bits on the LHS, but LHS's SEL generates 2 bits."
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's OR generates 48 bits."
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Operator AND expects 48 bits on the LHS, but LHS's SEL generates 2 bits."
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's AND generates 48 bits."
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Operator PATMEMBER expects 7 bits on the Pattern value, but Pattern value's * generates 64 bits"
+lint_off -rule WIDTH -file "*/cheshire_soc.sv" -match "Operator SHIFTL expects 32 bits on the LHS, but LHS's ARRAYSEL generates 1 bits."
+
+lint_off -rule WIDTH -file "*/spinal_usb_ohci.sv" -match "Operator AND expects 48 bits on the LHS, but LHS's SEL generates 32 bits."
+lint_off -rule WIDTH -file "*/cheshire_bootrom.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+
+// ACC disabled
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* connected by name with empty reference: 'cvxif_req_o'"
+
+
+lint_off -rule UNSIGNED -file "*/UsbOhciAxi4.v" -match "Comparison is constant due to unsigned arithmetic"
+lint_off -rule CMPCONST -file "*/UsbOhciAxi4.v" -match "Comparison is constant due to limited range"
+lint_off -rule DECLFILENAME -file "*/UsbOhciAxi4.v" -match "Filename * does not match MODULE name: '*'"
+
+lint_off -rule DECLFILENAME -file "*/spinal_usb_ohci.sv" -match "Filename * does not match PACKAGE name: '*'"
+
+lint_off -rule SYMRSVDWORD -file "*/cheshire_soc.sv" -match "Symbol matches C++ keyword: 'register'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_reg_top.sv"
+lint_off -rule DECLFILENAME -file "*/cheshire_reg_top.sv" -match "Filename * does not match MODULE name: *"
+
+
+
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_idma_wrap.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'out1_no'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'out2_no'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'isolate_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'clk_ena_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'reset_no'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'wstrb_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'wdata_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'msip_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'irq_id_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'ndmreset_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'mem_atop_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'busy_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'rvfi_probes_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'mmu_resp_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'mmu_en_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'axi_llc_events_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'dec_error_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/cheshire_soc.sv" -match "* pin connected by name with empty reference: 'dec_valid_o'"
+
+///////////
+// Multiple drivers
+///////////
+
+lint_off -rule MULTIDRIVEN -file "*/cheshire_soc.sv" -match "Variable written to in always_comb also written by other process (IEEE 1800-2023 9.2.2.2): 'axi_in_req'"
+lint_off -rule MULTIDRIVEN -file "*/cheshire_soc.sv" -match "Variable written to in always_comb also written by other process (IEEE 1800-2023 9.2.2.2): 'axi_out_rsp'"
+lint_off -rule MULTIDRIVEN -file "*/cheshire_soc.sv" -match "Variable also written to in always_comb (IEEE 1800-2023 9.2.2.2): 'axi_in_req'"
+///////////
+// Unused
+///////////
+lint_off -rule UNUSED -file "*/cheshire_reg_top.sv" -match "Parameter is not used: 'AW'"
+lint_off -rule UNUSED -file "*/cheshire_reg_pkg.sv" -match "Parameter is not used: *"
+lint_off -rule UNUSED -file "*/UsbOhciAxi4.v" -match "Signal is not used: *"
+lint_off -rule UNUSED -file "*/UsbOhciAxi4.v" -match "Signal is not used: *"
+lint_off -rule UNUSED -file "*/UsbOhciAxi4.v" -match "Signal is not driven, nor used: *"
+lint_off -rule UNUSED -file "*/UsbOhciAxi4.v" -match "Bits of signal are not used: *"
+lint_off -rule SYNCASYNCNET -file "*/UsbOhciAxi4.v" -match "Signal flopped as both synchronous and async: *i_UsbOhciAxi4__ctrl_reset'" // interaction with simjtag
+
+
+lint_off -rule UNUSED -file "*/cheshire_bootrom.sv" -match "Signal is not used: 'clk_i'"
+lint_off -rule UNUSED -file "*/cheshire_bootrom.sv" -match "Signal is not used: 'rst_ni'"
+lint_off -rule UNUSED -file "*/cheshire_bootrom.sv" -match "Signal is not used: 'req_i'"
+
+// Due to config
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'reg_id'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'clic_*'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'spih_*'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'spih_csb_dummy_en'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'spih_csb_dummy'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Bits of signal are not used: 'dbg_sba_addr_long'[63:48]"
+
+// 1D config
+lint_off -rule UNUSED -file "*/cheshire_idma_wrap.sv" -match "Signal is not driven, nor used: '*_d'"
+
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'axi_ext_slv_rsp_i'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'axi_ext_mst_req_i'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'reg_ext_slv_rsp_i'"
+lint_off -rule UNUSED -file "*/cheshire_soc.sv" -match "Signal is not used: 'dbg_ext_unavail_i'"
+
+lint_off -rule VARHIDDEN -file "*/cheshire_soc.sv" 
+
+////////////////////////////
+// Unoptimzable signals
+////////////////////////////
+// Debug system
+lint_off -rule UNOPTFLAT -file "*/cdc_4phase.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *.data_valid'"
+
+lint_off -rule UNOPTFLAT -file "*/stream_mux.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_dbg_slv_axi_to_mem.i_axi_to_mem_*.i_axi_to_detailed_mem.__Vcellout__i_ax_mux__inp_ready_o'"
+lint_off -rule UNOPTFLAT -file "*/stream_fork_dynamic.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_dbg_slv_axi_to_mem.i_axi_to_mem_*.i_axi_to_detailed_mem.__Vcellout__i_fork_dynamic__valid_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *__Vcellout__i_axi_to_detailed_mem__axi_resp_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptimizable: Circular combinational logic: '*i_dbg_slv_axi_to_mem.i_axi_to_mem_write.__VdfgRegularize_h*'"
+lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptimizable: Circular combinational logic: '*i_dbg_slv_axi_to_mem.i_axi_to_mem_write.i_axi_to_detailed_mem.arb_valid'"
+lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptimizable: Circular combinational logic: '*i_dbg_slv_axi_to_mem.i_axi_to_mem_write.i_axi_to_detailed_mem.meta_sel_d'"
+
+lint_off -rule UNOPTFLAT -file "*/dm_top.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_dbg_dm_top.data_valid'"
+lint_off -rule UNOPTFLAT -file "*/dm_top.sv" -match "Signal unoptimizable: Circular combinational logic: *.i_dbg_dm_top.clear_resumeack'"
+lint_off -rule UNOPTFLAT -file "*/dm_mem.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_dbg_dm_top.__Vcellout__i_dm_mem__data_o'"
+lint_off -rule UNOPTFLAT -file "*/dm_mem.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *.i_dbg_dm_top.i_dm_mem.exception'"
+lint_off -rule UNOPTFLAT -file "*/cdc_reset_ctrlr.sv" -match "Signal unoptimizable: Circular combinational logic: *i_cdc_reset_ctrlr.i_cdc_reset_ctrlr_half_a.initiator_phase_transition_ack'"
+lint_off -rule UNOPTFLAT -file "*/cdc_reset_ctrlr.sv" -match "Signal unoptimizable: Circular combinational logic: *i_cdc_reset_ctrlr.i_cdc_reset_ctrlr_half_a.receiver_phase_ack'"
+
+// Dbg atomic
+// and vga
+lint_off -rule UNOPTFLAT -file "*/id_queue.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *.oup_data_popped'"
+lint_off -rule UNOPTFLAT -file "*/id_queue.sv" -match "Signal unoptimizable: Circular combinational logic: *VdfgRegularize_*'"
+lint_off -rule UNOPTFLAT -file "*/id_queue.sv" -match "Signal unoptimizable: Circular combinational logic: *i_reg_atomics.i_axi_riscv_atomics_wrap.i_atomics.i_lrsc.i_read_in_flight_queue.match_in_id_valid'"
+lint_off -rule UNOPTFLAT -file "*/id_queue.sv" -match "Signal unoptimizable: Circular combinational logic: *i_reg_atomics.i_axi_riscv_atomics_wrap.i_atomics.i_lrsc.i_read_in_flight_queue.match_in_id'"
+
+// BUS
+lint_off -rule UNOPTFLAT -file "*/axi_demux_simple.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_axi_xbar.i_xbar_unmuxed.gen_slv_port_demux[*].i_axi_demux.__Vcellout__i_demux_simple__mst_reqs_o'"
+
+// UART
+lint_off -rule UNOPTFLAT -file "*/obi_uart_modem.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *gen_uart.i_uart.i_apb_uart_wrap.i_obi_uart.i_uart_modem.sync_cd_n_d'"
+lint_off -rule UNOPTFLAT -file "*/obi_uart_modem.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_uart.i_apb_uart_wrap.i_obi_uart.__Vcellout__i_uart_modem__reg_write_o'"
+lint_off -rule UNOPTFLAT -file "*/obi_uart_register.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *gen_uart.i_uart.i_apb_uart_wrap.i_obi_uart.__Vcellout__i_uart_register__obi_rsp_o'"
+// VGA
+lint_off -rule UNOPTFLAT -file "*/axi_vga.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *.gen_vga.i_axi_vga.credit_valid'"
+lint_off -rule UNOPTFLAT -file "*/axi_vga.sv" -match "Signal unoptimizable: Circular combinational logic: *.gen_vga.i_axi_vga.credit_ready'"
+lint_off -rule UNOPTFLAT -file "*/axi_burst_splitter_gran.sv" -match "Signal unoptimizable: Circular combinational logic: *i_axi_burst_splitter_gran_aw_chan.i_axi_burst_splitter_gran_counters.idq_inp_gnt'"
+
+// Axi2reg
+lint_off -rule UNOPTFLAT -file "*/stream_mux.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *.i_axi_to_reg_v2.i_axi_to_detailed_mem.__Vcellout__i_ax_mux__inp_ready_o'"
+// AXI serializer
+lint_off -rule UNOPTFLAT -file "*/axi_serializer.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_axi_id_serialize.__Vcellout__gen_serializers[*].i_axi_serializer__mst_req_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_serializer.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_axi_id_serialize.__Vcellout__gen_serializers[*].i_axi_serializer__mst_req_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_serializer.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_axi_id_serialize.__Vcellout__gen_serializers[*].i_axi_serializer__slv_resp_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_serializer.sv" -match "Signal unoptimizable: Circular combinational logic: '__VdfgRegularize_hf*'"
+lint_off -rule UNOPTFLAT -file "*/axi_serializer.sv" -match "Signal unoptimizable:*'__VdfgRegularize_hd*'"
+lint_off -rule UNOPTFLAT -file "*/axi_atop_filter.sv" -match "Signal unoptimizable: Circular combinational logic: '__VdfgRegularize_h*'"
+
+// USB
+lint_off -rule UNOPTFLAT -file "*/axi_dw_upsizer.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *gen_usb.i_spinal_usb_ohci.i_axi_dw_converter_dma.__Vcellout__gen_dw_upsize.i_axi_dw_upsizer__slv_resp_o'"
+lint_off -rule UNOPTFLAT -file "*/reg_to_axi.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *gen_usb.i_spinal_usb_ohci.__Vcellout__i_reg_to_axi_ctrl__axi_req_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_demux_simple.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_spinal_usb_ohci.i_axi_dw_converter_dma.gen_dw_upsize.i_axi_dw_upsizer.i_axi_demux.__Vcellout__i_demux_simple__mst_reqs_o'"
+lint_off -rule UNOPTFLAT -file "*/axi_dw_upsizer.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_spinal_usb_ohci.i_axi_dw_converter_dma.gen_dw_upsize.i_axi_dw_upsizer.slv_r_valid_tran'"
+lint_off -rule UNOPTFLAT -file "*/UsbOhciAxi4.v" -match "Signal unoptimizable: Circular combinational logic: *.gen_usb.i_spinal_usb_ohci.i_UsbOhciAxi4.front_dmaBridge_io_output_r_ready'"
+lint_off -rule UNOPTFLAT -file "*/UsbOhciAxi4.v" -match "Signal unoptimizable: Circular combinational logic: *gen_usb.i_spinal_usb_ohci.i_UsbOhciAxi4.front_dmaBridge_io_output_b_ready'"
+lint_off -rule UNOPTFLAT -file "*/axi_err_slv.sv" -match "Signal unoptimizable: Circular combinational logic: *gen_usb.i_spinal_usb_ohci.i_axi_dw_converter_dma.gen_dw_upsize.i_axi_dw_upsizer.i_axi_err_slv.__VdfgRegularize_h*'"
+lint_off -rule UNOPTFLAT -file "*/axi_dw_upsizer.sv" -match "Signal unoptimizable: Circular combinational logic: *gen_usb.i_spinal_usb_ohci.i_axi_dw_converter_dma.gen_dw_upsize.i_axi_dw_upsizer.inject_aw_into_ar_gnt'"
+lint_off -rule UNOPTFLAT -file "*/axi_dw_upsizer.sv" -match "Signal unoptimizable: Circular combinational logic: *gen_usb.i_spinal_usb_ohci.i_axi_dw_converter_dma.gen_dw_upsize.i_axi_dw_upsizer.*"
+lint_off -rule UNOPTFLAT -file "*/onehot_to_bin.sv" -match "Signal unoptimizable: Circular combinational logic: *gen_usb.i_spinal_usb_ohci.i_axi_dw_converter_dma.gen_dw_upsize.i_axi_dw_upsizer.i_rid_upsizer_lzc.bin'"
+
+
+
+
+// Serial link
+lint_off -rule UNOPTFLAT -file "*/serial_link_network.sv" -match "Signal unoptimizable: Circular combinational logic: '__VdfgRegularize_h*'"
+lint_off -rule UNOPTFLAT -file "*/serial_link.sv" -match "Signal unoptimizable: Circular combinational logic: *i_serial_link.data_link2alloc_data_out_valid'"
+
+
+// idma
+lint_off -rule UNOPTFLAT -file "*/axi_riscv_atomics.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*i_axi_riscv_atomics_wrap.i_atomics.int_axi_cut_rsp'"
+
+// Plic
+lint_off -rule UNOPTFLAT -file "*/prim_max_tree.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_plic.gen_target[*].u_target.u_prim_max_tree.vld_tree'"
+lint_off -rule UNOPTFLAT -file "*/prim_max_tree.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_plic.gen_target[*].u_target.u_prim_max_tree.max_tree'"
+lint_off -rule UNOPTFLAT -file "*/prim_max_tree.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *i_plic.gen_target[*].u_target.u_prim_max_tree.idx_tree'"
+
+// atomics
+lint_off -rule UNOPTFLAT -file "*/axi_riscv_lrsc.sv" -match "Signal unoptimizable: Circular combinational logic: *i_reg_atomics.i_axi_riscv_atomics_wrap.i_atomics.i_lrsc.b_status_inp_gnt'"
+lint_off -rule UNOPTFLAT -file "*/axi_riscv_lrsc.sv" -match "Signal unoptimizable: Circular combinational logic: *i_reg_atomics.i_axi_riscv_atomics_wrap.i_atomics.i_lrsc.wifq_inp_gnt'"
+lint_off -rule UNOPTFLAT -file "*/axi_riscv_lrsc.sv" -match "Signal unoptimizable: Circular combinational logic: *i_reg_atomics.i_axi_riscv_atomics_wrap.i_atomics.i_lrsc.rifq_inp_gnt'"
+
+lint_off -rule UNOPTFLAT -file "*/spill_register.sv" -match "Signal unoptimizable: Circular combinational logic: *i_llc.i_axi_llc_top_raw.i_axi_bypass_mux.__Vcellout__gen_mux.i_b_spill_reg__ready_o'"
+
+
+

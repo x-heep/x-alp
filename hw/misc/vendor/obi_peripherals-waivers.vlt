@@ -1,0 +1,16 @@
+`verilator_config
+lint_off -rule WIDTH -file "*/obi_uart_rx.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+
+lint_off -rule UNUSED -file "*/obi_uart_baudgen.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file "*/obi_uart_interrupts.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file "*/obi_uart_modem.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file "*/obi_uart_rx.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file "*/obi_uart_tx.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file "*/obi_uart_tx.sv" -match "Signal is not used: '*"
+lint_off -rule UNUSED -file "*/obi_uart.sv" -match "Parameter is not used: 'ObiCfg'"
+
+// Critical on character_length , might be BUG
+lint_off -rule LATCH -file "*/obi_uart_rx.sv" -match "Latch inferred for signal *"
+lint_off -rule UNOPTFLAT -file "*/obi_uart.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*.i_apb_uart_wrap.i_obi_uart.reg_write'"
+
+

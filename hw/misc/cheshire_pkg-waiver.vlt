@@ -1,0 +1,15 @@
+`verilator_config
+
+////////////////////////////
+// CHESHIRE PKG
+////////////////////////////
+lint_off -rule WIDTH -file "*/cheshire_pkg.sv" -match "Operator PATMEMBER expects 1024 bits on the Pattern value, but Pattern value's REPLICATE generates *"
+lint_off -rule WIDTHCONCAT -file "*/cheshire_pkg.sv" -match "More than a 8k bit replication is probably wrong: 8576"
+
+lint_off -rule SYMRSVDWORD -file "*/cheshire_pkg.sv" -match "Symbol matches C++ common word: 'map'"
+
+lint_off -rule UNUSED -file "*/cheshire_pkg.sv" -match "Parameter is not used:*"
+lint_off -rule UNUSED -file "*/cheshire_pkg.sv" -match "Bits of signal are not used:*"
+
+lint_off -rule VARHIDDEN -file "*/cheshire_pkg.sv"
+

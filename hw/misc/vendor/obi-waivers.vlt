@@ -1,0 +1,7 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/obi*/*.sv" -match "* pin connected by name with empty reference: '*'"
+lint_off -rule DECLFILENAME    -file "*/obi*/*.sv" -match "Filename '*' does not match IFACE name: '*'"
+lint_off -rule DECLFILENAME    -file "*/obi*/*.sv" -match "Filename '*' does not match MODULE name: '*'"
+lint_off -rule UNUSED          -file "*/obi*/src/obi_pkg.sv" -match "Parameter is not used: '*'"
+lint_off -rule UNUSED -file "*/apb_to_obi.sv" -match "Bits of signal are not used: '*"
+

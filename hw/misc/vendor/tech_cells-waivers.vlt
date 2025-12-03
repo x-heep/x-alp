@@ -1,0 +1,11 @@
+`verilator_config
+lint_off -rule UNUSED -file "*/tc_sram.sv" -match "Parameter is not used: *"
+lint_off -rule UNUSED -file "*/tc_sram.sv" -match "Signal is not used: 'init_val'"
+lint_off -rule UNSIGNED -file "*/tc_sram.sv" -match "Comparison is constant due to unsigned arithmetic"
+
+lint_off -rule DECLFILENAME -file "*/tc_clk.sv" -match "Filename * does not match MODULE name: *"
+lint_off -rule DECLFILENAME -file "*/tc_pwr.sv" -match "Filename * does not match MODULE name: *"
+lint_off -rule DECLFILENAME -file "*/pulp_clk_cells.sv" -match "Filename * does not match MODULE name: *"
+lint_off -rule DECLFILENAME -file "*/cluster_clk_cells.sv" -match "Filename * does not match MODULE name: *"
+
+lint_off -rule ASSIGNDLY -file "*/pulp_clk_cells.sv" -match "Unsupported: Ignoring delay on this assignment/primitive."

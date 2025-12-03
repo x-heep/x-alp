@@ -1,0 +1,20 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/clicint_reg_top.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/mclic_reg_top.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/clic_reg_top.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/clint_reg_top.sv"
+lint_off -rule DECLFILENAME -file "*/clint_reg_top.sv" -match "Filename 'clint_reg_top' does not match MODULE name: 'clint_reg_top_intf'"
+lint_off -rule DECLFILENAME -file "*/mclic_reg_top.sv" -match "Filename 'mclic_reg_top' does not match MODULE name: 'mclic_reg_top_intf'"
+lint_off -rule DECLFILENAME -file "*/clicint_reg_top.sv" -match "Filename 'clicint_reg_top' does not match MODULE name: 'clicint_reg_top_intf'"
+lint_off -rule DECLFILENAME -file "*/clint.sv" -match "Filename 'clint' does not match MODULE name: 'clint_sync_wedge'"
+
+lint_off -rule PINCONNECTEMPTY -file "*/clint.sv" -match "* pin connected by name with empty reference: 'f_edge_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/clint.sv" -match "* pin connected by name with empty reference: 'serial_o'"
+
+lint_off -rule UNUSED -file "*/clint_reg_top.sv" -match "Parameter is not used: 'AW'"
+lint_off -rule UNUSED -file "*/clic_reg_top.sv" -match "Parameter is not used: 'AW'"
+lint_off -rule UNUSED -file "*/mclic_reg_top.sv" -match "Parameter is not used: 'AW'"
+lint_off -rule UNUSED -file "*/clicint_reg_top.sv" -match "Parameter is not used: 'AW'"
+
+lint_off -rule UNUSED -file "*/clint.sv" -match "Signal is not used: 'testmode_i'"
+

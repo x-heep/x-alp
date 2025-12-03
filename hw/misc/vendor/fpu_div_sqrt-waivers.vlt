@@ -1,0 +1,34 @@
+`verilator_config
+lint_off -rule WIDTH -file "*/control_mvp.sv" -match "Operator ASSIGN expects * bits on the Assign RHS, but Assign RHS's * generates * bits."
+lint_off -rule WIDTH -file "*/control_mvp.sv" -match "Operator ASSIGNW expects * bits on the Assign RHS, but Assign RHS's * generates * bits."
+lint_off -rule WIDTH -file "*/control_mvp.sv" -match "Operator COND expects 14 bits on the Conditional True, but Conditional True's REPLICATE generates 13 bits."
+
+lint_off -rule WIDTH -file "*/preprocess_mvp.sv" -match "Operator * expects * bits on the *RHS, but * generates * bits."
+lint_off -rule WIDTH -file "*/norm_div_sqrt_mvp.sv" -match "Operator * expects * bits on the *RHS, but * generates * bits."
+lint_off -rule WIDTH -file "*/norm_div_sqrt_mvp.sv" -match "Operator COND expects * bits on the Conditional True, but Conditional True's * generates * bits."
+lint_off -rule WIDTH -file "*/norm_div_sqrt_mvp.sv" -match "Operator * expects * bits on the *LHS, but * generates * bits."
+
+lint_off -rule UNUSED -file "*/defs_div_sqrt_mvp.sv" -match "Parameter is not used:*"
+lint_off -rule UNUSED -file "*/norm_div_sqrt_mvp.sv" -match "Signal is not used:*"
+lint_off -rule UNUSED -file "*/norm_div_sqrt_mvp.sv" -match "Bits of signal are not used:*"
+lint_off -rule UNUSED -file "*/preprocess_mvp.sv" -match "Signal is not used:*"
+lint_off -rule UNUSED -file "*/nrbd_nrsc_mvp.sv" -match "Signal is not used:*"
+lint_off -rule UNUSED -file "*/control_mvp.sv" -match "Signal is not used:*"
+lint_off -rule UNUSED -file "*/control_mvp.sv" -match "Signal is not driven, nor used:*"
+lint_off -rule UNUSED -file "*/iteration_div_sqrt_mvp.sv" -match "Signal is not used:*"
+
+// Import
+lint_off -rule IMPORTSTAR -file "*/control_mvp.sv" -match "Import::* in $unit scope may pollute global namespace"
+lint_off -rule IMPORTSTAR -file "*/defs_div_sqrt_mvp.sv" -match "Import::* in $unit scope may pollute global namespace"
+lint_off -rule IMPORTSTAR -file "*/preprocess_mvp.sv" -match "Import::* in $unit scope may pollute global namespace"
+lint_off -rule IMPORTSTAR -file "*/norm_div_sqrt_mvp.sv" -match "Import::* in $unit scope may pollute global namespace"
+lint_off -rule IMPORTSTAR -file "*/nrbd_nrsc_mvp.sv" -match "Import::* in $unit scope may pollute global namespace"
+lint_off -rule IMPORTSTAR -file "*/div_sqrt_mvp_wrapper.sv" -match "Import::* in $unit scope may pollute global namespace"
+lint_off -rule IMPORTSTAR -file "*/div_sqrt_top_mvp.sv" -match "Import::* in $unit scope may pollute global namespace"
+
+//////////////////////
+// Unopt
+//////////////////////
+// TODO: check, some are sqrt
+lint_off -rule UNOPTFLAT -file "*/control_mvp.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+lint_off -rule UNOPTFLAT -file "*/control_mvp.sv" -match "Signal unoptimizable: Circular combinational logic:*"

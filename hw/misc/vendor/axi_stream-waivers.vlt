@@ -1,0 +1,4 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/axi_stream*/*.sv"
+lint_off -rule DECLFILENAME    -file "*/axi_stream*/*.sv" -match "Filename '*' does not match IFACE name: '*'"
+lint_off -rule DECLFILENAME    -file "*/axi_stream*/*.sv" -match "Filename '*' does not match MODULE name: '*'"
