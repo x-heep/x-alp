@@ -1,0 +1,540 @@
+CAPI=2:
+# Created by bender from the available manifest file, then reworked manually
+
+
+name: epfl:cheshire:cheshire:0.0.1
+filesets:
+  files_rtl:
+    file_type: systemVerilogSource
+    files:
+    - hw/future/UsbOhciAxi4.v:
+        file_type: verilogSource
+    - hw/future/spinal_usb_ohci.sv
+    - hw/bootrom/cheshire_bootrom.sv
+    - hw/regs/cheshire_reg_pkg.sv
+    - hw/regs/cheshire_reg_top.sv
+    - hw/cheshire_idma_wrap.sv
+    - hw/dmi_xbar_1toN.sv
+    - hw/cheshire_pkg.sv
+    - hw/cheshire_soc.sv
+    - hw/include/cheshire/typedef.svh:
+        is_include_file: true
+        include_path: hw/include
+    - hw/include/cheshire/intf_typedef.svh:
+        is_include_file: true
+        include_path: hw/include
+  rtl_vendor:
+    file_type: systemVerilogSource
+    files:
+    #- hw/vendor/tech_cells_generic/src/rtl/tc_sram.sv
+    - hw/vendor/pulp_platform_cluster_interconnect/rtl/tcdm_variable_latency_interconnect/addr_dec_resp_mux_varlat.sv
+    - hw/vendor/pulp_platform_cluster_interconnect/rtl/tcdm_variable_latency_interconnect/xbar_varlat.sv
+    depend:
+    - ::apb_uart:0.2.3
+    - pulp-platform.org::axi:0.39.8
+    - ::axi_riscv_atomics:0.8.2
+    - ::axi_rt:0.0.10
+    - ::axi_vga:0.1.4
+    - ::clic:2.0.0
+    - ::clint:0.2.0
+    - pulp-platform.org::common_cells:1.38.0
+    - tool_modelsim ? (pulp-platform.org::common_verification:0.2.5)
+    - '::cva6:'
+    - ::idma:0.6.5
+    - ::irq_router:0.0.1
+    - ::opentitan_peripherals:0.4.0
+    - ::register_interface:0.4.6
+    - ::riscv-dbg:0.8.1
+    - ::serial_link:1.1.2
+    - ::unbent:0.1.6
+    - ::dram_rtl_sim:0.1.1
+    #- openhwgroup.org:ip:cv32e40x
+    #- x-heep:ip:dma
+
+  waivers:
+    file_type: vlt
+    files:
+    - hw/misc/vendor/common_cells-waivers.vlt
+    - hw/misc/vendor/tech_cells-waivers.vlt
+    - hw/misc/vendor/apb-waivers.vlt
+    - hw/misc/vendor/unbent-waivers.vlt
+    - hw/misc/vendor/axi_stream-waivers.vlt
+    - hw/misc/vendor/irq_router-waivers.vlt
+    - hw/misc/vendor/axi_rt-waivers.vlt
+    - hw/misc/vendor/obi-waivers.vlt
+    - hw/misc/vendor/obi_peripherals-waivers.vlt
+    - hw/misc/vendor/opentitan_peripherals-waivers.vlt
+    - hw/misc/vendor/axi-waivers.vlt
+    - hw/misc/vendor/axi_vga-waivers.vlt
+    - hw/misc/vendor/riscv_dbg-waivers.vlt
+    - hw/misc/vendor/riscv_atomics-waivers.vlt
+    - hw/misc/vendor/fpnew-waivers.vlt
+    - hw/misc/vendor/fpu_div_sqrt-waivers.vlt
+    - hw/misc/vendor/register_interface-waivers.vlt
+    - hw/misc/vendor/serial_link-waivers.vlt
+    - hw/misc/vendor/cva6-waivers.vlt
+    - hw/misc/vendor/clint-waivers.vlt
+    #- hw/misc/vendor/axi_llc-waivers.vlt
+    - hw/misc/cheshire_pkg-waiver.vlt
+    - hw/misc/cheshire-waivers.vlt
+    - hw/misc/vendor/uartdpi-waivers.vlt
+    - hw/misc/tb/tb-waivers.vlt
+  
+  simulation_or_test:
+    file_type: systemVerilogSource
+    files:
+    - tb//models/s25fs512s.v:
+        file_type: verilogSource
+    - tb/models/24FC1025.v:
+        file_type: verilogSource
+    - tb/src/verilator/tb_cheshire_util.svh:
+        is_include_file: true
+    - tb/src/remote_bitbang/SimJTAG.sv
+    - hw/vendor/axi/src/axi_test.sv
+    - hw/vendor/riscv-dbg/src/dmi_intf.sv
+    - hw/vendor/riscv-dbg/tb/jtag_dmi/jtag_intf.sv
+    - hw/vendor/riscv-dbg/tb/jtag_dmi/jtag_test.sv
+    - tb/src/obi_to_mem.sv
+    - hw/vendor/tech_cells_generic/src/rtl/tc_sram.sv
+    - tb/src/tc_sram_mem_wrapper.sv
+    - tb/src/vip_cheshire_soc.sv
+    - tb/src/tb_cheshire_pkg.sv
+    - tb/src/fixture_cheshire_soc.sv
+    - tb/src/tb_cheshire_soc.sv
+    depend:
+    - ::apb_uart:0.2.3
+    - pulp-platform.org::axi:0.39.8
+    - ::axi_riscv_atomics:0.8.2
+    - ::axi_rt:0.0.10
+    - ::axi_vga:0.1.4
+    - ::clic:2.0.0
+    - ::clint:0.2.0
+    - pulp-platform.org::common_cells:1.38.0
+    - tool_modelsim ? (pulp-platform.org::common_verification:0.2.5)
+    - '::cva6:'
+    - ::idma:0.6.5
+    - ::irq_router:0.0.1
+    - ::opentitan_peripherals:0.4.0
+    - ::register_interface:0.4.6
+    - ::riscv-dbg:0.8.1
+    - ::serial_link:1.1.2
+    - ::unbent:0.1.6
+    - ::dram_rtl_sim:0.1.1
+  
+  postsyn_tb:
+    file_type: systemVerilogSource
+    files:
+    - tb/models/s25fs512s.v:
+        file_type: verilogSource
+    - tb/models/24FC1025.v:
+        file_type: verilogSource
+    - hw/include/cheshire/typedef.svh:
+        is_include_file: true
+        include_path: hw/include
+    - hw/vendor/axi_llc/include/axi_llc/cvxif_types.svh:
+        is_include_file: true
+        include_path: hw/vendor/axi_llc/include
+    - tb/src/verilator/tb_cheshire_util.svh:
+        is_include_file: true
+    - hw/future/spinal_usb_ohci.sv
+    - hw/vendor/axi/src/axi_pkg.sv
+    - hw/vendor/axi/src/axi_intf.sv
+    - hw/vendor/axi_llc/src/axi_llc_reg_pkg.sv
+    - hw/vendor/axi_llc/src/axi_llc_pkg.sv
+    - hw/vendor/axi_llc/src/packages/axi_llc_cfg_pkg.sv
+    - hw/vendor/cva6/core/include/config_pkg.sv
+    - cv64a6_imafdcx_sv39 ? (hw/vendor/cva6/core/include/cv64a6_imafdcx_sv39_config_pkg.sv)
+    - hw/regs/cheshire_reg_pkg.sv
+    - hw/cheshire_pkg.sv
+    - tb/src/remote_bitbang/SimJTAG.sv
+    - hw/vendor/axi/src/axi_test.sv
+    - hw/vendor/riscv-dbg/src/dmi_intf.sv
+    - hw/vendor/riscv-dbg/tb/jtag_dmi/jtag_intf.sv
+    - hw/vendor/riscv-dbg/tb/jtag_dmi/jtag_test.sv
+    - tb/src/obi_to_mem.sv
+    - hw/vendor/tech_cells_generic/src/rtl/tc_sram.sv
+    - tb/src/tc_sram_mem_wrapper.sv
+    - tb/src/vip_cheshire_soc.sv
+    - tb/src/tb_cheshire_pkg.sv
+    - tb/src/fixture_cheshire_soc.sv
+    - tb/src/tb_cheshire_soc.sv
+    depend:
+    - ::apb_uart:0.2.3
+    - pulp-platform.org::axi:0.39.8
+    - pulp-platform.org::common_verification:0.2.5
+    - ::riscv-dbg:0.8.1
+    - ::serial_link:1.1.2
+    - ::opentitan_peripherals:0.4.0
+    - ::clint:0.2.0
+
+  pre_build_dpi_files:
+    files:
+    - tb/scripts/compile_dpi_files.sh
+    - tb/scripts/compile_uart_dpi.sh
+    file_type: user
+
+  # TODO: FPGA support
+  #fpga_xilinx:
+  #  file_type: systemVerilogSource
+  #  files:
+  #  - target/xilinx/src/phy_definitions.svh
+  #  - target/xilinx/src/dram_wrapper_xilinx.sv
+  #  - target/xilinx/src/fan_ctrl.sv
+  #  - target/xilinx/src/regs/chs_xilinx_reg_pkg.sv
+  #  - target/xilinx/src/regs/chs_xilinx_reg_top.sv
+  #  - target/xilinx/src/cheshire_top_xilinx.sv
+  #  depend:
+  #  - ::apb_uart:0.2.3
+  #  - pulp-platform.org::axi:0.39.8
+  #  - ::axi_riscv_atomics:0.8.2
+  #  - ::axi_rt:0.0.10
+  #  - ::axi_vga:0.1.4
+  #  - ::clic:2.0.0
+  #  - ::clint:0.2.0
+  #  - pulp-platform.org::common_cells:1.38.0
+  #  - tool_modelsim ? (pulp-platform.org::common_verification:0.2.5)
+  #  - '::cva6:'
+  #  - ::idma:0.6.5
+  #  - ::irq_router:0.0.1
+  #  - ::opentitan_peripherals:0.4.0
+  #  - ::register_interface:0.4.6
+  #  - ::riscv-dbg:0.8.1
+  #  - ::serial_link:1.1.2
+  #  - ::unbent:0.1.6
+  #  - ::dram_rtl_sim:0.1.1
+  #  - pulp-platform.org::axi:0.39.8
+  #  #- openhwgroup.org:ip:cv32e40x
+  #  #- x-heep:ip:dma
+  
+  remote_bitbang_dpi:
+    depend:
+    - pulp-platform.org::riscv_dbg_remote_bitbang
+
+  uart_dpi:
+    depend:
+    - lowrisc:dv_dpi:uartdpi
+  
+  verilator_sim:
+    files:
+    - hw/vendor/common_verification/src/clk_rst_gen.sv
+    - tb/src/tb_cheshire_pkg.sv
+    - tb/src/obi_to_mem.sv
+    - tb/src/tc_sram_mem_wrapper.sv
+    - tb/src/vip_cheshire_soc.sv
+    - tb/src/cheshire_testharness.sv
+    file_type: systemVerilogSource
+    depend:
+    - ::apb_uart:0.2.3
+    - pulp-platform.org::axi:0.39.8
+    - ::axi_riscv_atomics:0.8.2
+    - ::axi_rt:0.0.10
+    - ::axi_vga:0.1.4
+    - ::clic:2.0.0
+    - ::clint:0.2.0
+    - pulp-platform.org::common_cells:1.38.0
+    - tool_modelsim ? (pulp-platform.org::common_verification:0.2.5)
+    - '::cva6:'
+    - ::idma:0.6.5
+    - ::irq_router:0.0.1
+    - ::opentitan_peripherals:0.4.0
+    - ::register_interface:0.4.6
+    - ::riscv-dbg:0.8.1
+    - ::serial_link:1.1.2
+    - ::unbent:0.1.6
+    - ::dram_rtl_sim:0.1.1
+    - pulp-platform.org::axi:0.39.8
+  tb_verilator:
+    files:
+    - tb/src/verilator/cheshire_utils.hh:
+        is_include_file: true
+    - tb/src/verilator/cheshire_utils.cpp
+    - tb/src/verilator/tb_elfloader.hh:
+        is_include_file: true
+    - tb/src/verilator/tb_elfloader.cpp
+    - tb/src/verilator/tb_sim_ctrl.h:
+        is_include_file: true
+    - tb/src/verilator/tb_sim_ctrl.cpp
+    - tb/src/verilator/tb_macros.hh:
+        is_include_file: true
+    - tb/src/verilator/tb_macros.cpp
+    - tb/src/verilator/tb_cheshire_util.svh:
+        is_include_file: true
+    - tb/src/tb_cheshire_top.cpp
+    file_type: cppSource
+
+targets:
+  default: &default
+    filesets:
+    - files_rtl
+    toplevel: cheshire_soc
+  sim:
+    <<: *default
+    filesets_append:
+    - rtl_vendor
+    - tool_verilator ? (waivers)
+    - tool_modelsim ? (simulation_or_test)
+    - tool_modelsim ? (pre_build_dpi_files)
+    - tool_verilator ? (verilator_sim)
+    - tool_verilator ? (remote_bitbang_dpi)
+    - tool_verilator ? (uart_dpi)
+    - tool_verilator ? (tb_verilator)
+    toplevel: 
+    - tool_modelsim ? (tb_cheshire_soc)
+    - tool_verilator ? (cheshire_testharness)
+    parameters_append:
+    - USE_JTAG_DPI
+    - DRAM_LATENCY=3
+    - MAX_CYCLES
+    - tool_verilator ? (LOG_LEVEL)
+    - tool_verilator ? (trace)
+    - tool_verilator ? (no_err)
+    - "tool_modelsim? (TARGET_TEST=true)"
+    - "tool_modelsim? (TARGET_VSIM=true)"
+    - "tool_modelsim ? (FAST_SIM=true)"
+    - "!tool_verilator ? (vcd_mode)"
+    - BINARY
+    - BOOTMODE
+    - tool_modelsim ? (PRELMODE)
+    - tool_modelsim ? (RTL_SIMULATION=true)
+    hooks:
+      pre_build:
+      - tool_modelsim? (compile_dpi_files)
+      - tool_modelsim? (compile_uart_dpi_files)
+      pre_run:
+      - prepare_dirs
+      post_run:
+      - tool_verilator ?  (copy_waves)
+      - tool_verilator ?  (copy_uart)
+
+    tools:
+      modelsim:
+        vlog_options:
+        - -timescale "1 ns / 1 ps"
+        - -suppress vlog-2577
+        - -suppress vlog-2583
+        #- -suppress vlog-2986 #careful added for axi_test
+        - -suppress vlog-13314
+        - -suppress vlog-13233
+        #- -suppress vlog-13262 #careful added for axi_test
+        #- -pedanticerrors # must remove or some files in axi trigger error
+        - -define MODELSIM
+        vsim_options:
+        #- -suppress 3111 # suppress error on passing string variables to $fdumpvars, that is apparently supported instead
+        - -voptargs="+acc=npr -permissive"
+        - -sv_lib ./build/libelfloader
+        - -sv_lib ./build/uartdpi
+        - "-64"
+      verilator:
+        mode: cc
+        verilator_options:
+        - '--cc'
+        - '--assert'
+        - '--trace'
+        #- '--timing' # Verilator 5.xx feature
+        #- '--threads 2' # Verilator 5.xx feature
+        - '--trace-fst'
+        - '--trace-structs'
+        - '--trace-max-array 128'
+        - '--x-assign unique'
+        - '--x-initial unique'
+        #- '--report-unoptflat'
+        - '--exe tb_cheshire_top.cpp'
+        - '-Wall'
+        - '-Wno-GENUNNAMED'
+        - '-Wpedantic'
+        - '-LDFLAGS "-pthread -lutil -lelf"'
+        - '-CFLAGS "-Wall -g -fno-var-tracking-assignments"'
+        - '-CFLAGS "-DTOPLEVEL_NAME=cheshire_testharness"'
+
+
+
+  # TODO: FPGA support
+  #zcu104:
+  #  <<: *default
+  #  filesets_append:
+  #  - rtl_vendor
+  #  - fpga_xilinx
+  #  default_tool: vivado
+  #  description: ZCU104 Evaluation Board
+  #  toplevel: 
+  #  - cheshire_top_xilinx
+  #  parameters_append:
+  #  - SYNTHESIS=true
+  #  - FPGA_ZCU104=true
+  #  - FPGA=true
+  #  tools:
+  #    vivado:
+  #      part: xczu7ev-ffvc1156-2-e
+  #      board_part: xilinx.com:zcu104:part0:1.1
+  #      board_repo_paths:
+  #    
+  # Format with Verible
+  format:
+    <<: *default
+    description: Format source files using verible-verilog-format
+    default_tool: veribleformat
+    tools:
+      veribleformat:
+        verible_format_args:
+        - '--assignment_statement_alignment=align'
+        - '--case_items_alignment=align'
+        - '--formal_parameters_indentation=indent'
+        - '--named_parameter_alignment=align'
+        - '--named_parameter_indentation=indent'
+        - '--named_port_alignment=align'
+        - '--named_port_indentation=indent'
+        - '--port_declarations_alignment=align'
+        - '--port_declarations_indentation=indent'
+        - '--assignment_statement_alignment=align'
+        - '--module_net_variable_alignment=align'
+        - '--inplace'
+  # Static analysis
+  lint:
+    <<: *default
+    description: Perform static analysis using Verible
+    default_tool: veriblelint
+    tools:
+      veriblelint:
+        ruleset: default
+        verible_lint_args:
+        - '--waiver_files=../../../hw/misc/verible-lint.waiver'
+        rules:
+        - 'line-length=length:120'
+
+
+parameters:
+  USE_JTAG_DPI:
+    datatype: bool
+    description: If set use JTAG DPI interface for RISC-V debug (0 or 1)
+    paramtype: vlogdefine
+    default: "false"
+  DRAM_LATENCY:
+    datatype: int
+    description: DRAM latency in cycles (used in Verilator simulation only)
+    default: 1
+    paramtype: vlogparam
+  LOG_LEVEL:
+    datatype: str
+    description: |
+      Set the log level. Admitted values: LOG_NONE|LOG_LOW|LOG_MEDIUM|LOG_HIGH|LOG_FULL|LOG_DEBUG.
+      Errors and configuration messages are always printed.
+    paramtype: cmdlinearg
+  trace:
+    datatype: str
+    description: If 'true', generate simulation waves dump.
+    default: "true"
+    paramtype: cmdlinearg
+    vcd_mode:
+    datatype: int
+    description: "VCD dump mode: 0 (no dump) | 1 (always active) | 2 (triggered by GPIO 0)"
+    default: 0
+    paramtype: plusarg
+  no_err:
+    datatype: str
+    description: Always exit with 0. Useful to run post-simulation hooks.
+    default: "true"
+    paramtype: cmdlinearg
+  verbose:
+    datatype: bool
+    description: Verbosity mode for QuestaSim testbench.
+    paramtype: plusarg
+  BOOTMODE:
+    datatype: str
+    description: |
+      Boot mode for QuestaSim and Verilator testbench. Admitted values for Verilator: jtag|flash|force.
+    default: 0
+    paramtype: plusarg
+  PRELMODE:
+    datatype: int
+    description: |
+      Preload mode for QuestaSim testbench. TODO: complete
+    default: 0
+    paramtype: plusarg
+  BINARY:
+    datatype: str
+    description: |
+      Binary to load in the QuestaSim TB (ELF format).
+    default: 0
+    paramtype: plusarg
+  vcd_mode:
+    datatype: int
+    description: "VCD dump mode: 0 (no dump) | 1 (always active) | 2 (triggered by GPIO 0)"
+    default: 0
+    paramtype: plusarg
+  MAX_CYCLES:
+    datatype: int
+    description: Maximum number of simulation cycles (halt the simulation when reached).
+    paramtype: plusarg
+  RTL_SIMULATION:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Select code for RTL simulation (e.g., faster SRAM initialization)
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Can isolate code that is (or is not) meant for Synthesis/Simulation only
+  FAST_SIM:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Enable optimizations for fast simulation (e.g., force DRAM code preload). For now only works in post-synthesis
+  LIB:
+    datatype: str
+    description: 22nm lib to use
+    paramtype: vlogdefine
+  PRIM_DEFAULT_IMPL:
+    datatype: str
+    paramtype: vlogdefine
+    description: Primitives implementation to use, e.g. "prim_pkg::ImplGeneric".
+    default: prim_pkg::ImplGeneri
+  TARGET_TEST:
+    datatype: bool
+    description: Set for test (Modelsim)
+    paramtype: vlogdefine
+    default: "false"
+  TARGET_VSIM:
+    datatype: bool
+    description: Set for simulation (Modelsim)
+    paramtype: vlogdefine
+    default: "false"
+  FPGA:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+  FPGA_ZCU104:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+
+
+scripts:
+  # Create log directory
+  prepare_dirs:
+    cmd:
+    - mkdir
+    - -p
+    - ../../../logs
+  compile_dpi_files:
+    cmd:
+    - sh
+    - ../../../tb/scripts/compile_dpi_files.sh
+  compile_uart_dpi_files:
+    cmd:
+    - sh
+    - ../../../tb/scripts/compile_uart_dpi.sh
+  # Copy waveforms
+  copy_waves:
+    cmd:
+    - bash
+    - ../../../tb/scripts/copy_waves.sh
+    - waveform.fst
+    #- waveform.vcd
+  # Copy UART log
+  copy_uart:
+    cmd:
+    - cp
+    - uart0.log
+    - ../../../logs
+
