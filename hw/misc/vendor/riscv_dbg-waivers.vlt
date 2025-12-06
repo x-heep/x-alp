@@ -1,0 +1,20 @@
+`verilator_config
+lint_off -rule WIDTH -file "*/dm_mem.sv" -match "Operator SUB expects * bits on *, but * generates 10 bits."
+lint_off -rule DECLFILENAME -file "*/dm_pkg.sv" -match "Filename 'dm_pkg' does not match PACKAGE name: 'dm'"
+lint_off -rule WIDTH -file "*/dm_top.sv" -match "Operator VAR 'DmBaseAddress' expects 64 bits on the Initial value, but Initial value's CONST '32'h10000' generates 32 bits."
+
+lint_off -rule UNUSED -file "*/debug_rom.sv" -match "Bits of signal are not used: 'addr_i'[63:8,2:0]"
+lint_off -rule UNUSED -file "*/dm_pkg.sv" -match "Parameter is not used:*"
+lint_off -rule UNUSED -file "*/dm_pkg.sv" -match "Bits of signal are not used:*"
+
+lint_off -rule UNUSED -file "*/dm_csrs.sv" -match "Bits of signal are not used:*"
+lint_off -rule UNUSED -file "*/dm_mem.sv" -match "Bits of signal are not used:*"
+lint_off -rule UNUSED -file "*/debug_rom_one_scratch.sv" -match "Bits of signal are not used:*"
+lint_off -rule UNUSED -file "*/dm_mem.sv" -match "Signal is not used:*"
+lint_off -rule UNUSED -file "*/dm_sba.sv" -match "Signal is not used:*"
+
+// empty pins
+lint_off -rule PINCONNECTEMPTY -file "*/dm_csrs.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/dmi_cdc.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/dm_csrs.sv"
+

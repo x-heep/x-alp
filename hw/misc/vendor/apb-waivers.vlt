@@ -1,0 +1,7 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/apb*/*.sv"
+lint_off -rule DECLFILENAME    -file "*/apb*/*.sv" -match "Filename '*' does not match IFACE name: '*'"
+lint_off -rule DECLFILENAME    -file "*/apb*/*.sv" -match "Filename '*' does not match MODULE name: '*'"
+
+
+lint_off -rule UNUSED -file "*/apb_pkg.sv" -match "Parameter is not used:*"

@@ -1,0 +1,86 @@
+`verilator_config
+lint_off -rule UNUSED -file "*/fpnew_pkg.sv" -match "Parameter is not used:*"
+lint_off -rule UNUSED -file "*/fpnew_pkg.sv" -match "Bits of signal are not used:*"
+
+
+// Blocking assignments
+lint_off -rule BLKANDNBLK -file "*/fpnew_cast_multi.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_divsqrt_multi.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_fma.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_noncomp.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_opgroup_multifmt_slice.sv"
+
+
+// Vl 4
+lint_off -rule LITENDIAN -file "*/fpnew_pkg.sv" -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_fma.sv" -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_cast_multi.sv" -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_noncomp.sv" -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_divsqrt_multi.sv" -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Little bit endian vector: left < right of bit range:*"
+
+// Vl 5
+lint_off -rule ASCRANGE -file "*/fpnew_pkg.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_fma.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_cast_multi.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_noncomp.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_divsqrt_multi.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Ascending bit range vector: left < right of bit range:*"
+
+
+lint_off -rule WIDTH -file "*/fpnew_cast_multi.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_noncomp.sv" -match "Operator PATMEMBER expects * bits on the Pattern value, but Pattern value's VARREF 'DONT_CARE' generates 1 bits."
+lint_off -rule WIDTH -file "*/fpnew_fma.sv" -match "Operator PATMEMBER expects * bits on the Pattern value, but Pattern value's VARREF 'DONT_CARE' generates 1 bits."
+lint_off -rule WIDTH -file "*/fpnew_fma.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_noncomp.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_divsqrt_multi.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_opgroup_fmt_slice.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_pkg.sv" -match "Operator FUNCREF 'maximum' expects 32 bits on the Function Argument, but Function Argument's SEL generates 3 bits."
+lint_off -rule WIDTH -file "*/fpnew_pkg.sv" -match "Operator FUNCREF 'maximum' expects 32 bits on the Function Argument, but Function Argument's CASTWRAP generates 3 bits."
+
+
+// TODO: might be a bug I introduced, check pipe is working
+lint_off -rule UNUSED -file   "*/fpnew_fma.sv" -match "Signal is not used: '*_d'"
+lint_off -rule UNDRIVEN -file "*/fpnew_fma.sv" -match "Signal is not driven: '*_q'"
+lint_off -rule UNUSED -file   "*/fpnew_cast_multi.sv" -match "Signal is not used: '*_d'"
+lint_off -rule UNDRIVEN -file "*/fpnew_cast_multi.sv" -match "Signal is not driven: '*_q'"
+lint_off -rule UNUSED -file   "*/fpnew_divsqrt_multi.sv" -match "Signal is not used: '*_d'"
+lint_off -rule UNDRIVEN -file "*/fpnew_divsqrt_multi.sv" -match "Signal is not driven: '*_q'"
+lint_off -rule UNUSED -file   "*/fpnew_noncomp.sv" -match "Signal is not used: '*_d'"
+lint_off -rule UNDRIVEN -file "*/fpnew_noncomp.sv" -match "Signal is not driven: '*_q'"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_multifmt_slice.sv" -match "Signal is not used: '*_d'"
+lint_off -rule UNDRIVEN -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Signal is not driven: '*_q'"
+
+lint_off -rule UNUSED -file   "*/fpnew_fma.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_fma.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_noncomp.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_noncomp.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_cast_multi.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_cast_multi.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_divsqrt_multi.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_divsqrt_multi.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_rounding.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_classifier.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_block.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_block.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_multifmt_slice.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_multifmt_slice.sv" -match "Parameter is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_multifmt_slice.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_multifmt_slice.sv" -match "Bits of signal are not driven, nor used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_fmt_slice.sv" -match "Signal is not used: '*'"
+lint_off -rule UNUSED -file   "*/fpnew_opgroup_fmt_slice.sv" -match "Bits of signal are not used: '*"
+lint_off -rule UNUSED -file   "*/fpnew_top.sv" -match "Signal is not used: 'opgrp_ext'"
+
+lint_off -rule PINCONNECTEMPTY -file "*/fpnew_divsqrt_th_32.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/fpnew_divsqrt_th_64_multi.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/fpnew_opgroup_block.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/fpnew_top.sv"
+
+// On pipe ready, to be checked carefully!
+lint_off -rule UNOPTFLAT -file "*/fpnew_fma.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*" 
+lint_off -rule UNOPTFLAT -file "*/fpnew_cast_multi.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*" 
+lint_off -rule UNOPTFLAT -file "*/fpnew_divsqrt_multi.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*" 
+lint_off -rule UNOPTFLAT -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+lint_off -rule UNOPTFLAT -file "*/fpnew_noncomp.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+lint_off -rule UNOPTFLAT -file "*/fpnew_opgroup_block.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"

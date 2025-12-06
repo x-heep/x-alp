@@ -1,0 +1,14 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/bus_err_unit_reg_top.sv"
+lint_off -rule UNUSED -file "*/bus_err_unit_reg_pkg.sv" -match "Parameter is not used: *"
+lint_off -rule DECLFILENAME -file "*/bus_err_unit_reg_top.sv" -match "Filename * does not match MODULE name: '*'"
+
+lint_off -rule PINCONNECTEMPTY -file "*/bus_err_unit_bare.sv"
+
+lint_off -rule UNUSED -file "*/axi_err_unit_wrap.sv" -match "Bits of signal are not used: 'axi_rsp_i'[83]"
+lint_off -rule UNUSED -file "*/axi_err_unit_wrap.sv" -match "Bits of signal are not used: 'axi_req_i*"
+lint_off -rule UNUSED -file "*/bus_err_unit_reg_top.sv" -match "Parameter is not used: 'AW'"
+lint_off -rule UNUSED -file "*/bus_err_unit_reg_top.sv" -match "Signal is not used: 'clk_i'"
+lint_off -rule UNUSED -file "*/bus_err_unit_reg_top.sv" -match "Signal is not used: 'rst_ni'"
+
+
