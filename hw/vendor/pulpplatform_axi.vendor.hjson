@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/pulp-platform/axi.git",
-    rev: "d74943c703fe03006e8c991994adb11f76315908",
+    rev: "v0.39.8",
   },
 
   exclude_from_upstream: [
@@ -20,7 +20,6 @@
     "test",
     ".gitignore",
     ".gitlab-ci.yml",
-    "axi.core",
     "Bender.yml",
     "CHANGELOG.md",
     "CONTRIBUTING.md",
