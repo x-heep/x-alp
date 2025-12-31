@@ -1,0 +1,69 @@
+CAPI=2:
+
+name: x-heep:x-alp:x-alp:0.0.1
+
+filesets:
+  x-alp:
+    depend:
+      - x-heep:x-alp:core-v-mcu:0.0.1
+
+targets:
+  default: &default
+    filesets:
+    - x-alp
+    toplevel: core_v_mcu
+
+  simulate:
+    <<: *default
+    description: RTL simulation
+    default_tool: verilator
+    tools:
+      verilator:
+        mode: cc
+        verilator_options:
+        - '--cc'
+        - '--assert'
+        - '--trace'
+        - '--trace-fst'
+        - '--trace-structs'
+        - '--trace-max-array 128'
+        - '--x-assign unique'
+        - '--x-initial unique'
+        #- '--threads 2' # only use with Verilator v5.XXX
+        - '--exe'
+        - 'polheepo_tb.cpp'
+        - '-Wall'
+        - '-Wpedantic'
+        - '-LDFLAGS "-pthread -lutil -lelf"'
+        # - '-CFLAGS "-Wall -g"'
+  # Format with Verible
+  format:
+    <<: *default
+    description: Format source files using verible-verilog-format
+    default_tool: veribleformat
+    tools:
+      veribleformat:
+        verible_format_args:
+        - '--assignment_statement_alignment=align'
+        - '--case_items_alignment=align'
+        - '--formal_parameters_indentation=indent'
+        - '--named_parameter_alignment=align'
+        - '--named_parameter_indentation=indent'
+        - '--named_port_alignment=align'
+        - '--named_port_indentation=indent'
+        - '--port_declarations_alignment=align'
+        - '--port_declarations_indentation=indent'
+        - '--assignment_statement_alignment=align'
+        - '--module_net_variable_alignment=align'
+        - '--inplace'
+  
+  # Static analysis
+  lint:
+    <<: *default
+    description: Perform static analysis using Verible
+    default_tool: veriblelint
+    tools:
+      veriblelint:
+        ruleset: default
+        rules:
+        - 'line-length=length:120'
