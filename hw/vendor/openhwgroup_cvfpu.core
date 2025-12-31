@@ -1,0 +1,29 @@
+CAPI=2:
+name : openhwgroup.org::cvfpu
+
+filesets:
+  rtl:
+    files:
+    - openhwgroup_cvfpu/src/fpnew_cast_multi.sv 
+    - openhwgroup_cvfpu/src/fpnew_classifier.sv 
+    - openhwgroup_cvfpu/src/fpnew_divsqrt_multi.sv 
+    - openhwgroup_cvfpu/src/fpnew_divsqrt_th_32.sv 
+    - openhwgroup_cvfpu/src/fpnew_divsqrt_th_64_multi.sv 
+    - openhwgroup_cvfpu/src/fpnew_fma_multi.sv 
+    - openhwgroup_cvfpu/src/fpnew_fma.sv 
+    - openhwgroup_cvfpu/src/fpnew_noncomp.sv 
+    - openhwgroup_cvfpu/src/fpnew_opgroup_block.sv 
+    - openhwgroup_cvfpu/src/fpnew_opgroup_fmt_slice.sv 
+    - openhwgroup_cvfpu/src/fpnew_opgroup_multifmt_slice.sv 
+    - openhwgroup_cvfpu/src/fpnew_pkg.sv 
+    - openhwgroup_cvfpu/src/fpnew_rounding.sv 
+    - openhwgroup_cvfpu/src/fpnew_top.sv
+    file_type : systemVerilogSource
+    depend:
+      - pulp-platform.org::common_cells:1.31.1
+
+targets:
+  default:
+    filesets:
+    - "!target_format ? (!target_lint ? (rtl))"
+

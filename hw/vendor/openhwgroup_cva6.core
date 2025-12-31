@@ -61,6 +61,8 @@ filesets:
       - openhwgroup_cva6/core/trigger_module.sv 
       - openhwgroup_cva6/core/zcmt_decoder.sv
     file_type : systemVerilogSource
+    depend:
+      - openhwgroup.org::cvfpu
 
 targets:
   default:
