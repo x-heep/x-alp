@@ -1,0 +1,20 @@
+`verilator_config
+
+// PULP AXI
+
+lint_off -rule VARHIDDEN -file "*/*axi*.sv"
+lint_off -rule GENUNNAMED -file "*/*axi*.sv"
+lint_off -rule DECLFILENAME -file "*/*axi*.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/*axi*.sv"
+
+// PULP COMMON CELLS
+
+lint_off -rule GENUNNAMED -file "*/*common_cells*/*.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/*common_cells*/*.sv"
+lint_off -rule DECLFILENAME -file "*/*common_cells*/*.sv"
+
+// CVA6
+
+lint_off -rule DECLFILENAME -file "*/*cva6*/*.sv"
+lint_off -rule GENUNNAMED -file "*/*cva6*/*.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/*cva6*/*.sv"

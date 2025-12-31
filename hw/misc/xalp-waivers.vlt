@@ -1,0 +1,6 @@
+`verilator_config
+
+lint_off -rule PINCONNECTEMPTY -file "*/cpu_subsystem.sv" -match "Instance pin connected by name with empty reference: 'rvfi_probes_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/core_v_mcu.sv" -match "Instance pin connected by name with empty reference: 'cvxif_req_o'"
+
+lint_off -rule WIDTHEXPAND

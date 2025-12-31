@@ -1,3 +1,0 @@
-`verilator_config
-
-lint_off -rule UNUSED -file "*/axi_rt_reg_pkg.sv" -match "Parameter is not used: *"

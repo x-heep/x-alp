@@ -1,6 +1,0 @@
-`verilator_config
-lint_off -rule PINCONNECTEMPTY -file "*/irq_router_reg_top.sv" -match "* pin connected by name with empty reference: '*'"
-lint_off -rule DECLFILENAME    -file "*/irq_router_reg_top.sv" -match "Filename '*' does not match MODULE name: '*'"
-
-
-
