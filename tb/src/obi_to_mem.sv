@@ -8,40 +8,40 @@
 // Description: OBI to SRAM interface
 
 module obi_to_mem #(
-  // OBI request type, expected to contain:
-  //    logic           req     > request
-  //    logic           we      > write enable
-  //    logic [BEW-1:0] be      > byte enable
-  //    logic  [AW-1:0] addr    > target address
-  //    logic  [DW-1:0] wdata   > data to write
-  parameter type obi_req_t = logic,
-  // OBI response type, expected to contain:
-  //    logic           gnt     > request accepted
-  //    logic           rvalid  > read data is valid
-  //    logic  [DW-1:0] rdata   > read data
-  parameter type obi_resp_t = logic,
-  // SRAM request type, expected to contain:
-  //    logic           req     > request
-  //    logic           we      > write enable
-  //    logic [BEW-1:0] be      > byte enable
-  //    logic  [AW-1:0] addr    > target address
-  //    logic  [DW-1:0] wdata   > data to write
-  parameter type mem_req_t = logic,
-  // SRAM response type, expected to contain:
-  //    logic  [DW-1:0] rdata   > read data
-  parameter type mem_resp_t = logic,
-  parameter int unsigned Latency = 'd1  // SRAM read Latency
+    // OBI request type, expected to contain:
+    //    logic           req     > request
+    //    logic           we      > write enable
+    //    logic [BEW-1:0] be      > byte enable
+    //    logic  [AW-1:0] addr    > target address
+    //    logic  [DW-1:0] wdata   > data to write
+    parameter type obi_req_t = logic,
+    // OBI response type, expected to contain:
+    //    logic           gnt     > request accepted
+    //    logic           rvalid  > read data is valid
+    //    logic  [DW-1:0] rdata   > read data
+    parameter type obi_resp_t = logic,
+    // SRAM request type, expected to contain:
+    //    logic           req     > request
+    //    logic           we      > write enable
+    //    logic [BEW-1:0] be      > byte enable
+    //    logic  [AW-1:0] addr    > target address
+    //    logic  [DW-1:0] wdata   > data to write
+    parameter type mem_req_t = logic,
+    // SRAM response type, expected to contain:
+    //    logic  [DW-1:0] rdata   > read data
+    parameter type mem_resp_t = logic,
+    parameter int unsigned Latency = 'd1  // SRAM read Latency
 ) (
-  input logic clk_i,
-  input logic rst_ni,
+    input logic clk_i,
+    input logic rst_ni,
 
-  // OBI interface
-  input  obi_req_t  obi_req_i,  // OBI bus request
-  output obi_resp_t obi_resp_o,  // OBI bus response
+    // OBI interface
+    input  obi_req_t  obi_req_i,  // OBI bus request
+    output obi_resp_t obi_resp_o, // OBI bus response
 
-  // SRAM interface
-  output mem_req_t mem_req_o,  // SRAM request
-  input  mem_resp_t mem_resp_i   // SRAM response
+    // SRAM interface
+    output mem_req_t  mem_req_o,  // SRAM request
+    input  mem_resp_t mem_resp_i  // SRAM response
 );
   // INTERNAL SIGNALS
   // ----------------

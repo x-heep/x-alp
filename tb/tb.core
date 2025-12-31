@@ -1,0 +1,52 @@
+CAPI=2:
+
+name: x-heep:x-alp:tb:0.0.1
+filesets:
+  verilator_tb:
+    files:
+    - hw/vendor/common_verification/src/clk_rst_gen.sv
+    - tb/src/tb_cheshire_pkg.sv
+    - tb/src/obi_to_mem.sv
+    - tb/src/tc_sram_mem_wrapper.sv
+    - tb/src/vip_cheshire_soc.sv
+    - tb/src/cheshire_testharness.sv
+    file_type: systemVerilogSource
+    depend:
+    - ::apb_uart:0.2.3
+    - pulp-platform.org::axi:0.39.8
+    - ::axi_riscv_atomics:0.8.2
+    - ::axi_rt:0.0.10
+    - ::axi_vga:0.1.4
+    - ::clic:2.0.0
+    - ::clint:0.2.0
+    - pulp-platform.org::common_cells:1.38.0
+    - tool_modelsim ? (pulp-platform.org::common_verification:0.2.5)
+    - '::cva6:'
+    - ::idma:0.6.5
+    - ::irq_router:0.0.1
+    - ::opentitan_peripherals:0.4.0
+    - ::register_interface:0.4.6
+    - ::riscv-dbg:0.8.1
+    - ::serial_link:1.1.2
+    - ::unbent:0.1.6
+    - ::dram_rtl_sim:0.1.1
+    - pulp-platform.org::axi:0.39.8
+  tb_verilator:
+    files:
+    - tb/src/verilator/cheshire_utils.hh:
+        is_include_file: true
+    - tb/src/verilator/cheshire_utils.cpp
+    - tb/src/verilator/tb_elfloader.hh:
+        is_include_file: true
+    - tb/src/verilator/tb_elfloader.cpp
+    - tb/src/verilator/tb_sim_ctrl.h:
+        is_include_file: true
+    - tb/src/verilator/tb_sim_ctrl.cpp
+    - tb/src/verilator/tb_macros.hh:
+        is_include_file: true
+    - tb/src/verilator/tb_macros.cpp
+    - tb/src/verilator/tb_cheshire_util.svh:
+        is_include_file: true
+    - tb/src/tb_cheshire_top.cpp
+    file_type: cppSource
+    
