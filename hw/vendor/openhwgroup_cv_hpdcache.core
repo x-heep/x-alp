@@ -1,0 +1,64 @@
+CAPI=2:
+name : openhwgroup.org::cv-hpdcache
+
+filesets:
+  rtl:
+    files:
+      - openhwgroup_cv_hpdcache/rtl/include/include/hpdcache_typedef.svh: {is_include_file: true, include_path: openhwgroup_cv_hpdcache/rtl/include}
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_pkg.sv
+      - openhwgroup_cv_hpdcache/rtl/src/utils/hpdcache_mem_req_read_arbiter.sv
+      - openhwgroup_cv_hpdcache/rtl/src/utils/hpdcache_mem_req_write_arbiter.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_demux.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_lfsr.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_sync_buffer.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_fifo_reg.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_fifo_reg_initialized.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_fxarb.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_rrarb.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_mux.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_decoder.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_1hot_to_binary.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_prio_1hot_encoder.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_sram.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_sram_wbyteenable.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_sram_wmask.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_regbank_wbyteenable_1rw.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_regbank_wmask_1rw.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_data_downsize.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_data_upsize.sv
+      - openhwgroup_cv_hpdcache/rtl/src/common/hpdcache_data_resize.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hwpf_stride/hwpf_stride_pkg.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hwpf_stride/hwpf_stride.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hwpf_stride/hwpf_stride_arb.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hwpf_stride/hwpf_stride_wrapper.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_amo.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_cmo.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_core_arbiter.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_ctrl.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_ctrl_pe.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_memctrl.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_miss_handler.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_mshr.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_rtab.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_uncached.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_victim_plru.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_victim_random.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_victim_sel.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_wbuf.sv
+      - openhwgroup_cv_hpdcache/rtl/src/hpdcache_flush.sv
+    file_type : systemVerilogSource
+
+  behavioral_macros:
+    files:
+      - openhwgroup_cv_hpdcache/rtl/src/common/macros/behav/hpdcache_sram_1rw.sv 
+      - openhwgroup_cv_hpdcache/rtl/src/common/macros/behav/hpdcache_sram_wbyteenable_1rw.sv 
+      - openhwgroup_cv_hpdcache/rtl/src/common/macros/behav/hpdcache_sram_wmask_1rw.sv
+    file_type : systemVerilogSource
+
+targets:
+  default:
+    filesets:
+    - "!target_format ? (!target_lint ? (rtl))"
+    - "!target_format ? (target_lint ? (behavioral_macros))"
+    - target_sim ? (behavioral_macros)

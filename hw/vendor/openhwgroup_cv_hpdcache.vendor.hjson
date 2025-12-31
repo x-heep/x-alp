@@ -1,0 +1,23 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  name: "openhwgroup_cv_hpdcache",
+  target_dir: "openhwgroup_cv_hpdcache",
+
+  upstream: {
+    url: "https://github.com/openhwgroup/cv-hpdcache.git",
+    rev: "04de80896981527c34fbbd35d7b1ef787a082d7c",
+  },
+
+  exclude_from_upstream: [
+  ".gitignore",
+  "Bender.yml",
+  "CHANGELOG.md",
+  "CODEOWNERS",
+  "LICENSE",
+  "README.md",
+  ".github",
+  "docs"
+  ]
+}
