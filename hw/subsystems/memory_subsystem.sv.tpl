@@ -3,7 +3,7 @@
 /* verilator lint_off UNUSED */
 /* verilator lint_off MULTIDRIVEN */
 
-module mempory_subsystem
+module memory_subsystem
 
 // removed obi_pkg , added these includes
 
