@@ -1,0 +1,30 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  name: "openhwgroup_cvfpu",
+  target_dir: "openhwgroup_cvfpu",
+
+  upstream: {
+    url: "https://github.com/openhwgroup/cvfpu.git",
+    rev: "58ca3c376beb914b2b80b811d4b270c063d4e6f7",
+  },
+
+  exclude_from_upstream: [
+   "tb",
+   "tb/flexfloat",
+   "util",
+   "vendor",
+   ".gitignore",
+   ".gitmodules",
+   "Bender.yml",
+   "CITATION.cff",
+   "ips_list.yml",
+   "LICENSE.apache",
+   "LICENSE.solderpad",
+   "README.license.md",
+   "README.md",
+   "src_files.yml",
+   "docs"
+  ]
+}
