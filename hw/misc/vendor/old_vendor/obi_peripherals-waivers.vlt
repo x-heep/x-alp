@@ -1,0 +1,9 @@
+`verilator_config
+lint_off -rule WIDTH -file "*/obi_uart_rx.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+
+
+// Critical on character_length , might be BUG
+lint_off -rule LATCH -file "*/obi_uart_rx.sv" -match "Latch inferred for signal *"
+lint_off -rule UNOPTFLAT -file "*/obi_uart.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*.i_apb_uart_wrap.i_obi_uart.reg_write'"
+
+

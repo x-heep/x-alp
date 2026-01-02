@@ -1,0 +1,35 @@
+`verilator_config
+
+// Seems a BUG to me, should be ORED or smth similar
+// w_cnt_q is more than 1 bit because outstanding req are supported
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'w_cnt_q' generates 4 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'w_cnt_inj_q' generates 4 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'w_cnt_q' generates 5 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'w_cnt_inj_q' generates 5 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'w_cnt_q' generates 3 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's VARREF 'w_cnt_inj_q' generates 3 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Logical operator IF expects 1 bit on the If, but If's OR generates 8 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Operator OR expects 8 bits on the RHS, but RHS's VARREF 'slv_aw_lock_i' generates 1 bits."
+
+// Could be a bug
+lint_off -rule BLKSEQ -file "*/axi_riscv_lrsc.sv"
+//-match "Blocking assignments (=) in sequential (flop or latch) block"
+
+// These don't know, due to internal ID being 2 bits and external 5 bits
+lint_off -rule WIDTH -file "*/axi_riscv_lrsc.sv" -match "Operator COND expects 5 bits on the Conditional True, but Conditional True's * generates 2 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_lrsc.sv" -match "Operator ASSIGNW expects 2 bits on the Assign RHS, but Assign RHS's COND generates 5 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_lrsc.sv" -match "Operator ASSIGN expects 2 bits on the Assign RHS, but Assign RHS's VARREF 'slv_aw_id_i' generates 5 bits."
+
+
+
+// Safe to lint
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Operator SHIFTL expects 48 bits on the LHS, but LHS's CONST '8'h1' generates 8 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_amos.sv" -match "Operator GT expects 32 bits on the LHS, but LHS's VARREF 'slv_aw_size_i' generates 3 bits."
+
+lint_off -rule WIDTH -file "*/axi_riscv_lrsc.sv" -match "Operator * expects 32 bits on the LHS, but LHS's VARREF 'slv_aw_size_i' generates 3 bits."
+lint_off -rule WIDTH -file "*/axi_riscv_lrsc.sv" -match "Operator SUB expects 32 bits on the RHS, but RHS's VARREF 'slv_aw_size_i' generates 3 bits."
+lint_off -rule UNSIGNED -file "*/axi_riscv_lrsc.sv" -match "Comparison is constant due to unsigned arithmetic"
+lint_off -rule CMPCONST -file "*/axi_riscv_lrsc.sv" -match "Comparison is constant due to limited range"
+
+// Not critical, automatic variable
+lint_off -rule LATCH -file "*/axi_res_tbl.sv" -match "Latch inferred for signal *"

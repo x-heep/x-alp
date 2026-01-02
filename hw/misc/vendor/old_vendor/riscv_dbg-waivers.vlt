@@ -1,0 +1,10 @@
+`verilator_config
+lint_off -rule WIDTH -file "*/dm_mem.sv" -match "Operator SUB expects * bits on *, but * generates 10 bits."
+lint_off -rule DECLFILENAME -file "*/dm_pkg.sv" -match "Filename 'dm_pkg' does not match PACKAGE name: 'dm'"
+lint_off -rule WIDTH -file "*/dm_top.sv" -match "Operator VAR 'DmBaseAddress' expects 64 bits on the Initial value, but Initial value's CONST '32'h10000' generates 32 bits."
+
+// empty pins
+lint_off -rule PINCONNECTEMPTY -file "*/dm_csrs.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/dmi_cdc.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/dm_csrs.sv"
+

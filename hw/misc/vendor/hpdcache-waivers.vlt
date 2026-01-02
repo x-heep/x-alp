@@ -1,0 +1,5 @@
+`verilator_config
+
+lint_off -rule UNOPTFLAT -file "*/*hpdcache*/*.sv"         -match "Signal unoptimizable: Circular combinational logic: '*'"
+lint_off -rule ASCRANGE  -file "*/hpdcache_data_upsize.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE  -file "*/hpdcache_memctrl.sv"     -match "Ascending bit range vector: left < right of bit range:*"

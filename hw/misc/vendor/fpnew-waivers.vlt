@@ -1,0 +1,45 @@
+`verilator_config
+
+lint_off -rule SYNCASYNCNET -file "*/*cvfpu*/*.v"
+
+// Blocking assignments
+lint_off -rule BLKANDNBLK -file "*/fpnew_cast_multi.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_divsqrt_multi.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_fma.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_noncomp.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_opgroup_multifmt_slice.sv"
+
+// Vl 4
+lint_off -rule LITENDIAN -file "*/fpnew_pkg.sv"                    -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_fma.sv"                    -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_cast_multi.sv"             -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_noncomp.sv"                -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_divsqrt_multi.sv"          -match "Little bit endian vector: left < right of bit range:*"
+lint_off -rule LITENDIAN -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Little bit endian vector: left < right of bit range:*"
+// Vl 5
+lint_off -rule ASCRANGE -file "*/fpnew_pkg.sv"                    -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_fma.sv"                    -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_cast_multi.sv"             -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_noncomp.sv"                -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_divsqrt_multi.sv"          -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Ascending bit range vector: left < right of bit range:*"
+lint_off -rule ASCRANGE -file "*/fpnew_divsqrt_th_64_multi.sv"    -match "Ascending bit range vector: left < right of bit range:*"
+
+lint_off -rule WIDTH -file "*/fpnew_cast_multi.sv"             -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_noncomp.sv"                -match "Operator PATMEMBER expects * bits on the Pattern value, but Pattern value's VARREF 'DONT_CARE' generates 1 bits."
+lint_off -rule WIDTH -file "*/fpnew_fma.sv"                    -match "Operator PATMEMBER expects * bits on the Pattern value, but Pattern value's VARREF 'DONT_CARE' generates 1 bits."
+lint_off -rule WIDTH -file "*/fpnew_fma.sv"                    -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_noncomp.sv"                -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_divsqrt_multi.sv"          -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_opgroup_fmt_slice.sv"      -match "Operator * expects * bits on the *, but *'s * generates * bits."
+lint_off -rule WIDTH -file "*/fpnew_pkg.sv"                    -match "Operator FUNCREF 'maximum' expects 32 bits on the Function Argument, but Function Argument's SEL generates 3 bits."
+lint_off -rule WIDTH -file "*/fpnew_pkg.sv"                    -match "Operator FUNCREF 'maximum' expects 32 bits on the Function Argument, but Function Argument's CASTWRAP generates 3 bits."
+
+// On pipe ready, to be checked carefully!
+lint_off -rule UNOPTFLAT -file "*/fpnew_fma.sv"                    -match "Signal unoptimizable: Feedback to clock or circular logic:*" 
+lint_off -rule UNOPTFLAT -file "*/fpnew_cast_multi.sv"             -match "Signal unoptimizable: Feedback to clock or circular logic:*" 
+lint_off -rule UNOPTFLAT -file "*/fpnew_divsqrt_multi.sv"          -match "Signal unoptimizable: Feedback to clock or circular logic:*" 
+lint_off -rule UNOPTFLAT -file "*/fpnew_opgroup_multifmt_slice.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+lint_off -rule UNOPTFLAT -file "*/fpnew_noncomp.sv"                -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+lint_off -rule UNOPTFLAT -file "*/fpnew_opgroup_block.sv"          -match "Signal unoptimizable: Feedback to clock or circular logic:*"

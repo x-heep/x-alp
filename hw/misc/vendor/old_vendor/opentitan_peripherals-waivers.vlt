@@ -1,0 +1,33 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/rv_plic_reg_top.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_reg_top.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/i2c_reg_top.sv"
+lint_off -rule PINCONNECTEMPTY -file "*/gpio_reg_top.sv"
+
+lint_off -rule DECLFILENAME -file "*/rv_plic_reg_top.sv" -match "Filename * does not match MODULE name: '*'"
+lint_off -rule DECLFILENAME -file "*/spi_host_reg_top.sv" -match "Filename * does not match MODULE name: '*'"
+lint_off -rule DECLFILENAME -file "*/i2c_reg_top.sv" -match "Filename * does not match MODULE name: '*'"
+lint_off -rule DECLFILENAME -file "*/gpio_reg_top.sv" -match "Filename * does not match MODULE name: '*'"
+
+
+
+
+
+
+
+lint_off -rule UNDRIVEN -file "*/spi_host_window.sv" -match "Bits of signal are not driven: *"
+
+lint_off -rule PINCONNECTEMPTY -file "*/prim_fifo_sync_cnt.sv" -match "* pin connected by name with empty reference: 'cnt_next_o'"
+
+
+lint_off -rule PINCONNECTEMPTY -file "*/i2c_core.sv" -match "* pin connected by name with empty reference: 'full_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/i2c_core.sv" -match "* pin connected by name with empty reference: 'err_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/i2c_core.sv" -match "* pin connected by name with empty reference: 'wready_o'"
+
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_data_fifos.sv" -match "* pin connected by name with empty reference: 'full_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_data_fifos.sv" -match "* pin connected by name with empty reference: 'err_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_command_queue.sv" -match "* pin connected by name with empty reference: 'full_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_command_queue.sv" -match "* pin connected by name with empty reference: 'err_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_byte_select.sv" -match "* pin connected by name with empty reference: 'depth_o'"
+lint_off -rule PINCONNECTEMPTY -file "*/spi_host_byte_merge.sv" -match "* pin connected by name with empty reference: 'depth_o'"
+

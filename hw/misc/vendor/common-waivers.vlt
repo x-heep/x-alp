@@ -1,0 +1,14 @@
+`verilator_config
+
+lint_off -rule UNUSEDSIGNAL    -file "*/vendor/*.*v"
+lint_off -rule UNUSED          -file "*/vendor/*.*v"
+lint_off -rule DECLFILENAME    -file "*/vendor/*.*v"
+lint_off -rule UNDRIVEN        -file "*/vendor/*.*v"
+lint_off -rule PINCONNECTEMPTY -file "*/vendor/*.*v"
+lint_off -rule VARHIDDEN       -file "*/vendor/*.*v"
+lint_off -rule GENUNNAMED      -file "*/vendor/*.*v"
+lint_off -rule CASEINCOMPLETE  -file "*/vendor/*.*v"
+lint_off -rule EOFNEWLINE      -file "*/vendor/*.*v"
+lint_off -rule IMPORTSTAR      -file "*/vendor/*.*v"
+lint_off -rule WIDTHTRUNC      -file "*/vendor/*.*v"
+lint_off -rule WIDTHEXPAND     -file "*/vendor/*.*v"

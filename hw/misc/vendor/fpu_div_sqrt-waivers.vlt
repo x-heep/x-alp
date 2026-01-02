@@ -1,0 +1,16 @@
+`verilator_config
+lint_off -rule WIDTH -file "*/control_mvp.sv" -match "Operator ASSIGN expects * bits on the Assign RHS, but Assign RHS's * generates * bits."
+lint_off -rule WIDTH -file "*/control_mvp.sv" -match "Operator ASSIGNW expects * bits on the Assign RHS, but Assign RHS's * generates * bits."
+lint_off -rule WIDTH -file "*/control_mvp.sv" -match "Operator COND expects 14 bits on the Conditional True, but Conditional True's REPLICATE generates 13 bits."
+
+lint_off -rule WIDTH -file "*/preprocess_mvp.sv"    -match "Operator * expects * bits on the *RHS, but * generates * bits."
+lint_off -rule WIDTH -file "*/norm_div_sqrt_mvp.sv" -match "Operator * expects * bits on the *RHS, but * generates * bits."
+lint_off -rule WIDTH -file "*/norm_div_sqrt_mvp.sv" -match "Operator COND expects * bits on the Conditional True, but Conditional True's * generates * bits."
+lint_off -rule WIDTH -file "*/norm_div_sqrt_mvp.sv" -match "Operator * expects * bits on the *LHS, but * generates * bits."
+
+//////////////////////
+// Unopt
+//////////////////////
+// TODO: check, some are sqrt
+lint_off -rule UNOPTFLAT -file "*/control_mvp.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+lint_off -rule UNOPTFLAT -file "*/control_mvp.sv" -match "Signal unoptimizable: Circular combinational logic:*"

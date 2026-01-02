@@ -1,0 +1,8 @@
+`verilator_config
+lint_off -rule PINCONNECTEMPTY -file "*/bus_err_unit_reg_top.sv"
+lint_off -rule DECLFILENAME -file "*/bus_err_unit_reg_top.sv" -match "Filename * does not match MODULE name: '*'"
+
+lint_off -rule PINCONNECTEMPTY -file "*/bus_err_unit_bare.sv"
+
+
+

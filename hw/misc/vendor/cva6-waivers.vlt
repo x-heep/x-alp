@@ -1,0 +1,128 @@
+`verilator_config
+
+lint_off -rule SYMRSVDWORD    -file "*/*cva6*/cva6.sv" -match "Symbol matches C++ keyword: '*'"
+lint_off -rule IMPLICITSTATIC -file "*/*cva6*/cva6.sv" -match "Variable's lifetime implicitly set to static"
+lint_off -rule PINMISSING     -file "*/fpu_wrap.sv"    -match "Instance has missing pin: '*'"
+
+///////////////
+// FPU Wrap
+///////////////
+// Double vs Single precision
+lint_off -rule WIDTH -file "*/fpu_wrap.sv" -match "Operator COND expects 64 bits on the Conditional False, but Conditional False's REPLICATE generates 32 bits."
+
+///////////////
+// ALU
+///////////////
+lint_off -rule WIDTH -file "*/alu.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+
+//////////////////////
+// ISSUE READ OPERANDS
+//////////////////////
+// Superscalar mode not supported
+lint_off -rule SELRANGE -file "*/issue_read_operands.sv" -match "Selection index out of range: *:* outside *:0"
+
+//////////////////////
+// PERF Counters
+//////////////////////
+lint_off -rule WIDTH -file "*/perf_counters.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+
+//////////////////////
+// CSR Registers
+//////////////////////
+lint_off -rule WIDTH    -file "*/csr_regfile.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+lint_off -rule WIDTH    -file "*/csr_regfile.sv" -match "Bit extraction of var[63:0] requires 6 bit index, not 5 bits."
+lint_off -rule UNSIGNED -file "*/csr_regfile.sv" -match "Comparison is constant due to unsigned arithmetic"
+lint_off -rule CMPCONST -file "*/csr_regfile.sv" -match "Comparison is constant due to limited range"
+
+//////////////////////
+// EX Stage
+//////////////////////
+// Superscalar mode not supported
+lint_off -rule SELRANGE -file "*/ex_stage.sv" -match "Selection index out of range: 1:1 outside 0:0"
+
+lint_off -rule WIDTH -file "*/serdiv.sv" -match "Operator COND expects 32 bits on the Conditional False, but Conditional False's REPLICATE generates 7 bits."
+lint_off -rule WIDTH -file "*/serdiv.sv" -match "Operator ASSIGNW expects 7 bits on the Assign RHS, but Assign RHS's COND generates 32 bits."
+
+
+//////////////////////
+// CVA6 TLB
+//////////////////////
+lint_off -rule WIDTH -file "*/cva6_tlb.sv" -match "Operator ADD expects 32 bits on the RHS, but RHS's SEL generates 1 bits."
+// RVH not enabled
+lint_off -rule WIDTH -file "*/cva6_tlb.sv" -match "Operator NOT expects 2 bits on the LHS, but LHS's REDOR generates 1 bits."
+// TODO: check HYP_EXT=0, seems not exclusive (there is a if HYP_EXT=0 || ...), don't know if works with the OR
+// We never use HYP mode?
+lint_off -rule WIDTH    -file "*/cva6_tlb.sv"          -match "Logical operator LOGAND expects 1 bit on the RHS, but RHS's * generates 2 bits."
+lint_off -rule WIDTH    -file "*/cva6_tlb.sv"          -match "Logical operator LOGAND expects 1 bit on the LHS, but LHS's * generates 2 bits."
+lint_off -rule WIDTH    -file "*/cva6_tlb.sv"          -match "Logical operator LOGNOT expects 1 bit on the LHS, but LHS's VARREF 'asid_to_be_flushed_is0' generates 2 bits."
+lint_off -rule WIDTH    -file "*/cva6_tlb.sv"          -match "Logical operator LOGNOT expects 1 bit on the LHS, but LHS's VARREF 'vaddr_to_be_flushed_is0' generates 2 bits."
+lint_off -rule SELRANGE -file "*/wt_dcache_wbuffer.sv" -match "Extracting 8 bits from only 2 bit number"
+
+//////////////////////
+// Load Unit
+//////////////////////
+lint_off -rule WIDTH -file "*/load_unit.sv" -match "Operator LT expects 32 or 4 bits on the LHS, but LHS's SEL generates 3 bits."
+
+//////////////////////
+// WT Cache
+//////////////////////
+lint_off -rule WIDTH -file "*/wt_axi_adapter.sv" -match "Operator * expects 4 bits on the *, but * generates * bits."
+lint_off -rule WIDTH -file "*/cva6_icache.sv" -match "Operator * expects * bits on the *, but * generates * bits."
+
+//////////////////////
+// CVA6
+//////////////////////
+lint_off -rule WIDTH -file "*/cva6.sv" -match "Operator ASSIGN expects 8 bits on the Assign RHS, but Assign RHS's CONST * generates 64 bits."
+
+lint_off -rule UNSIGNED -file "*/pmp_data_if.sv" -match "Comparison is constant due to unsigned arithmetic"
+lint_off -rule CMPCONST -file "*/raw_checker.sv" -match "Comparison is constant due to limited range"
+
+
+//////////////////////
+// Latches
+//////////////////////
+// To be carefully checked, might be BUGS
+lint_off -rule LATCH -file "*/cva6_fifo_v3.sv" -match "Latch inferred for signal *"
+// This comes from an automatic, so maybe it is not a problem in synthesis
+lint_off -rule LATCH -file "*/csr_regfile.sv" -match "Latch inferred for signal *"
+lint_off -rule LATCH -file "*/cva6_tlb.sv" -match "Latch inferred for signal *"
+
+
+//////////////////////
+// Unopt
+//////////////////////
+// Ready signal
+lint_off -rule UNOPTFLAT -file "*/fpu_wrap.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*"
+// Decoder
+lint_off -rule UNOPTFLAT -file "*/decoder.sv" -match "Signal unoptimizable: Circular combinational logic: '*'"
+lint_off -rule UNOPTFLAT -file "*/instr_queue.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*.i_frontend.i_instr_queue.pc_j'"
+lint_off -rule UNOPTFLAT -file "*/instr_queue.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*.i_frontend.i_instr_queue.idx_ds'"
+// Scoreboard
+lint_off -rule UNOPTFLAT -file "*/scoreboard.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*issue_stage_i.i_scoreboard.commit_pointer_n'"
+lint_off -rule UNOPTFLAT -file "*/scoreboard.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*issue_stage_i.i_scoreboard.issue_pointer'"
+// Cache
+lint_off -rule UNOPTFLAT -file "*/wt_cache_subsystem.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*gen_cache_wt.i_cache_subsystem.icache_adapter_data_req'"
+lint_off -rule UNOPTFLAT -file "*/frontend.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*.__Vcellout__i_frontend__icache_dreq_o'"
+lint_off -rule UNOPTFLAT -file "*/cva6_icache.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*gen_cache_wt.i_cache_subsystem.__Vcellout__i_cva6_icache__dreq_o'"
+lint_off -rule UNOPTFLAT -file "*/wt_dcache_mem.sv" -match "Signal unoptimizable: Circular combinational logic: '__VdfgRegularize_h*'"
+lint_off -rule UNOPTFLAT -file "*/wt_dcache_ctrl.sv" -match "Signal unoptimizable: Circular combinational logic: '__VdfgRegularize_h*'"
+lint_off -rule UNOPTFLAT -file "*/wt_dcache_missunit.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*gen_cache_wt.i_cache_subsystem.i_wt_dcache.__Vcellout__i_wt_dcache_missunit__mem_data_o'"
+lint_off -rule UNOPTFLAT -file "*/wt_axi_adapter.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*gen_cache_wt.i_cache_subsystem.i_adapter.axi_rd_gnt'"
+lint_off -rule UNOPTFLAT -file "*/wt_axi_adapter.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*gen_cache_wt.i_cache_subsystem.i_adapter.axi_wr_gnt'"
+lint_off -rule UNOPTFLAT -file "*/cva6_hpdcache_if_adapter.sv" -match "Signal unoptimizable: Circular combinational logic: '*"
+// MMU
+lint_off -rule UNOPTFLAT -file "*/cva6_mmu.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*ex_stage_i.lsu_i.__Vcellout__gen_mmu.i_cva6_mmu__lsu_exception_o'"
+lint_off -rule UNOPTFLAT -file "*/cva6_mmu.sv" -match "Signal unoptimizable: *ex_stage_i.lsu_i.gen_mmu.i_cva6_mmu.canonical_addr_check'"
+// LSU
+lint_off -rule UNOPTFLAT -file "*/load_store_unit.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*ex_stage_i.lsu_i.lsu_req_i'"
+lint_off -rule UNOPTFLAT -file "*/load_unit.sv" -match "Signal unoptimizable: Feedback to clock or circular logic: *ex_stage_i.lsu_i.__Vcellout__i_load_unit__req_port_o'"
+lint_off -rule UNOPTFLAT -file "*/load_store_unit.sv" -match "Signal unoptimizable: Circular combinational logic: *ex_stage_i.lsu_i.cva6_translation_req'"
+// CSR
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*__Vcellout__csr_regfile_i__csr_exception_o'"
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*.csr_regfile_i.csr_read'"
+lint_off -rule UNOPTFLAT -file "*/cva6.sv" -match "Signal unoptimizable: Feedback to clock or circular logic:*i_core_cva6.amo_valid_commit'"
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Circular combinational logic:*csr_regfile_i.privilege_violation'"
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Circular combinational logic:*'__VdfgRegularize_h*'"
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Circular combinational logic:*csr_regfile_i.update_access_exception'"
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Circular combinational logic:*csr_regfile_i.csr_we'"
+lint_off -rule UNOPTFLAT -file "*/csr_regfile.sv" -match "Signal unoptimizable: Circular combinational logic:*csr_regfile_i.csr_read'"

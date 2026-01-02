@@ -18,7 +18,6 @@ lint_off -rule WIDTH -file "*/tb_cheshire_util.svh" -match "Operator ASSIGN expe
 lint_off -rule WIDTH -file "*/tb_cheshire_util.svh" -match "Bit extraction of array[*:0] requires * bit index, not 64 bits."
 lint_off -rule WIDTH -file "*/tb_cheshire_util.svh" -match "Operator DIV expects * bits on the *HS, but *HS's * generates * bits."
 lint_off -rule WIDTH -file "*/tb_cheshire_util.svh" -match "Operator TASKREF 'writeSPM_*' expects 32 bits on the Function Argument, but Function Argument's VARREF 'bank_addr' generates * bits."
-lint_off -rule UNUSED -file "*/tb_cheshire_util.svh" -match "Bits of signal are not used: 'bank_addr'*"
 
 
 lint_off -rule WIDTH -file "*/cheshire_reg_top.sv" -match "Operator SHIFTL expects 32 bits on the LHS, but LHS's ARRAYSEL generates 1 bits."
@@ -29,8 +28,6 @@ lint_off -rule WIDTH -file "*/cheshire_reg_top.sv" -match "Operator SHIFTL expec
 
 //lint_off -rule DECLFILENAME -file "*/jtag_debug_simple.sv"
 //lint_off -rule WIDTH -file "*/jtag_debug_simple.sv"
-//lint_off -rule UNUSEDSIGNAL -file "*/jtag_debug_simple.sv" -match "Bits of signal are not used: 'data_out'[40:34]"
-lint_off -rule UNUSED -file "*/SimJTAG.sv"
 lint_off -rule BLKSEQ -file "*/SimJTAG.sv"
 lint_off -rule SYNCASYNCNET -file "*/SimJTAG.sv" -match "Signal flopped as both synchronous and async: *i_sim_jtag__reset'"
 lint_off -rule SYNCASYNCNET -file "*/cheshire_testharness.sv" -match "Signal flopped as both synchronous and async: 'rst_ni'"
@@ -42,9 +39,6 @@ lint_off -rule PINCONNECTEMPTY -file "*/tc_sram_mem_wrapper.sv" -match "* pin co
 // Width
 lint_off -rule WIDTH -file "*/tc_sram.sv" -match "Bit extraction of array[*:0] requires * bit index, not * bits." // mem is smaller than 48/64 bit of addressing
 // Unused, Undriven
-lint_off -rule UNUSED -file "*/tc_sram_mem_wrapper.sv" -match "Signal is not driven, nor used: 'mem_req'"
-lint_off -rule UNUSED -file "*/tc_sram_mem_wrapper.sv" -match "Signal is not driven, nor used: 'mem_resp'"
-lint_off -rule UNUSED -file "*/tc_sram_mem_wrapper.sv" -match "Bits of signal are not used: 'addr_r'[2:0]"
 lint_off -rule WIDTH -file "*/tc_sram_mem_wrapper.sv" -match "Input port connection 'addr_i' expects * bits on the pin connection, but pin connection's SEL generates * bits." // mem is smaller than 48/64 bit of addressing
 
 // Unoptimizable signals
@@ -53,15 +47,6 @@ lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptim
 lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptimizable: Circular combinational logic: '__VdfgRegularize*'"
 lint_off -rule UNOPTFLAT -file "*/axi_to_detailed_mem.sv" -match "Signal unoptimizable: Circular combinational logic:*u_axi_to_mem.i_axi_to_detailed_mem.i_mem_to_banks.cnt_req_ready'"
 
-
-// IP verilator
-///////////////
-// Unused signals
-
-lint_off -rule UNUSED -file "*/ip_cheshire_soc.sv" -match "Signal is not used: 'axi_slink_mst_req'"
-lint_off -rule UNUSED -file "*/ip_cheshire_soc.sv" -match "Signal is not used: 'slink_rcv_clk_o'"
-lint_off -rule UNUSED -file "*/ip_cheshire_soc.sv" -match "Signal is not used: 'slink_o'"
-lint_off -rule UNUSED -file "*/*ip_cheshire_soc.sv" -match "Signal is not used: 'jtag*'"
 
 // Undriven
 lint_off -rule UNDRIVEN -file "*/ip_cheshire_soc.sv" -match "Signal is not driven: 'axi_slink_mst_rsp'"
