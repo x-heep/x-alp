@@ -29,6 +29,7 @@ targets:
         - '--trace-max-array 128'
         - '--x-assign unique'
         - '--x-initial unique'
+        - '--Mdir verilator_out'
         #- '--threads 2' # only use with Verilator v5.XXX
         - '--exe'
         - 'polheepo_tb.cpp'
