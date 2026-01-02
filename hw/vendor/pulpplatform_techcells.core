@@ -1,0 +1,14 @@
+CAPI=2:
+name : pulpplatform.org::tech_cells:0.2.13
+
+filesets:
+  rtl:
+    files:
+      - pulpplatform_tech_cells/src/rtl/tc_sram.sv
+    file_type : systemVerilogSource
+
+targets:
+  default:
+    filesets:
+    - "!target_format ? (!target_lint ? (rtl))"
+
