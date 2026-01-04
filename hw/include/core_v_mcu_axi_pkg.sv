@@ -12,50 +12,50 @@ package core_v_mcu_axi_pkg;
   typedef struct packed {
     logic [AxiIdWidth-1:0]   id;
     logic [AxiAddrWidth-1:0] addr;
-    axi_pkg::len_t            len;
-    axi_pkg::size_t           size;
-    axi_pkg::burst_t          burst;
-    logic                     lock;
-    axi_pkg::cache_t          cache;
-    axi_pkg::prot_t           prot;
-    axi_pkg::qos_t            qos;
-    axi_pkg::region_t         region;
+    axi_pkg::len_t           len;
+    axi_pkg::size_t          size;
+    axi_pkg::burst_t         burst;
+    logic                    lock;
+    axi_pkg::cache_t         cache;
+    axi_pkg::prot_t          prot;
+    axi_pkg::qos_t           qos;
+    axi_pkg::region_t        region;
     logic [AxiUserWidth-1:0] user;
   } axi_ar_chan_t;
 
   typedef struct packed {
     logic [AxiIdWidth-1:0]   id;
     logic [AxiAddrWidth-1:0] addr;
-    axi_pkg::len_t            len;
-    axi_pkg::size_t           size;
-    axi_pkg::burst_t          burst;
-    logic                     lock;
-    axi_pkg::cache_t          cache;
-    axi_pkg::prot_t           prot;
-    axi_pkg::qos_t            qos;
-    axi_pkg::region_t         region;
-    axi_pkg::atop_t           atop;
+    axi_pkg::len_t           len;
+    axi_pkg::size_t          size;
+    axi_pkg::burst_t         burst;
+    logic                    lock;
+    axi_pkg::cache_t         cache;
+    axi_pkg::prot_t          prot;
+    axi_pkg::qos_t           qos;
+    axi_pkg::region_t        region;
+    axi_pkg::atop_t          atop;
     logic [AxiUserWidth-1:0] user;
   } axi_aw_chan_t;
 
   typedef struct packed {
     logic [AxiDataWidth-1:0]     data;
     logic [(AxiDataWidth/8)-1:0] strb;
-    logic                         last;
+    logic                        last;
     logic [AxiUserWidth-1:0]     user;
   } axi_w_chan_t;
 
   typedef struct packed {
     logic [AxiIdWidth-1:0]   id;
-    axi_pkg::resp_t           resp;
+    axi_pkg::resp_t          resp;
     logic [AxiUserWidth-1:0] user;
   } b_chan_t;
 
   typedef struct packed {
     logic [AxiIdWidth-1:0]   id;
     logic [AxiDataWidth-1:0] data;
-    axi_pkg::resp_t           resp;
-    logic                     last;
+    axi_pkg::resp_t          resp;
+    logic                    last;
     logic [AxiUserWidth-1:0] user;
   } r_chan_t;
 
