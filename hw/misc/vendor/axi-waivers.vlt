@@ -24,3 +24,6 @@ lint_off -rule WIDTH -file "*/axi_to_detailed_mem.sv" -match "Operator PATMEMBER
 
 lint_off -rule WIDTH -file "*/axi_dw_upsizer.sv" -match "Operator * expects * bits on *, but * generates * bits."
 lint_off -rule WIDTH -file "*/axi_id_remap.sv" -match "Operator EQ expects 32 bits on the LHS, but LHS's SEL generates * bits."
+
+// AXI to Detailed Mem
+lint_off -rule ASCRANGE -file "*/axi_to_detailed_mem.sv"
