@@ -32,78 +32,14 @@ FUSESOC 	:= $(shell which fusesoc)
 PYTHON  	:= $(shell which python)
 endif
 
-# X-HEEP GEN path
-XHEEP_GEN := $(mkfile_path)/hw/vendor/eslepfl_xheep
+# FuseSoC args
+FUSESOC_ARGS    ?= 
 
-# Build directories
-BUILD_DIR         = build
-FUSESOC_BUILD_DIR = $(shell find $(BUILD_DIR) -maxdepth 1 -type d -name 'openhwgroup.org_systems_core-v-mcu_*' 2>/dev/null | sort -V | head -n 1)
-VERILATOR_DIR     = $(FUSESOC_BUILD_DIR)/sim-verilator
-QUESTASIM_DIR     = $(FUSESOC_BUILD_DIR)/sim-modelsim
-
-# Project options are based on the app to be built (default - hello_world)
-PROJECT  ?= hello_world
-
-# Folder where the linker scripts are located
-LINK_FOLDER ?= $(mkfile_path)/sw/linker
-# Linker options are 'on_chip' (default),'flash_load','flash_exec','freertos'
-LINKER   ?= on_chip
-
-# Target options are 'sim' (default) and 'pynq-z2' and 'nexys-a7-100t'
-TARGET   	?= sim
-
-# Mcu-gen configuration files
-PYTHON_XALP_CFG ?= util/x_alp_gen/XAlp.py
-# Cached mcu-gen xalp configuration
-XALP_CONFIG_CACHE ?= $(BUILD_DIR)/xalp_config_cache.pickle
-
-MCU_GEN_TEMPLATES = \
-	hw/system/core_v_mcu.sv.tpl 
-# hw/system/include/core_v_mcu_pkg.sv.tpl
-
-# Compiler prefix options are 'riscv32-corev-' (default) and 'riscv32-unknown-'
-COMPILER_PREFIX ?= riscv32-corev-
-# Compiler flags to be passed (for both linking and compiling)
-COMPILER_FLAGS 	?=
-# Arch options are any RISC-V ISA string supported by the CPU. Default 'rv32imc_zicsr'
-ARCH     		?= rv32imc_zicsr
-
-# Path relative from the location of sw/Makefile from which to fetch source files. The directory of that file is the default value.
-SOURCE 	 ?= $(".")
-
-# Simulation engines options are verilator (default) and questasim
-SIMULATOR ?= verilator
-# SIM_ARGS: Additional simulation arguments for run-app-verilator based on input parameters:
-# - MAX_SIM_TIME: Maximum simulation time in clock cycles (unlimited if not provided)
-SIM_ARGS += $(if $(MAX_SIM_TIME),+max_sim_time=$(MAX_SIM_TIME))
-
-# Helper variables for Make string manipulation
-empty :=
-space := $(empty) $(empty)
-comma := ,
-
-# Testing flags
-# Optional TEST_FLAGS options are '--compile-only'
-TEST_FLAGS=
-
-# Flash read address for testing, in hexadecimal format 0x0000
-FLASHREAD_ADDR ?= 0x0
-FLASHREAD_FILE ?= $(mkfile_path)/flashcontent.hex
-FLASHREAD_BYTES ?= 256
-# Binary to store in flash memory
-FLASHWRITE_FILE ?= $(mkfile_path)/sw/build/main.hex
-# Max address in the hex file, used to program the flash
-ifeq ($(wildcard $(FLASHWRITE_FILE)),)
-	MAX_HEX_ADDRESS  := 0
-	MAX_HEX_ADDRESS_DEC := 0
-	BYTES_AFTER_MAX_HEX_ADDRESS := 0
-	FLASHWRITE_BYTES := 0
-else
-	MAX_HEX_ADDRESS  := $(shell cat $(FLASHWRITE_FILE) | grep "@" | tail -1 | cut -c2-)
-	MAX_HEX_ADDRESS_DEC := $(shell printf "%d" 0x$(MAX_HEX_ADDRESS))
-	BYTES_AFTER_MAX_HEX_ADDRESS := $(shell tac $(FLASHWRITE_FILE) | awk 'BEGIN {count=0} /@/ {print count; exit} {count++}')
-	FLASHWRITE_BYTES := $(shell echo $$(( $(MAX_HEX_ADDRESS_DEC) + $(BYTES_AFTER_MAX_HEX_ADDRESS)*16 )))
-endif
+# Verilator simulation parameters
+LOG_LEVEL	?= LOG_DEBUG
+BINARY      ?= ""
+BOOTMODE    ?= force
+MAX_CYCLES  ?= 1000000
 
 # Export variables to sub-makefiles
 export
@@ -111,44 +47,6 @@ export
 ## @section Conda
 conda:
 	conda env create -f util/conda_environment.yml
-
-## @section Installation
-
-## Generates mcu files core-v-mcu files and build the design with fusesoc
-## @param CPU=[cv32e20(default),cv32e40p,cv32e40x,cv32e40px]
-## @param BUS=[onetoM(default),NtoM]
-## @param MEMORY_BANKS=[2(default)to(16-MEMORY_BANKS_IL)]
-## @param MEMORY_BANKS_IL=[0(default),2,4,8]
-## @param XALP_CFG=[configs/general.hjson(default),<path-to-config-file>]
-## @param PYTHON_XALP_CFG=[configs/general.py(default),<path-to-config-file>]
-mcu-gen:
-	$(PYTHON) $(XHEEP_GEN)/util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --python_config $(PYTHON_XALP_CFG)
-	$(PYTHON) $(XHEEP_GEN)/util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --cached --outtpl hw/system/core_v_mcu.sv.tpl 
-# "$(subst $(space),$(comma),$(MCU_GEN_TEMPLATES))"
-	$(MAKE) verible
-
-## Display mcu_gen.py help
-mcu-gen-help:
-	$(PYTHON) util/mcu_gen.py -h
-
-# Format
-.PHONY: format
-format: .check-fusesoc
-	$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target format $(XALP)
-
-# Lint
-.PHONY: lint
-lint: .check-fusesoc
-	$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target lint $(XALP)
-
-## Runs black formating for python xalp generator files
-format-python:
-	$(PYTHON) -m black util/xalp_gen.py
-	$(PYTHON) -m black util/periph_structs_gen.py
-	$(PYTHON) -m black util/mcu_gen.py
-	$(PYTHON) -m black util/waiver-gen.py
-	$(PYTHON) -m black util/c_gen.py
-	$(PYTHON) -m black test/test_xalp_gen
 
 ## @section APP FW Build
 
@@ -179,9 +77,31 @@ app-list:
 
 ## @section Simulation
 
-## Verilator simulation with C++
+## Verilator simulation
 verilator-build: | .check-verilator
-	$(FUSESOC) --cores-root . run --no-export --target=sim --tool=verilator $(FUSESOC_FLAGS) --build x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildsim.log
+	$(FUSESOC) --cores-root . run --no-export --target sim --tool verilator --build x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_ARGS) 2>&1 | tee buildsim.log
+
+verilator-run: | verilator-build
+	$(FUSESOC) run --no-export --target sim --tool verilator --run x-heep:x-alp:x-alp:0.0.1 \
+		--LOG_LEVEL=$(LOG_LEVEL) \
+		--BINARY=$(BINARY) \
+		--BOOTMODE=$(BOOTMODE) \
+		--MAX_CYCLES=$(MAX_CYCLES) \
+		--trace=true \
+		$(FUSESOC_ARGS)
+
+## @section formatting and linting
+
+## Format
+.PHONY: format
+format: .check-fusesoc
+	$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target format $(XALP)
+
+## Lint
+.PHONY: lint
+lint: .check-fusesoc
+	$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target lint $(XALP)
+
 
 ## @section Cleaning commands
 

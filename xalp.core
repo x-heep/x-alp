@@ -4,19 +4,37 @@ name: x-heep:x-alp:x-alp:0.0.1
 
 filesets:
   x-alp:
+    files:
+    - hw/include/x_alp_pkg.sv
+    - hw/x_alp.sv
+    file_type : systemVerilogSource
     depend:
       - x-heep:x-alp:core-v-mcu:0.0.1
+
+  testbench:
+    depend:
+      - x-heep:x-alp:tb:0.0.1
 
 targets:
   default: &default
     filesets:
     - x-alp
-    toplevel: core_v_mcu
-
+    - testbench
+    toplevel: x_alp
   sim:
     <<: *default
     description: RTL simulation
     default_tool: verilator
+    toplevel: testharness
+    parameters:
+    - USE_JTAG_DPI
+    - DRAM_LATENCY=3
+    - MAX_CYCLES
+    - tool_verilator ? (LOG_LEVEL)
+    - tool_verilator ? (trace)
+    - tool_verilator ? (no_err)
+    - BINARY
+    - BOOTMODE
     tools:
       verilator:
         mode: cc
@@ -29,13 +47,14 @@ targets:
         - '--trace-max-array 128'
         - '--x-assign unique'
         - '--x-initial unique'
-        - '--Mdir verilator_out'
         #- '--threads 2' # only use with Verilator v5.XXX
-        - '--exe'
-        - 'polheepo_tb.cpp'
+        - '--exe tb_top.cpp'
         - '-Wall'
         - '-Wpedantic'
+        - '-CFLAGS "-Wno-format -Wno-deprecated-declarations"'
         - '-LDFLAGS "-pthread -lutil -lelf"'
+        - '-Wno-UNUSEDSIGNAL'
+        - '-Wno-UNDRIVEN'
         # - '-CFLAGS "-Wall -g"'
   # Format with Verible
   format:
@@ -68,3 +87,83 @@ targets:
         ruleset: default
         rules:
         - 'line-length=length:120'
+
+
+parameters:
+  USE_JTAG_DPI:
+    datatype: bool
+    description: If set use JTAG DPI interface for RISC-V debug (0 or 1)
+    paramtype: vlogdefine
+    default: "false"
+  DRAM_LATENCY:
+    datatype: int
+    description: DRAM latency in cycles (used in Verilator simulation only)
+    default: 1
+    paramtype: vlogdefine # Should be vlogparam to propagate to Verilator
+  LOG_LEVEL:
+    datatype: str
+    description: |
+      Set the log level. Admitted values: LOG_NONE|LOG_LOW|LOG_MEDIUM|LOG_HIGH|LOG_FULL|LOG_DEBUG.
+      Errors and configuration messages are always printed.
+    paramtype: cmdlinearg
+  trace:
+    datatype: str
+    description: If 'true', generate simulation waves dump.
+    default: "true"
+    paramtype: cmdlinearg
+  vcd_mode:
+    datatype: int
+    description: "VCD dump mode: 0 (no dump) | 1 (always active) | 2 (triggered by GPIO 0)"
+    default: 0
+    paramtype: plusarg
+  no_err:
+    datatype: str
+    description: Always exit with 0. Useful to run post-simulation hooks.
+    default: "true"
+    paramtype: cmdlinearg
+  verbose:
+    datatype: bool
+    description: Verbosity mode for QuestaSim testbench.
+    paramtype: plusarg
+  BOOTMODE:
+    datatype: str
+    description: |
+      Boot mode for QuestaSim and Verilator testbench. Admitted values for Verilator: jtag|flash|force.
+    default: 0
+    paramtype: plusarg
+  PRELMODE:
+    datatype: int
+    description: |
+      Preload mode for QuestaSim testbench. TODO: complete
+    default: 0
+    paramtype: plusarg
+  BINARY:
+    datatype: str
+    description: |
+      Binary to load in the QuestaSim TB (ELF format).
+    default: 0
+    paramtype: plusarg
+  vcd_mode:
+    datatype: int
+    description: "VCD dump mode: 0 (no dump) | 1 (always active) | 2 (triggered by GPIO 0)"
+    default: 0
+    paramtype: plusarg
+  MAX_CYCLES:
+    datatype: int
+    description: Maximum number of simulation cycles (halt the simulation when reached).
+    paramtype: plusarg
+  RTL_SIMULATION:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Select code for RTL simulation (e.g., faster SRAM initialization)
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Can isolate code that is (or is not) meant for Synthesis/Simulation only
+  FAST_SIM:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Enable optimizations for fast simulation (e.g., force DRAM code preload). For now only works in post-synthesis
