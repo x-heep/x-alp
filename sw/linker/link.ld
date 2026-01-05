@@ -10,8 +10,8 @@
    metal programs. These are mostly removing dynamic linking related sections and
    putting sections into our memory regions. */
 
-OUTPUT_FORMAT("elf32-littleriscv", "elf32-littleriscv",
-        "elf32-littleriscv")
+OUTPUT_FORMAT("elf64-littleriscv", "elf64-littleriscv",
+        "elf64-littleriscv")
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 

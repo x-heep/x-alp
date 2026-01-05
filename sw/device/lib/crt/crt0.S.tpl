@@ -11,7 +11,7 @@
  */
 
 #include "x-heep.h"
-#include "core_v_mini_mcu.h"
+#include "core_v_mcu.h"
 #include "soc_ctrl_regs.h"
 
 #define RAMSIZE_COPIEDBY_BOOTROM 2048

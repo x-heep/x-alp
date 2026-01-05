@@ -18,69 +18,69 @@
 .option norvc
 vector_table:
 	//  0 : exception Handler and user software interrupt
-	j handler_exception
+	// j handler_exception
 	//  1 : supervisor software interrupt
-	j __no_irq_handler
+	// j __no_irq_handler
 	//  2 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	//  3 : machine software interrupt handler
-	j handler_irq_software
+	// j handler_irq_software
 	//  4 : user timer interrupt
-	j __no_irq_handler
+	// j __no_irq_handler
 	//  5 : supervisor timer interrupt
-	j __no_irq_handler
+	// j __no_irq_handler
 	//  6 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	//  7 : machine timer interrupt handler
-	j handler_irq_timer
+	// j handler_irq_timer
 	//  8 : user external interrupt
-	j __no_irq_handler
+	// j __no_irq_handler
 	//  9 : supervisor external interrupt
-	j __no_irq_handler
+	// j __no_irq_handler
 	// 10 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	// 11 : machine external interrupt handler
-	j handler_irq_external
+	// j handler_irq_external
 	// 12 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	// 13 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	// 14 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	// 15 : unmapped
-	j __no_irq_handler
+	// j __no_irq_handler
 	// 16 : fast interrupt - timer_1
-	j handler_irq_fast_timer_1
+	// j handler_irq_fast_timer_1
 	// 17 : fast interrupt - timer_2
-	j handler_irq_fast_timer_2
+	// j handler_irq_fast_timer_2
 	// 18 : fast interrupt - timer_3
-	j handler_irq_fast_timer_3
+	// j handler_irq_fast_timer_3
 	// 19 : fast interrupt - dma_done
-	j handler_irq_fast_dma_done
+	// j handler_irq_fast_dma_done
 	// 20 : fast interrupt - spi
-	j handler_irq_fast_spi
+	// j handler_irq_fast_spi
 	// 21 : fast interrupt - spi_flash
-	j handler_irq_fast_spi_flash
+	// j handler_irq_fast_spi_flash
 	// 22 : fast interrupt - gpio_0
-	j handler_irq_fast_gpio_0
+	// j handler_irq_fast_gpio_0
 	// 23 : fast interrupt - gpio_1
-	j handler_irq_fast_gpio_1
+	// j handler_irq_fast_gpio_1
 	// 24 : fast interrupt - gpio_2
-	j handler_irq_fast_gpio_2
+	// j handler_irq_fast_gpio_2
 	// 25 : fast interrupt - gpio_3
-	j handler_irq_fast_gpio_3
+	// j handler_irq_fast_gpio_3
 	// 26 : fast interrupt - gpio_4
-	j handler_irq_fast_gpio_4
+	// j handler_irq_fast_gpio_4
 	// 27 : fast interrupt - gpio_5
-	j handler_irq_fast_gpio_5
+	// j handler_irq_fast_gpio_5
 	// 28 : fast interrupt - gpio_6
-	j handler_irq_fast_gpio_6
+	// j handler_irq_fast_gpio_6
 	// 29 : fast interrupt - gpio_7
-	j handler_irq_fast_gpio_7
+	// j handler_irq_fast_gpio_7
 	// 30 : fast interrupt - dma_window
-	j handler_irq_fast_dma_window
+	// j handler_irq_fast_dma_window
 	// 31 : fast interrupt - external peripheral
-	j handler_irq_fast_external_peripheral
+	// j handler_irq_fast_external_peripheral
 
 
 .section .text.vecs
