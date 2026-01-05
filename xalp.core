@@ -35,6 +35,7 @@ targets:
     - tool_verilator ? (no_err)
     - BINARY
     - BOOTMODE
+    - HPDCACHE_ASSERT_OFF
     tools:
       verilator:
         mode: cc
@@ -100,6 +101,11 @@ parameters:
     description: DRAM latency in cycles (used in Verilator simulation only)
     default: 1
     paramtype: vlogdefine # Should be vlogparam to propagate to Verilator
+  HPDCACHE_ASSERT_OFF:
+    datatype: bool
+    description: Disable HPDCache assertions (useful for random tests that may trigger them)
+    default: "true"
+    paramtype: vlogdefine
   LOG_LEVEL:
     datatype: str
     description: |
