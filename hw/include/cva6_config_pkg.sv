@@ -17,71 +17,71 @@
 
 package cva6_config_pkg;
 
-  localparam CVA6ConfigXlen = 64;
+  localparam int CVA6ConfigXlen = 64;
 
-  localparam CVA6ConfigRVF = 1;
-  localparam CVA6ConfigRVD = 1;
-  localparam CVA6ConfigF16En = 0;
-  localparam CVA6ConfigF16AltEn = 0;
-  localparam CVA6ConfigF8En = 0;
-  localparam CVA6ConfigFVecEn = 0;
+  localparam int CVA6ConfigRVF = 1;
+  localparam int CVA6ConfigRVD = 1;
+  localparam int CVA6ConfigF16En = 0;
+  localparam int CVA6ConfigF16AltEn = 0;
+  localparam int CVA6ConfigF8En = 0;
+  localparam int CVA6ConfigFVecEn = 0;
 
-  localparam CVA6ConfigCvxifEn = 1;
-  localparam CVA6ConfigCExtEn = 1;
-  localparam CVA6ConfigZcbExtEn = 1;
-  localparam CVA6ConfigZcmpExtEn = 0;
-  localparam CVA6ConfigAExtEn = 1;
-  localparam CVA6ConfigBExtEn = 1;
-  localparam CVA6ConfigVExtEn = 0;
-  localparam CVA6ConfigHExtEn = 0;
-  localparam CVA6ConfigRVZiCond = 1;
+  localparam int CVA6ConfigCvxifEn = 1;
+  localparam int CVA6ConfigCExtEn = 1;
+  localparam int CVA6ConfigZcbExtEn = 1;
+  localparam int CVA6ConfigZcmpExtEn = 0;
+  localparam int CVA6ConfigAExtEn = 1;
+  localparam int CVA6ConfigBExtEn = 1;
+  localparam int CVA6ConfigVExtEn = 0;
+  localparam int CVA6ConfigHExtEn = 0;
+  localparam int CVA6ConfigRVZiCond = 1;
 
-  localparam CVA6ConfigAxiIdWidth = 4;
-  localparam CVA6ConfigAxiAddrWidth = 64;
-  localparam CVA6ConfigAxiDataWidth = 64;
-  localparam CVA6ConfigFetchUserEn = 0;
-  localparam CVA6ConfigFetchUserWidth = CVA6ConfigXlen;
-  localparam CVA6ConfigDataUserEn = 0;
-  localparam CVA6ConfigDataUserWidth = CVA6ConfigXlen;
+  localparam int CVA6ConfigAxiIdWidth = 4;
+  localparam int CVA6ConfigAxiAddrWidth = 64;
+  localparam int CVA6ConfigAxiDataWidth = 64;
+  localparam int CVA6ConfigFetchUserEn = 0;
+  localparam int CVA6ConfigFetchUserWidth = CVA6ConfigXlen;
+  localparam int CVA6ConfigDataUserEn = 0;
+  localparam int CVA6ConfigDataUserWidth = CVA6ConfigXlen;
 
-  localparam CVA6ConfigIcacheByteSize = 16384;
-  localparam CVA6ConfigIcacheSetAssoc = 4;
-  localparam CVA6ConfigIcacheLineWidth = 128;
-  localparam CVA6ConfigDcacheByteSize = 32768;
-  localparam CVA6ConfigDcacheSetAssoc = 8;
-  localparam CVA6ConfigDcacheLineWidth = 128;
+  localparam int CVA6ConfigIcacheByteSize = 16384;
+  localparam int CVA6ConfigIcacheSetAssoc = 4;
+  localparam int CVA6ConfigIcacheLineWidth = 128;
+  localparam int CVA6ConfigDcacheByteSize = 32768;
+  localparam int CVA6ConfigDcacheSetAssoc = 8;
+  localparam int CVA6ConfigDcacheLineWidth = 128;
 
-  localparam CVA6ConfigDcacheFlushOnFence = 1'b0;
-  localparam CVA6ConfigDcacheInvalidateOnFlush = 1'b0;
+  localparam int CVA6ConfigDcacheFlushOnFence = 1'b0;
+  localparam int CVA6ConfigDcacheInvalidateOnFlush = 1'b0;
 
-  localparam CVA6ConfigDcacheIdWidth = 3;
-  localparam CVA6ConfigMemTidWidth = CVA6ConfigAxiIdWidth;
+  localparam int CVA6ConfigDcacheIdWidth = 3;
+  localparam int CVA6ConfigMemTidWidth = CVA6ConfigAxiIdWidth;
 
-  localparam CVA6ConfigWtDcacheWbufDepth = 8;
+  localparam int CVA6ConfigWtDcacheWbufDepth = 8;
 
-  localparam CVA6ConfigNrScoreboardEntries = 8;
+  localparam int CVA6ConfigNrScoreboardEntries = 8;
 
-  localparam CVA6ConfigNrLoadPipeRegs = 1;
-  localparam CVA6ConfigNrStorePipeRegs = 0;
-  localparam CVA6ConfigNrLoadBufEntries = 8;
+  localparam int CVA6ConfigNrLoadPipeRegs = 1;
+  localparam int CVA6ConfigNrStorePipeRegs = 0;
+  localparam int CVA6ConfigNrLoadBufEntries = 8;
 
-  localparam CVA6ConfigRASDepth = 2;
-  localparam CVA6ConfigBTBEntries = 32;
-  localparam CVA6ConfigBHTEntries = 128;
+  localparam int CVA6ConfigRASDepth = 2;
+  localparam int CVA6ConfigBTBEntries = 32;
+  localparam int CVA6ConfigBHTEntries = 128;
 
-  localparam CVA6ConfigTvalEn = 1;
+  localparam int CVA6ConfigTvalEn = 1;
 
-  localparam CVA6ConfigNrPMPEntries = 8;
+  localparam int CVA6ConfigNrPMPEntries = 8;
 
-  localparam CVA6ConfigPerfCounterEn = 1;
+  localparam int CVA6ConfigPerfCounterEn = 1;
 
   localparam config_pkg::cache_type_t CVA6ConfigDcacheType = config_pkg::HPDCACHE_WT;
 
-  localparam CVA6ConfigMmuPresent = 1;
+  localparam int CVA6ConfigMmuPresent = 1;
 
-  localparam CVA6ConfigRvfiTrace = 1;
+  localparam int CVA6ConfigRvfiTrace = 1;
 
-  localparam config_pkg::cva6_user_cfg_t cva6_cfg = '{
+  localparam config_pkg::cva6_user_cfg_t CVA6Cfg = '{
       XLEN: unsigned'(CVA6ConfigXlen),
       VLEN: unsigned'(64),
       FpgaEn: bit'(0),  // for Xilinx and Altera

@@ -11,16 +11,16 @@ module memory_subsystem (
 
 );
 
-/* verilator lint_off PINCONNECTEMPTY */
-/* verilator lint_off UNUSEDSIGNAL */
+  /* verilator lint_off PINCONNECTEMPTY */
+  /* verilator lint_off UNUSEDSIGNAL */
 
-  localparam AddrWidth = $clog2(8192); // 8 KB SRAM
+  localparam int AddrWidth = $clog2(8192);  // 8 KB SRAM
 
-  logic        mem_req;
+  logic                 mem_req;
   logic [AddrWidth-1:0] mem_addr;
-  logic [63:0] mem_wdata;
-  logic        mem_we;
-  logic [63:0] mem_rdata;
+  logic [         63:0] mem_wdata;
+  logic                 mem_we;
+  logic [         63:0] mem_rdata;
 
   axi_to_mem #(
     .axi_req_t   (core_v_mcu_axi_pkg::axi_req_t),

@@ -24,9 +24,9 @@ module memory_subsystem
     output axi_rsp_t [NUM_BANKS-1:0] ram_resp_o,
 
     // power manager signals that goes to the ASIC macros
-    input logic [core_v_mini_mcu_pkg::NUM_BANKS-1:0] pwrgate_ni,
-    output logic [core_v_mini_mcu_pkg::NUM_BANKS-1:0] pwrgate_ack_no,
-    input logic [core_v_mini_mcu_pkg::NUM_BANKS-1:0] set_retentive_ni
+    input logic [core_v_mcu_pkg::NUM_BANKS-1:0] pwrgate_ni,
+    output logic [core_v_mcu_pkg::NUM_BANKS-1:0] pwrgate_ack_no,
+    input logic [core_v_mcu_pkg::NUM_BANKS-1:0] set_retentive_ni
 );
 
   logic [NUM_BANKS-1:0] ram_valid_q;
