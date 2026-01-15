@@ -38,15 +38,30 @@ module memory_subsystem (
     .axi_req_i   (bus_req_i),
     .axi_resp_o  (bus_resp_o),
     .mem_req_o   (mem_req),
-    .mem_gnt_i   (),
+    .mem_gnt_i   (mem_gnt),
     .mem_addr_o  (mem_addr),
     .mem_wdata_o (mem_wdata),
     .mem_strb_o  (),
     .mem_atop_o  (),
     .mem_we_o    (mem_we),
-    .mem_rvalid_i(),
+    .mem_rvalid_i(mem_valid_q),
     .mem_rdata_i (mem_rdata)
   );
+
+  logic mem_valid_q;
+  logic mem_valid;
+  logic mem_gnt;
+
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+      if (!rst_ni) begin
+        mem_valid_q <= '0;
+      end else begin
+        mem_valid_q <= mem_req;
+      end
+    end
+
+    assign mem_gnt = 1'b1;
+    assign mem_valid = mem_valid_q;
 
   sram_wrapper #(
     .NumWords (8192),
