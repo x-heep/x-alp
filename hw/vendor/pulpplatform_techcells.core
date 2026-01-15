@@ -1,5 +1,5 @@
 CAPI=2:
-name : pulpplatform.org::tech_cells:0.2.13
+name : pulpp-latform.org::tech_cells:0.2.13
 
 filesets:
   rtl:
@@ -11,4 +11,3 @@ targets:
   default:
     filesets:
     - "!target_format ? (!target_lint ? (rtl))"
-
