@@ -18,6 +18,7 @@
 build : build/Makefile
 	@echo Build 
 	${MAKE} -s -C build
+	@cp build/main.elf build/main.spm.elf
 
 setup : build/Makefile
 
