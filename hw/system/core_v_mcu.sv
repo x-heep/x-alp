@@ -16,7 +16,7 @@ module core_v_mcu (
   cpu_subsystem u_cpu_subsystem (
     .clk_i      (clk_i),
     .rst_ni     (rst_ni),
-    .boot_addr_i('0),
+    .boot_addr_i(64'h0000_0000_0000_0180), 
 
     // .cvxif_resp_o (),
     // .cvxif_req_i('0),
