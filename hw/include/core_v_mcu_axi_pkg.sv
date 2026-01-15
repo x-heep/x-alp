@@ -2,7 +2,7 @@ package core_v_mcu_axi_pkg;
 
   // AXI configuration parameters
 
-  localparam int unsigned AxiIdWidth = 4;
+  localparam int unsigned AxiIdWidth = 4;    // TODO: Check ID width for slaves (check AXI spec)
   localparam int unsigned AxiAddrWidth = 64;
   localparam int unsigned AxiDataWidth = 64;
   localparam int unsigned AxiUserWidth = 64;
