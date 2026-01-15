@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-# Copyright lowRISC contributors.
+# Copyright lowRISC contributors (OpenTitan project).
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 '''A tool to copy source code from upstream into this repository.
 
-For an introduction to using this tool, see doc/ug/vendor_hw.md in this
-repository (on the internet at https://docs.opentitan.org/doc/ug/vendor_hw/).
+For an introduction to using this tool, see doc/contributing/hw/vendor.md in this
+repository (on the internet at https://opentitan.org/book/doc/contributing/hw/vendor.html).
 
-For full documentation, see doc/rm/vendor_in_tool.md (on the internet at
-https://docs.opentitan.org/doc/rm/vendor_in_tool).
+For full documentation, see util/doc/vendor.md (on the internet at
+https://opentitan.org/book/util/doc/vendor.html).
 
 '''
 
@@ -29,7 +29,7 @@ import hjson
 
 EXCLUDE_ALWAYS = ['.git']
 
-LOCK_FILE_HEADER = """// Copyright lowRISC contributors.
+LOCK_FILE_HEADER = """// Copyright lowRISC contributors (OpenTitan project).
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -45,7 +45,7 @@ OVERRIDABLE_DESC_KEYS = [
     'patch_repo.rev_base',
     'patch_repo.rev_patched',
     'upstream.url',
-    'upstream.ref',
+    'upstream.rev',
 ]
 
 verbose = False
@@ -77,7 +77,7 @@ def github_qualify_references(log, repo_userorg, repo_name):
 
     r = re.compile(r"(^|[^\w])(?:#|[gG][hH]-)(\d+)\b")
     repl_str = r'\1%s/%s#\2' % (repo_userorg, repo_name)
-    return [r.sub(repl_str, l) for l in log]
+    return [r.sub(repl_str, line) for line in log]
 
 
 def test_github_qualify_references():
@@ -245,30 +245,44 @@ class Mapping1:
         self.patch_dir = patch_dir
 
     @staticmethod
+    def check_path(idx, name, val):
+        '''Check that a path is valid for use in a mapping.
+
+        This spots things like '../../../foo' or '/etc/passwd'.
+        '''
+        val = os.path.normpath(val)
+        if val.startswith('/') or val.startswith('..'):
+            raise JsonError(val,
+                            'Mapping entry {} has a bad path for {!r} '
+                            '(must be a relative path that doesn\'t '
+                            'escape the directory)'
+                            .format(idx + 1, name))
+        return Path(val)
+
+    @staticmethod
     def make(path, idx, data):
-        assert isinstance(data, dict)
+        if isinstance(data, str):
+            # A string S is interpreted as {from: S, to: S}.
+            from_path = Mapping1.check_path(idx, 'from', data)
+            to_path = from_path
+            patch_dir = None
+        else:
+            # Otherwise, we expect a dictionary with 'from', 'to' and
+            # (optionally) 'patch_dir'.
+            assert isinstance(data, dict)
 
-        def get_path(name, optional=False):
-            val = get_field(path, 'in mapping entry {}'.format(idx + 1),
-                            data, name, expected_type=str, optional=optional)
-            if val is None:
-                return None
+            def get_path(name, optional=False):
+                val = get_field(path, 'in mapping entry {}'.format(idx + 1),
+                                data, name,
+                                expected_type=str, optional=optional)
+                if val is None:
+                    return None
 
-            # Check that the paths aren't evil ('../../../foo' or '/etc/passwd'
-            # are *not* ok!)
-            val = os.path.normpath(val)
-            if val.startswith('/') or val.startswith('..'):
-                raise JsonError(path,
-                                'Mapping entry {} has a bad path for {!r} '
-                                '(must be a relative path that doesn\'t '
-                                'escape the directory)'
-                                .format(idx + 1, name))
+                return Mapping1.check_path(idx, name, val)
 
-            return Path(val)
-
-        from_path = get_path('from')
-        to_path = get_path('to')
-        patch_dir = get_path('patch_dir', optional=True)
+            from_path = get_path('from')
+            to_path = get_path('to')
+            patch_dir = get_path('patch_dir', optional=True)
 
         return Mapping1(from_path, to_path, patch_dir)
 
@@ -279,7 +293,13 @@ class Mapping1:
                         Path('.') if have_patch_dir else None)
 
     @staticmethod
-    def apply_patch(basedir, patchfile):
+    def apply_patch(basepath, patchfile):
+        # Sometimes basepath is actually a file to which the patch should be applied.
+        # In that case, make basedir point to the containing directory instead of the file.
+        if os.path.isfile(basepath):
+            basedir = os.path.dirname(basepath)
+        else:
+            basedir = basepath
         cmd = ['git', 'apply', '--directory', str(basedir), '-p1',
                str(patchfile)]
         if verbose:
@@ -326,8 +346,9 @@ class Mapping:
         items = []
         assert isinstance(data, list)
         for idx, elt in enumerate(data):
-            if not isinstance(elt, dict):
-                raise JsonError(path, 'Mapping element {!r} is not a dict.'.format(elt))
+            if not (isinstance(elt, dict) or isinstance(elt, str)):
+                raise JsonError(path,
+                                f'Mapping element {elt!r} is not a dict.')
             items.append(Mapping1.make(path, idx, elt))
 
         return Mapping(items)
