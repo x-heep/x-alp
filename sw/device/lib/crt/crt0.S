@@ -10,9 +10,9 @@
  * http://www.opensource.org/licenses.
  */
 
-// #include "x-heep.h"
-// #include "core_v_mcu.h"
-// #include "soc_ctrl_regs.h"
+#include "x-alp.h"
+#include "core_v_mcu.h"
+#include "soc_ctrl_regs.h"
 
 #define RAMSIZE_COPIEDBY_BOOTROM 2048
 
@@ -33,9 +33,9 @@ _start:
    la sp, _sp
 
 /* set the frequency */
-   // li a0, SOC_CTRL_START_ADDRESS
-   // li a2, REFERENCE_CLOCK_Hz
-   // sw a2, SOC_CTRL_SYSTEM_FREQUENCY_HZ_REG_OFFSET(a0)
+   li a0, SOC_CTRL_START_ADDRESS
+   li a2, REFERENCE_CLOCK_Hz
+   sw a2, SOC_CTRL_SYSTEM_FREQUENCY_HZ_REG_OFFSET(a0)
 
 #ifdef EXTERNAL_CRTO
    #include "external_crt0.S"
