@@ -1,5 +1,5 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 name: "lowrisc:ip:uart:0.1"
@@ -7,10 +7,9 @@ description: "uart"
 filesets:
   files_rtl:
     depend:
-      - lowrisc:virtual_constants:top_pkg
+      - lowrisc:constants:top_pkg
       - lowrisc:prim:all
       - lowrisc:ip:tlul
-      - lowrisc:virtual_constants:top_racl_pkg
     files:
       - rtl/uart_reg_pkg.sv
       - rtl/uart_reg_top.sv
@@ -69,3 +68,5 @@ targets:
         mode: lint-only
         verilator_options:
           - "-Wall"
+
+

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +12,6 @@ package xbar_env_pkg;
   import dv_utils_pkg::*;
   import tl_agent_pkg::*;
   import dv_lib_pkg::*;
-  import cip_base_pkg::*;
 
   typedef struct {
     string                      device_name;

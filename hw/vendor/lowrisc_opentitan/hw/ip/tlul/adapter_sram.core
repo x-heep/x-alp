@@ -1,5 +1,5 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 name: "lowrisc:tlul:adapter_sram:0.1"
@@ -12,7 +12,6 @@ filesets:
       - lowrisc:prim:assert
       - lowrisc:tlul:common
     files:
-      - rtl/tlul_sram_byte.sv
       - rtl/tlul_adapter_sram.sv
     file_type: systemVerilogSource
 

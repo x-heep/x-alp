@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -21,18 +21,13 @@ class xbar_env extends dv_base_env#(.CFG_T              (xbar_env_cfg),
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-
-    // use cip_tl_seq_item to create tl_seq_item with correct integrity values and obtain integrity
-    // related functions
-    tl_seq_item::type_id::set_type_override(cip_tl_seq_item::get_type());
-
     // Connect TileLink host and device agents
     host_agent = new[cfg.num_hosts];
     foreach (host_agent[i]) begin
       host_agent[i] = tl_agent::type_id::create(
                       $sformatf("%0s_agent", xbar_hosts[i].host_name), this);
       uvm_config_db#(tl_agent_cfg)::set(this,
-        $sformatf("%0s_agent", xbar_hosts[i].host_name),"cfg", cfg.host_agent_cfg[i]);
+        $sformatf("*%0s*", xbar_hosts[i].host_name),"cfg", cfg.host_agent_cfg[i]);
       cfg.host_agent_cfg[i].en_cov = cfg.en_cov;
     end
     device_agent = new[cfg.num_devices];
@@ -40,7 +35,7 @@ class xbar_env extends dv_base_env#(.CFG_T              (xbar_env_cfg),
       device_agent[i] = tl_agent::type_id::create(
                       $sformatf("%0s_agent", xbar_devices[i].device_name), this);
       uvm_config_db#(tl_agent_cfg)::set(this,
-        $sformatf("%0s_agent", xbar_devices[i].device_name), "cfg", cfg.device_agent_cfg[i]);
+        $sformatf("*%0s*", xbar_devices[i].device_name), "cfg", cfg.device_agent_cfg[i]);
       cfg.device_agent_cfg[i].en_cov = cfg.en_cov;
     end
 

@@ -1,5 +1,5 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 name: "lowrisc:dv:uart_env:0.1"
@@ -10,10 +10,8 @@ filesets:
       - lowrisc:dv:ralgen
       - lowrisc:dv:uart_agent
       - lowrisc:dv:cip_lib
-      - lowrisc:ip:uart
     files:
       - uart_env_pkg.sv
-      - uart_nf_if.sv
       - uart_env_cfg.sv: {is_include_file: true}
       - uart_env_cov.sv: {is_include_file: true}
       - uart_virtual_sequencer.sv: {is_include_file: true}
@@ -45,7 +43,6 @@ generate:
     parameters:
       name: uart
       ip_hjson: ../../data/uart.hjson
-    position: prepend
 
 targets:
   default:

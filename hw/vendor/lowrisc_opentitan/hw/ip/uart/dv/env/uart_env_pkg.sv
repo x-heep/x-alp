@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -11,62 +11,41 @@ package uart_env_pkg;
   import tl_agent_pkg::*;
   import uart_agent_pkg::*;
   import dv_lib_pkg::*;
-  import dv_base_reg_pkg::*;
   import cip_base_pkg::*;
   import uart_ral_pkg::*;
-  import uart_reg_pkg::RxFifoDepth;
-  import uart_reg_pkg::TxFifoDepth;
 
   // macro includes
   `include "uvm_macros.svh"
   `include "dv_macros.svh"
 
   // local types
-  parameter uint MAX_RX_WATERMARK_LVL = 7;
-  parameter uint MAX_TX_WATERMARK_LVL = 7;
-  // alerts
-  parameter uint NUM_ALERTS = 1;
-  parameter string LIST_OF_ALERTS[NUM_ALERTS] = {"fatal_fault"};
+  parameter uint UART_FIFO_DEPTH = 32;
 
   typedef enum int {
     TxWatermark = 0,
     RxWatermark = 1,
-    TxDone      = 2,
+    TxEmpty     = 2,
     RxOverflow  = 3,
     RxFrameErr  = 4,
     RxBreakErr  = 5,
     RxTimeout   = 6,
     RxParityErr = 7,
-    TxEmpty     = 8,
-    NumUartIntr = 9
+    NumUartIntr = 8
   } uart_intr_e;
 
   // get the number of bytes that triggers watermark interrupt
-  function automatic int get_rx_watermark_bytes_by_level(int lvl);
-    int thresh = 2**lvl;
-    if (lvl > MAX_RX_WATERMARK_LVL) begin
-      `uvm_fatal("uart_env_pkg::get_rx_watermark_bytes_by_level",
-                 $sformatf("invalid RX watermark level value - %0d", lvl))
-    end else if (thresh > RxFifoDepth) begin
-      return 2**(MAX_RX_WATERMARK_LVL+1);
-    end else if (thresh == RxFifoDepth) begin
-      return thresh - 2;
-    end else begin
-      return thresh;
-    end
-  endfunction
-
-  // get the number of bytes that triggers watermark interrupt
-  function automatic int get_tx_watermark_bytes_by_level(int lvl);
-    int thresh = 2**lvl;
-    if (lvl > MAX_TX_WATERMARK_LVL) begin
-      `uvm_fatal("uart_env_pkg::get_tx_watermark_bytes_by_level",
-                 $sformatf("invalid TX watermark level value - %0d", lvl))
-    end else if (thresh >= TxFifoDepth/2) begin
-      return TxFifoDepth/2;
-    end else begin
-      return thresh;
-    end
+  function automatic int get_watermark_bytes_by_level(int lvl, uart_dir_e dir);
+    case(lvl)
+      0: return dir == UartTx ? 2 : 1;
+      1: return 4;
+      2: return 8;
+      3: return 16;
+      4: return 30;
+      default: begin
+        `uvm_fatal("uart_env_pkg::get_watermark_bytes_by_level",
+                   $sformatf("invalid watermark level value - %0d", lvl))
+      end
+    endcase
   endfunction
 
   // get the number of bytes that triggers break interrupt
@@ -87,7 +66,7 @@ package uart_env_pkg;
   // if uart baud rate is 1500_000 and IO is 24Mhz, NCO is 'h1_0000, which is over the NCO width
   // use NCO = 'hffff for this case since the error is tolerable. Refer to #4263
   `define CALC_NCO(baud_rate, nco_width, clk_freq_mhz) \
-    (baud_rate == BaudRate1p5Mbps && clk_freq_mhz == 24) ? 16'hffff : \
+    (baud_rate == BaudRate1p5Mbps && clk_freq_mhz == ClkFreq24Mhz) ? 16'hffff : \
         (longint'(baud_rate) * (2**(nco_width+4))) / (clk_freq_mhz * 1000_000)
 
   // calculate the nco

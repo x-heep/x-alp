@@ -1,11 +1,8 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
-// This module implements a single-round Keccak permutation. It is unhardened. For an
-// implementation with side-channel hardening, refer to the keccak_2share module used in the
-// KMAC hardware IP block.
-
+// prim_keccak is single round permutation module
 `include "prim_assert.sv"
 module prim_keccak #(
   parameter int Width = 1600, // b= {25, 50, 100, 200, 400, 800, 1600}
@@ -295,3 +292,4 @@ module prim_keccak #(
   //endfunction : keccak_rnd
 
 endmodule
+

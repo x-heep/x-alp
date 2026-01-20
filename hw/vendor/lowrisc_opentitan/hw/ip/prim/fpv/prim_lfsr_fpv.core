@@ -1,5 +1,5 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 name: "lowrisc:fpv:prim_lfsr_fpv:0.1"
@@ -9,7 +9,7 @@ filesets:
     depend:
       - lowrisc:prim:lfsr
     files:
-      - tb/prim_lfsr_tb.sv
+      - tb/prim_lfsr_fpv.sv
     file_type: systemVerilogSource
 
 targets:
@@ -20,7 +20,7 @@ targets:
     filesets:
       - files_formal
     toplevel:
-      - prim_lfsr_tb
+      - prim_lfsr_fpv
 
   formal:
     <<: *default_target

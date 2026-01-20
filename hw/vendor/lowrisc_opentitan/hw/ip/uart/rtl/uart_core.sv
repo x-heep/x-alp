@@ -1,11 +1,9 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
 // Description: UART core module
 //
-
-`include "prim_assert.sv"
 
 module uart_core (
   input                  clk_i,
@@ -17,12 +15,9 @@ module uart_core (
   input                  rx,
   output logic           tx,
 
-  output logic           lsio_trigger_o,
-
   output logic           intr_tx_watermark_o,
-  output logic           intr_tx_empty_o,
   output logic           intr_rx_watermark_o,
-  output logic           intr_tx_done_o,
+  output logic           intr_tx_empty_o,
   output logic           intr_rx_overflow_o,
   output logic           intr_rx_frame_err_o,
   output logic           intr_rx_break_err_o,
@@ -33,28 +28,19 @@ module uart_core (
   import uart_reg_pkg::*;
 
   localparam int NcoWidth = $bits(reg2hw.ctrl.nco.q);
-  localparam int TxFifoDepthW = $clog2(TxFifoDepth)+1;
-  localparam int RxFifoDepthW = $clog2(RxFifoDepth)+1;
-
-  // The design does not support FIFOs deeper than 255 elements with the current CSR layout.
-  `ASSERT_INIT(TxFifoDepth_A, TxFifoDepth < 256)
-  `ASSERT_INIT(RxFifoDepth_A, RxFifoDepth < 256)
 
   logic   [15:0]  rx_val_q;
   logic   [7:0]   uart_rdata;
   logic           tick_baud_x16, rx_tick_baud;
-
-  logic   [TxFifoDepthW-1:0] tx_fifo_depth;
-  logic   [RxFifoDepthW-1:0] rx_fifo_depth;
-  logic   [RxFifoDepthW-1:0] rx_fifo_depth_prev_q;
-
+  logic   [5:0]   tx_fifo_depth, rx_fifo_depth;
+  logic   [5:0]   rx_fifo_depth_prev_q;
   logic   [23:0]  rx_timeout_count_d, rx_timeout_count_q, uart_rxto_val;
   logic           rx_fifo_depth_changed, uart_rxto_en;
   logic           tx_enable, rx_enable;
   logic           sys_loopback, line_loopback, rxnf_enable;
   logic           uart_fifo_rxrst, uart_fifo_txrst;
   logic   [2:0]   uart_fifo_rxilvl;
-  logic   [2:0]   uart_fifo_txilvl;
+  logic   [1:0]   uart_fifo_txilvl;
   logic           ovrd_tx_en, ovrd_tx_val;
   logic   [7:0]   tx_fifo_data;
   logic           tx_fifo_rready, tx_fifo_rvalid;
@@ -69,9 +55,10 @@ module uart_core (
   logic           break_err;
   logic   [4:0]   allzero_cnt_d, allzero_cnt_q;
   logic           allzero_err, not_allzero_char;
-  logic           event_tx_watermark, event_tx_empty, event_rx_watermark, event_tx_done;
-  logic           event_rx_overflow, event_rx_frame_err, event_rx_break_err, event_rx_timeout;
-  logic           event_rx_parity_err;
+  logic           event_tx_watermark, event_rx_watermark, event_tx_empty, event_rx_overflow;
+  logic           event_rx_frame_err, event_rx_break_err, event_rx_timeout, event_rx_parity_err;
+  logic           tx_watermark_d, tx_watermark_prev_q;
+  logic           rx_watermark_d, rx_watermark_prev_q;
   logic           tx_uart_idle_q;
 
   assign tx_enable        = reg2hw.ctrl.tx.q;
@@ -152,14 +139,14 @@ module uart_core (
   assign hw2reg.status.rxfull.d      = ~rx_fifo_wready;
   assign hw2reg.status.txfull.d      = ~tx_fifo_wready;
 
-  assign hw2reg.fifo_status.txlvl.d  = 8'(tx_fifo_depth);
-  assign hw2reg.fifo_status.rxlvl.d  = 8'(rx_fifo_depth);
+  assign hw2reg.fifo_status.txlvl.d  = tx_fifo_depth;
+  assign hw2reg.fifo_status.rxlvl.d  = rx_fifo_depth;
 
   // resets are self-clearing, so need to update FIFO_CTRL
   assign hw2reg.fifo_ctrl.rxilvl.de = 1'b0;
   assign hw2reg.fifo_ctrl.rxilvl.d  = 3'h0;
   assign hw2reg.fifo_ctrl.txilvl.de = 1'b0;
-  assign hw2reg.fifo_ctrl.txilvl.d  = 3'h0;
+  assign hw2reg.fifo_ctrl.txilvl.d  = 2'h0;
 
   //              NCO 16x Baud Generator
   // output clock rate is:
@@ -185,7 +172,7 @@ module uart_core (
   prim_fifo_sync #(
     .Width   (8),
     .Pass    (1'b0),
-    .Depth   (TxFifoDepth)
+    .Depth   (32)
   ) u_uart_txfifo (
     .clk_i,
     .rst_ni,
@@ -197,8 +184,7 @@ module uart_core (
     .full_o (),
     .rvalid_o(tx_fifo_rvalid),
     .rready_i(tx_fifo_rready),
-    .rdata_o (tx_fifo_data),
-    .err_o   ()
+    .rdata_o (tx_fifo_data)
   );
 
   uart_tx uart_tx (
@@ -286,7 +272,7 @@ module uart_core (
   prim_fifo_sync #(
     .Width   (8),
     .Pass    (1'b0),
-    .Depth   (RxFifoDepth)
+    .Depth   (32)
   ) u_uart_rxfifo (
     .clk_i,
     .rst_ni,
@@ -298,8 +284,7 @@ module uart_core (
     .full_o (),
     .rvalid_o(rx_fifo_rvalid),
     .rready_i(reg2hw.rdata.re),
-    .rdata_o (uart_rdata),
-    .err_o   ()
+    .rdata_o (uart_rdata)
   );
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
@@ -311,54 +296,53 @@ module uart_core (
   // Interrupt & Status //
   ////////////////////////
 
-  logic [TxFifoDepthW-1:0] tx_watermark_thresh;
   always_comb begin
-    // Create power of two thresholds.
-    // The threshold saturates at half the FIFO depth.
-    if (uart_fifo_txilvl >= (TxFifoDepthW-2)) begin
-      tx_watermark_thresh = TxFifoDepthW'(TxFifoDepth/2);
-    end else begin
-      tx_watermark_thresh = 1'b1 << uart_fifo_txilvl;
-    end
-    event_tx_watermark = tx_fifo_depth < tx_watermark_thresh;
+    unique case(uart_fifo_txilvl)
+      2'h0:    tx_watermark_d = (tx_fifo_depth < 6'd2);
+      2'h1:    tx_watermark_d = (tx_fifo_depth < 6'd4);
+      2'h2:    tx_watermark_d = (tx_fifo_depth < 6'd8);
+      default: tx_watermark_d = (tx_fifo_depth < 6'd16);
+    endcase
   end
 
-  assign event_tx_empty = tx_fifo_depth == '0;
+  assign event_tx_watermark = tx_watermark_d & ~tx_watermark_prev_q;
 
-  assign event_tx_done = ~tx_fifo_rvalid & ~tx_uart_idle_q & tx_uart_idle;
+  // The empty condition handling is a bit different.
+  // If empty rising conditions were detected directly, then every first write of a burst
+  // would trigger an empty.  This is due to the fact that the uart_tx fsm immediately
+  // withdraws the content and asserts "empty".
+  // To guard against this false trigger, empty is qualified with idle to extend the window
+  // in which software has an opportunity to deposit new data.
+  // However, if software deposit speed is TOO slow, this would still be an issue.
+  //
+  // The alternative software fix is to disable tx_enable until it has a chance to
+  // burst in the desired amount of data.
+  assign event_tx_empty     = ~tx_fifo_rvalid & ~tx_uart_idle_q & tx_uart_idle;
 
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
+      tx_watermark_prev_q  <= 1'b1; // by default watermark condition is true
+      rx_watermark_prev_q  <= 1'b0; // by default watermark condition is false
       tx_uart_idle_q       <= 1'b1;
     end else begin
+      tx_watermark_prev_q  <= tx_watermark_d;
+      rx_watermark_prev_q  <= rx_watermark_d;
       tx_uart_idle_q       <= tx_uart_idle;
     end
   end
 
-  logic [RxFifoDepthW-1:0] rx_watermark_thresh;
   always_comb begin
-    // Create power of two thresholds.
-    if (uart_fifo_rxilvl > (RxFifoDepthW-1)) begin
-      // This results in the comparison always returning 0 below because RxFifoDepth can
-      // encode depths up to 2*RxFifoDepth-1.
-      rx_watermark_thresh = {RxFifoDepthW{1'b1}};
-    end else if (uart_fifo_rxilvl == (RxFifoDepthW-1)) begin
-      // The maximum valid threshold threshold is an exception and saturates at RxFifoDepth-2.
-      rx_watermark_thresh = RxFifoDepthW'(RxFifoDepth-2);
-    end else begin
-      rx_watermark_thresh = 1'b1 << uart_fifo_rxilvl;
-    end
-    event_rx_watermark = rx_fifo_depth >= rx_watermark_thresh;
+    unique case(uart_fifo_rxilvl)
+      3'h0:    rx_watermark_d = (rx_fifo_depth >= 6'd1);
+      3'h1:    rx_watermark_d = (rx_fifo_depth >= 6'd4);
+      3'h2:    rx_watermark_d = (rx_fifo_depth >= 6'd8);
+      3'h3:    rx_watermark_d = (rx_fifo_depth >= 6'd16);
+      3'h4:    rx_watermark_d = (rx_fifo_depth >= 6'd30);
+      default: rx_watermark_d = 1'b0;
+    endcase
   end
 
-  // Flop trigger signal to avoid glitches on the output
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if (!rst_ni) begin
-      lsio_trigger_o <= 1'b0;
-    end else begin
-      lsio_trigger_o <= event_tx_watermark | event_rx_watermark;
-    end
-  end
+  assign event_rx_watermark = rx_watermark_d & ~rx_watermark_prev_q;
 
   // rx timeout interrupt
   assign uart_rxto_en  = reg2hw.timeout_ctrl.en.q;
@@ -378,7 +362,7 @@ module uart_core (
               (rx_fifo_depth == '0)               ? 24'd0 :
               // stop the count at timeout value (this will set the interrupt)
               //   Removed below line as when the timeout reaches the value,
-              //   event occurred, and timeout value reset to 0h.
+              //   event occured, and timeout value reset to 0h.
               //(rx_timeout_count_q == uart_rxto_val) ? rx_timeout_count_q :
               // increment if at rx baud tick
               rx_tick_baud                        ? (rx_timeout_count_q + 24'd1) :
@@ -389,7 +373,7 @@ module uart_core (
   always_ff @(posedge clk_i or negedge rst_ni) begin
     if (!rst_ni) begin
       rx_timeout_count_q   <= 24'd0;
-      rx_fifo_depth_prev_q <= '0;
+      rx_fifo_depth_prev_q <= 6'd0;
     end else begin
       rx_timeout_count_q    <= rx_timeout_count_d;
       rx_fifo_depth_prev_q  <= rx_fifo_depth;
@@ -401,7 +385,7 @@ module uart_core (
 
   // instantiate interrupt hardware primitives
 
-  prim_intr_hw #(.Width(1), .IntrT("Status")) intr_hw_tx_watermark (
+  prim_intr_hw #(.Width(1)) intr_hw_tx_watermark (
     .clk_i,
     .rst_ni,
     .event_intr_i           (event_tx_watermark),
@@ -414,20 +398,7 @@ module uart_core (
     .intr_o                 (intr_tx_watermark_o)
   );
 
-  prim_intr_hw #(.Width(1), .IntrT("Status")) intr_hw_tx_empty (
-    .clk_i,
-    .rst_ni,
-    .event_intr_i           (event_tx_empty),
-    .reg2hw_intr_enable_q_i (reg2hw.intr_enable.tx_empty.q),
-    .reg2hw_intr_test_q_i   (reg2hw.intr_test.tx_empty.q),
-    .reg2hw_intr_test_qe_i  (reg2hw.intr_test.tx_empty.qe),
-    .reg2hw_intr_state_q_i  (reg2hw.intr_state.tx_empty.q),
-    .hw2reg_intr_state_de_o (hw2reg.intr_state.tx_empty.de),
-    .hw2reg_intr_state_d_o  (hw2reg.intr_state.tx_empty.d),
-    .intr_o                 (intr_tx_empty_o)
-  );
-
-  prim_intr_hw #(.Width(1), .IntrT("Status")) intr_hw_rx_watermark (
+  prim_intr_hw #(.Width(1)) intr_hw_rx_watermark (
     .clk_i,
     .rst_ni,
     .event_intr_i           (event_rx_watermark),
@@ -440,17 +411,17 @@ module uart_core (
     .intr_o                 (intr_rx_watermark_o)
   );
 
-  prim_intr_hw #(.Width(1)) intr_hw_tx_done (
+  prim_intr_hw #(.Width(1)) intr_hw_tx_empty (
     .clk_i,
     .rst_ni,
-    .event_intr_i           (event_tx_done),
-    .reg2hw_intr_enable_q_i (reg2hw.intr_enable.tx_done.q),
-    .reg2hw_intr_test_q_i   (reg2hw.intr_test.tx_done.q),
-    .reg2hw_intr_test_qe_i  (reg2hw.intr_test.tx_done.qe),
-    .reg2hw_intr_state_q_i  (reg2hw.intr_state.tx_done.q),
-    .hw2reg_intr_state_de_o (hw2reg.intr_state.tx_done.de),
-    .hw2reg_intr_state_d_o  (hw2reg.intr_state.tx_done.d),
-    .intr_o                 (intr_tx_done_o)
+    .event_intr_i           (event_tx_empty),
+    .reg2hw_intr_enable_q_i (reg2hw.intr_enable.tx_empty.q),
+    .reg2hw_intr_test_q_i   (reg2hw.intr_test.tx_empty.q),
+    .reg2hw_intr_test_qe_i  (reg2hw.intr_test.tx_empty.qe),
+    .reg2hw_intr_state_q_i  (reg2hw.intr_state.tx_empty.q),
+    .hw2reg_intr_state_de_o (hw2reg.intr_state.tx_empty.de),
+    .hw2reg_intr_state_d_o  (hw2reg.intr_state.tx_empty.d),
+    .intr_o                 (intr_tx_empty_o)
   );
 
   prim_intr_hw #(.Width(1)) intr_hw_rx_overflow (
@@ -517,9 +488,5 @@ module uart_core (
     .hw2reg_intr_state_d_o  (hw2reg.intr_state.rx_parity_err.d),
     .intr_o                 (intr_rx_parity_err_o)
   );
-
-  // unused registers
-  logic unused_reg;
-  assign unused_reg = ^reg2hw.alert_test;
 
 endmodule

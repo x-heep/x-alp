@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -47,7 +47,7 @@ class xbar_stress_all_with_rand_reset_vseq extends xbar_base_vseq;
                                              };)
           cfg.clk_rst_vif.wait_clks(delay);
           reset_ongoing = 1;
-          // reset needs to be longer than any clocks to allow TLUL driver flash out all items
+          // reset needs to be longger than any clocks to allow TLUL driver flash out all items
           cfg.clk_rst_vif.apply_reset(.reset_width_clks($urandom_range(100, 200)));
           reset_ongoing = 0;
           `uvm_info(`gfn, $sformatf("Reset is issued for run %0d/%0d", i, num_trans), UVM_LOW)

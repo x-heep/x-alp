@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -8,27 +8,9 @@ class xbar_random_vseq extends xbar_base_vseq;
   `uvm_object_utils(xbar_random_vseq)
   `uvm_object_new
 
-  function void pre_randomize();
-    int plusarg_max_num_trans;
-    super.pre_randomize();
-    if ($value$plusargs("max_num_trans=%0d", plusarg_max_num_trans)) begin
-      `uvm_info(`gfn, $sformatf("+max_num_trans=%0d specified", plusarg_max_num_trans), UVM_MEDIUM)
-      // Override upper bound for number of runs.
-      max_num_trans = plusarg_max_num_trans;
-    end
-  endfunction
-
   // override it to control host seq in extended classes
   virtual function void update_host_seq();
   endfunction
-
-  virtual task pre_start();
-    super.pre_start();
-    if (cfg.short_xbar_test) begin
-      num_trans_c.constraint_mode(0);
-      num_trans = $urandom_range(1, 3);
-    end
-  endtask
 
   virtual task body();
     run_all_device_seq_nonblocking();

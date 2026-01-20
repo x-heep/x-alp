@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -20,7 +20,6 @@ class uart_loopback_vseq extends uart_tx_rx_vseq;
 
   task body();
     for (int i = 1; i <= num_trans; i++) begin
-      if (cfg.stop_transaction_generators()) break;
       `DV_CHECK_RANDOMIZE_FATAL(this)
       uart_init();
 
@@ -40,8 +39,8 @@ class uart_loopback_vseq extends uart_tx_rx_vseq;
     csr_update(ral.ctrl);
 
     `DV_CHECK_STD_RANDOMIZE_FATAL(tx_byte)
-    `DV_CHECK_MEMBER_RANDOMIZE_FATAL(dly_to_next_tx_trans)
-    cfg.clk_rst_vif.wait_clks(dly_to_next_tx_trans);
+    `DV_CHECK_MEMBER_RANDOMIZE_FATAL(dly_to_next_trans)
+    cfg.clk_rst_vif.wait_clks(dly_to_next_trans);
 
     // drive tx data and expect to receive it rx fifo
     send_tx_byte(tx_byte);
@@ -49,8 +48,8 @@ class uart_loopback_vseq extends uart_tx_rx_vseq;
     spinwait_txidle();
     spinwait_rxidle();
     csr_rd_check(.ptr(ral.rdata), .compare_value(tx_byte));
-    // clear TxDone interrupt
-    csr_wr(.ptr(ral.intr_state), .value(1 << TxDone));
+    // clear TxEmpty interrupt
+    csr_wr(.ptr(ral.intr_state), .value(1 << TxEmpty));
     // check status is default value
     csr_rd_check(.ptr(ral.status), .compare_value(ral.status.get_reset()));
 
@@ -75,9 +74,9 @@ class uart_loopback_vseq extends uart_tx_rx_vseq;
           // drive RX with random data and random delay
           repeat ($urandom_range(100, 1000)) begin
             cfg.m_uart_agent_cfg.vif.uart_rx = $urandom_range(0, 1);
-            `DV_CHECK_MEMBER_RANDOMIZE_WITH_FATAL(dly_to_next_rx_trans,
-                                                  dly_to_next_rx_trans > 0;)
-            #(dly_to_next_rx_trans * 1ns);
+            `DV_CHECK_MEMBER_RANDOMIZE_WITH_FATAL(dly_to_next_trans,
+                                                  dly_to_next_trans > 0;)
+            #(dly_to_next_trans * 1ns);
           end
           // RX has same value as TX without any synchronizer in the data path
           forever begin
@@ -96,17 +95,12 @@ class uart_loopback_vseq extends uart_tx_rx_vseq;
     cfg.m_uart_agent_cfg.en_tx_monitor = 1;
     cfg.m_uart_agent_cfg.en_rx_monitor = 1;
 
-    // CDC sync on RX input adds propagation delay, so wait some cycles to ensure the internal RX
-    // value is 1 before disabling line loopback. Otherwise, unexpected value (0) may be propagated
-    // to RX datapath and be falsely interpreted as the beginning of a START bit.
-    cfg.clk_rst_vif.wait_clks(2);
-    // If noise filter is on, need an additional cycle of delay.
-    if (en_noise_filter) cfg.clk_rst_vif.wait_clks(1);
+    // if noise filter is on, need 3 cycles delay to make sure internal rx value is 1, otherwise,
+    // unexpected value (0) may be propagated to RX datapath
+    if (en_noise_filter) cfg.clk_rst_vif.wait_clks(3);
 
     ral.ctrl.llpbk.set(0);
-    ral.fifo_ctrl.rxrst.set(1);
     csr_update(ral.ctrl);
-    csr_update(ral.fifo_ctrl);
   endtask
 
 endclass : uart_loopback_vseq

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -10,7 +10,6 @@ module prim_fifo_async #(
   parameter  int unsigned Width  = 16,
   parameter  int unsigned Depth  = 4,
   parameter  bit OutputZeroIfEmpty = 1'b0, // if == 1 always output 0 when FIFO is empty
-  parameter  bit OutputZeroIfInvalid = 1'b0, // if == 1 always output 0 when rvalid_o is low
   localparam int unsigned DepthW = $clog2(Depth+1) // derived parameter representing [0..Depth]
 ) (
   // write port
@@ -53,7 +52,7 @@ module prim_fifo_async #(
   assign fifo_incr_wptr = wvalid_i & wready_o;
 
   // decimal version
-  assign fifo_wptr_d = fifo_wptr_q + PTR_WIDTH'(1'b1);
+  assign fifo_wptr_d = fifo_wptr_q + PTR_WIDTH'(1);
 
   always_ff @(posedge clk_wr_i or negedge rst_wr_ni) begin
     if (!rst_wr_ni) begin
@@ -86,7 +85,7 @@ module prim_fifo_async #(
   assign fifo_incr_rptr = rvalid_o & rready_i;
 
   // decimal version
-  assign fifo_rptr_d = fifo_rptr_q + PTR_WIDTH'(1'b1);
+  assign fifo_rptr_d = fifo_rptr_q + PTR_WIDTH'(1);
 
   always_ff @(posedge clk_rd_i or negedge rst_rd_ni) begin
     if (!rst_rd_ni) begin
@@ -125,10 +124,8 @@ module prim_fifo_async #(
   // Empty / Full //
   //////////////////
 
-  logic [PTR_WIDTH-1:0] xor_mask;
-  assign xor_mask   =  PTR_WIDTH'(1'b1) << (PTR_WIDTH-1);
-  assign full_wclk  = (fifo_wptr_q == (fifo_rptr_sync_q ^ xor_mask));
-  assign full_rclk  = (fifo_wptr_sync_combi == (fifo_rptr_q ^ xor_mask));
+  assign full_wclk  = (fifo_wptr_q == (fifo_rptr_sync_q ^ {1'b1,{(PTR_WIDTH-1){1'b0}}}));
+  assign full_rclk  = (fifo_wptr_sync_combi == (fifo_rptr_q ^ {1'b1,{(PTR_WIDTH-1){1'b0}}}));
   assign empty_rclk = (fifo_wptr_sync_combi ==  fifo_rptr_q);
 
   if (Depth > 1) begin : g_depth_calc
@@ -168,8 +165,8 @@ module prim_fifo_async #(
 
   end
 
-  assign wready_o = ~full_wclk;
-  assign rvalid_o = ~empty_rclk;
+  assign wready_o = !full_wclk;
+  assign rvalid_o = !empty_rclk;
 
   /////////////
   // Storage //
@@ -198,21 +195,10 @@ module prim_fifo_async #(
 
   end
 
-  // rdata_o is qualified with rvalid_o to avoid CDC error
   if (OutputZeroIfEmpty == 1'b1) begin : gen_output_zero
-    if (OutputZeroIfInvalid  == 1'b1) begin : gen_invalid_zero
-      assign rdata_o = empty_rclk ? '0 : (rvalid_o ? rdata_int : '0);
-    end
-    else begin : gen_invalid_non_zero
-      assign rdata_o = empty_rclk ? '0 : rdata_int;
-    end
+    assign rdata_o = empty_rclk ? '0 : rdata_int;
   end else begin : gen_no_output_zero
-    if (OutputZeroIfInvalid  == 1'b1) begin : gen_invalid_zero
-        assign rdata_o = rvalid_o ? rdata_int : '0;
-    end
-    else begin : gen_invalid_non_zero
-        assign rdata_o = rdata_int;
-    end
+    assign rdata_o = rdata_int;
   end
 
   //////////////////////////////////////
@@ -224,42 +210,32 @@ module prim_fifo_async #(
 
     function automatic [PTR_WIDTH-1:0] dec2gray(input logic [PTR_WIDTH-1:0] decval);
       logic [PTR_WIDTH-1:0] decval_sub;
-      logic [PTR_WIDTH-1:0] decval_in;
+      logic [PTR_WIDTH-2:0] decval_in;
       logic                 unused_decval_msb;
 
       decval_sub = (PTR_WIDTH)'(Depth) - {1'b0, decval[PTR_WIDTH-2:0]} - 1'b1;
 
-      decval_in = decval[PTR_WIDTH-1] ? decval_sub : decval;
-
-      // We do not care about the MSB, hence we mask it out
-      unused_decval_msb = decval_in[PTR_WIDTH-1];
-      decval_in[PTR_WIDTH-1] = 1'b0;
-
-      // Perform the XOR conversion
-      dec2gray = decval_in;
-      dec2gray ^= (decval_in >> 1);
-
-      // Override the MSB
-      dec2gray[PTR_WIDTH-1] = decval[PTR_WIDTH-1];
+      {unused_decval_msb, decval_in} = decval[PTR_WIDTH-1] ? decval_sub : decval;
+      // Was done in two assigns for low bits and top bit
+      // but that generates a (bogus) verilator warning, so do in one assign
+      dec2gray = {decval[PTR_WIDTH-1],
+                  {1'b0,decval_in[PTR_WIDTH-2:1]} ^ decval_in[PTR_WIDTH-2:0]};
     endfunction
 
     // Algorithm walks up from 0..N-1 then flips the upper bit and walks down from N-1 to 0.
     function automatic [PTR_WIDTH-1:0] gray2dec(input logic [PTR_WIDTH-1:0] grayval);
-      logic [PTR_WIDTH-1:0] dec_tmp, dec_tmp_sub;
+      logic [PTR_WIDTH-2:0] dec_tmp, dec_tmp_sub;
       logic                 unused_decsub_msb;
 
-      dec_tmp = '0;
-      for (int unsigned i = PTR_WIDTH-1; i > 0; i--) begin
-        dec_tmp[i-1] = dec_tmp[i] ^ grayval[i-1];
+      dec_tmp[PTR_WIDTH-2] = grayval[PTR_WIDTH-2];
+      for (int i = PTR_WIDTH-3; i >= 0; i--) begin
+        dec_tmp[i] = dec_tmp[i+1] ^ grayval[i];
       end
-      dec_tmp_sub = (PTR_WIDTH)'(Depth) - dec_tmp - 1'b1;
+      {unused_decsub_msb, dec_tmp_sub} = (PTR_WIDTH-1)'(Depth) - {1'b0, dec_tmp} - 1'b1;
       if (grayval[PTR_WIDTH-1]) begin
-        gray2dec = dec_tmp_sub;
-        // Override MSB
-        gray2dec[PTR_WIDTH-1] = 1'b1;
-        unused_decsub_msb = dec_tmp_sub[PTR_WIDTH-1];
+        gray2dec = {1'b1, dec_tmp_sub};
       end else begin
-        gray2dec = dec_tmp;
+        gray2dec = {1'b0, dec_tmp};
       end
     endfunction
 
@@ -274,10 +250,10 @@ module prim_fifo_async #(
   end else if (Depth == 2) begin : g_simple_gray_conversion
 
     assign fifo_rptr_sync_combi = {fifo_rptr_gray_sync[PTR_WIDTH-1], ^fifo_rptr_gray_sync};
-    assign fifo_wptr_sync_combi = {fifo_wptr_gray_sync[PTR_WIDTH-1], ^fifo_wptr_gray_sync};
+    assign fifo_wptr_sync_combi = {fifo_wptr_gray_sync[PTR_WIDTH-1], ^fifo_rptr_gray_sync};
 
     assign fifo_rptr_gray_d = {fifo_rptr_d[PTR_WIDTH-1], ^fifo_rptr_d};
-    assign fifo_wptr_gray_d = {fifo_wptr_d[PTR_WIDTH-1], ^fifo_wptr_d};
+    assign fifo_wptr_gray_d = {fifo_wptr_d[PTR_WIDTH-1], ^fifo_rptr_d};
 
   end else begin : g_no_gray_conversion
 
@@ -285,14 +261,14 @@ module prim_fifo_async #(
     assign fifo_wptr_sync_combi = fifo_wptr_gray_sync;
 
     assign fifo_rptr_gray_d = fifo_rptr_d;
-    assign fifo_wptr_gray_d = fifo_wptr_d;
+    assign fifo_wptr_gray_d = fifo_rptr_d;
 
   end
 
   // TODO: assertions on full, empty
-  `ASSERT(GrayWptr_A, ##1 $countones(fifo_wptr_gray_q ^ $past(fifo_wptr_gray_q)) <= 1,
+  `ASSERT(GrayWptr_A, $countones(fifo_wptr_gray_q ^ $past(fifo_wptr_gray_q)) <= 1,
           clk_wr_i, !rst_wr_ni)
-  `ASSERT(GrayRptr_A, ##1 $countones(fifo_rptr_gray_q ^ $past(fifo_rptr_gray_q)) <= 1,
+  `ASSERT(GrayRptr_A, $countones(fifo_rptr_gray_q ^ $past(fifo_rptr_gray_q)) <= 1,
           clk_rd_i, !rst_rd_ni)
 
 endmodule

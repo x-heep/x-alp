@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,6 +7,7 @@ module tb;
   import uvm_pkg::*;
   import dv_utils_pkg::*;
   import xbar_test_pkg::*;
+
 
   wire clk, rst_n;
   // reference clock for scb/seq and this clock isn't connected to any design clock

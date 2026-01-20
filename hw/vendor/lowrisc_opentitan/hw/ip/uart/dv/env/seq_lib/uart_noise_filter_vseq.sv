@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,25 +7,6 @@ class uart_noise_filter_vseq extends uart_tx_rx_vseq;
   `uvm_object_utils(uart_noise_filter_vseq)
 
   `uvm_object_new
-
-  string cdc_sel_path = {"tb.dut.uart_core.sync_rx.gen_generic",
-                         ".u_prim_cdc_rand_delay.gen_enable.data_sel"};
-
-  virtual task dut_init(string reset_kind = "HARD");
-    super.dut_init(reset_kind);
-    // Disable CDC randomization for rx_sync by forcing internal select signal
-    if (cfg.en_dv_cdc && uvm_hdl_check_path(cdc_sel_path)) begin
-      `DV_CHECK(uvm_hdl_force(cdc_sel_path, 0));
-    end
-  endtask
-
-  virtual task dut_shutdown();
-    super.dut_init();
-    // Enable CDC randomization for rx_sync by releasing internal select signal
-    if (cfg.en_dv_cdc && uvm_hdl_check_path(cdc_sel_path)) begin
-      `DV_CHECK(uvm_hdl_release(cdc_sel_path));
-    end
-  endtask
 
   // add noise before sending rx byte
   // check rxidle should be high after adding noise

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,7 +7,7 @@
 `include "prim_assert.sv"
 
 module prim_rom_adv import prim_rom_pkg::*; #(
-  // Parameters passed on the ROM primitive.
+  // Parameters passed on the the ROM primitive.
   parameter  int Width       = 32,
   parameter  int Depth       = 2048, // 8kB default
   parameter      MemInitFile = "", // VMEM file to initialize the memory with
@@ -30,13 +30,19 @@ module prim_rom_adv import prim_rom_pkg::*; #(
     .MemInitFile(MemInitFile)
   ) u_prim_rom (
     .clk_i,
-    .rst_ni,
     .req_i,
     .addr_i,
-    .rvalid_o,
     .rdata_o,
     .cfg_i
   );
+
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) begin
+      rvalid_o <= 1'b0;
+    end else begin
+      rvalid_o <= req_i;
+    end
+  end
 
   ////////////////
   // ASSERTIONS //

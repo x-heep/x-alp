@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -39,7 +39,6 @@ class xbar_base_test extends dv_base_test #(.ENV_T(xbar_env), .CFG_T(xbar_env_cf
     void'($value$plusargs("min_device_rsp_delay=%d", cfg.min_device_rsp_delay));
     void'($value$plusargs("max_device_rsp_delay=%d", cfg.max_device_rsp_delay));
     void'($value$plusargs("num_enabled_hosts=%d",    cfg.num_enabled_hosts));
-    void'($value$plusargs("short_xbar_test=%b",      cfg.short_xbar_test));
     cfg.update_agent_cfg();
   endfunction : build_phase
 

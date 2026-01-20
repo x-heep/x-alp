@@ -1,54 +1,10 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
-{
-  name:               "uart",
-  human_name:         "UART",
-  one_line_desc:      "Full duplex serial communication interface, supports bit rates of up to 1 Mbit/s",
-  one_paragraph_desc: '''
-  Universal Asynchronous Receiver/Transmitter (UART) provides industry standard serial communication with external devices via two wires at a programmable baud rate.
-  Its full duplex design supports simultaneous transmission and reception, and flow control may be achieved using software handshaking if required.
-  To reduce software load, UART includes hardware FIFOs and supports interrupt generation when the FIFO level reaches software-programmable thresholds.
-  For compatibility with a variety of different targets and applications, the baud rate is software programmable and bit rates of up to 1 Mbit/s are supported.
-  The data format is restricted to 8 bits, reducing the complexity and cost, with optional parity for robustness against transmission errors.
-  '''
-  // Unique comportable IP identifier defined under KNOWN_CIP_IDS in the regtool.
-  cip_id:             "30",
-  design_spec:        "../doc",
-  dv_doc:             "../doc/dv",
-  hw_checklist:       "../doc/checklist",
-  sw_checklist:       "/sw/device/lib/dif/dif_uart",
-  revisions: [
-  {
-    version:            "1.0.0",
-    life_stage:         "L2",
-    design_stage:       "D3",
-    verification_stage: "V3",
-    commit_id:          "4166794b902cc72b4cfdfacca0869ffc56e6b42a",
-    notes:              ""
-  }
-  {
-    version:            "1.1.0",
-    life_stage:         "L1",
-    design_stage:       "D3",
-    verification_stage: "V2S",
-    commit_id:          "486ba480c12f8e71cfb0d41cdf8df1e51a1f26ab"
-    dif_stage:          "S2",
-    notes:              ""
-  }
-  {
-    version:            "2.1.0",
-    life_stage:         "L1",
-    design_stage:       "D2S",
-    verification_stage: "V2S",
-    commit_id:          "ffab8da7381c66b3d2e2b78a382a9f6937e5482e",
-    dif_stage:          "S2",
-    notes:              ""
-  }
-  ]
-  clocking: [{clock: "clk_i", reset: "rst_ni"}],
+{ name: "uart",
+  clock_primary: "clk_i",
   bus_interfaces: [
-    { protocol: "tlul", direction: "device", racl_support: true }
+    { protocol: "tlul", direction: "device" }
   ],
   available_input_list: [
     { name: "rx", desc: "Serial receive bit" }
@@ -57,20 +13,17 @@
     { name: "tx", desc: "Serial transmit bit" }
   ],
   interrupt_list: [
-    { name:    "tx_watermark",
-      type:    "status",
-      default: "1",
-      desc:    "raised if the transmit FIFO is past the high-water mark."}
-    { name: "rx_watermark",
-      type: "status",
+    { name: "tx_watermark"
+      desc: "raised if the transmit FIFO is past the high-water mark."}
+    { name: "rx_watermark"
       desc: "raised if the receive FIFO is past the high-water mark."}
-    { name: "tx_done",
+    { name: "tx_empty"
       desc: "raised if the transmit FIFO has emptied and no transmit is ongoing."}
-    { name: "rx_overflow",
+    { name: "rx_overflow"
       desc: "raised if the receive FIFO has overflowed."}
-    { name: "rx_frame_err",
+    { name: "rx_frame_err"
       desc: "raised if a framing error has been detected on receive."}
-    { name: "rx_break_err",
+    { name: "rx_break_err"
       desc: "raised if break condition has been detected on receive."}
     { name: "rx_timeout"
       desc: '''
@@ -80,106 +33,6 @@
     }
     { name: "rx_parity_err"
       desc: "raised if the receiver has detected a parity error."}
-    { name:   "tx_empty",
-      type:   "status",
-      default: "1",
-      desc:    "raised if the transmit FIFO is empty."}
-  ],
-  alert_list: [
-    { name: "fatal_fault",
-      desc: '''
-      This fatal alert is triggered when a fatal TL-UL bus integrity fault is detected.
-      '''
-    }
-  ],
-  features: [
-    { name: "UART.PARITY",
-      desc: '''
-        The UART can be configured to so that it sends (or expects) a parity bit after each 8 data bits.
-        In receive mode, the UART sends the rx_parity_err interrupt if it receives a parity bit of the wrong polarity.
-        The parity mode is configurable (ensuring words are even or odd).
-      '''
-    },
-    { name: "UART.LINE_LOOPBACK",
-      desc: '''
-        The UART can be configured so that incoming bits are sent on the TX side.
-      '''
-    },
-    { name: "UART.SYSTEM_LOOPBACK",
-      desc: '''
-        The UART can be configured so that outgoing bits are registered as having been received on the RX side.
-      '''
-    },
-    { name: "UART.BAUD_RATE_CONTROL",
-      desc: '''
-        The UART baud rate can be configured.
-      '''
-    },
-    { name: "UART.LINE_BREAK",
-      desc: '''
-        The UART can detect line breaks (defined as the RX pin being continuously low for several bit-times).
-        The threshold for number of low bits to signal a line break is configurable.
-      '''
-    },
-    { name: "UART.FIFO_INTERRUPTS",
-      desc: '''
-        The UART can be configured to send an "watermark" interrupt when RX or TX FIFO is nearly full/empty, respectively.
-        It sends an rx_overflow interrupt if it sees an extra character when the RX FIFO is full.
-      '''
-    },
-  ]
-  inter_signal_list: [
-    { struct: "logic"
-      type:   "uni"
-      name:   "lsio_trigger"
-      desc: '''
-            Self-clearing status trigger for the DMA.
-            Set when RX or TX FIFOs are past their configured watermarks matching watermark interrupt behaviour.
-      '''
-      act:    "req"
-    }
-    { struct:  "racl_policy_vec",
-      type:    "uni",
-      name:    "racl_policies",
-      act:     "rcv",
-      package: "top_racl_pkg",
-      desc:    '''
-        Incoming RACL policy vector from a racl_ctrl instance.
-        The policy selection vector (parameter) selects the policy for each register.
-      '''
-    }
-    { struct:  "racl_error_log",
-      type:    "uni",
-      name:    "racl_error",
-      act:     "req",
-      width:   "1"
-      package: "top_racl_pkg",
-      desc:    '''
-        RACL error log information of this module.
-      '''
-    }
-  ]
-  countermeasures: [
-    { name: "BUS.INTEGRITY",
-      desc: "End-to-end bus integrity scheme."
-    }
-  ]
-  param_list: [
-    // Note that the watermark CSRs further below need to be adjusted when
-    // making changes to these FIFO depths. The RTL and DV are written in
-    // a parametric way and will adjust automatically.
-    { name:    "RxFifoDepth",
-      desc:    "Number of bytes in the RX FIFO.",
-      type:    "int",
-      default: "64",
-      local:   "true",
-    }
-    { name:    "TxFifoDepth",
-      desc:    "Number of bytes in the TX FIFO.",
-      type:    "int",
-      default: "32",
-      local:   "true",
-    }
   ]
   regwidth: "32",
   registers: [
@@ -352,32 +205,24 @@
               desc: "1 character"
             },
             { value: "1",
-              name: "rxlvl2",
-              desc: "2 characters"
-            },
-            { value: "2",
               name: "rxlvl4",
               desc: "4 characters"
             },
-            { value: "3",
+            { value: "2",
               name: "rxlvl8",
               desc: "8 characters"
             },
-            { value: "4",
+            { value: "3",
               name: "rxlvl16",
               desc: "16 characters"
             },
-            { value: "5",
-              name: "rxlvl32",
-              desc: "32 characters"
-            },
-            { value: "6",
-              name: "rxlvl62",
-              desc: "62 characters"
+            { value: "4",
+              name: "rxlvl30",
+              desc: "30 characters"
             },
           ]
         }
-        { bits: "7:5",
+        { bits: "6:5",
           name: "TXILVL",
           desc: '''Trigger level for TX interrupts. If the FIFO depth is less than the setting, it
                 raises tx_watermark interrupt.
@@ -385,24 +230,20 @@
           enum: [
             { value: "0",
               name: "txlvl1",
-              desc: "1 character"
-            },
-            { value: "1",
-              name: "txlvl2",
               desc: "2 characters"
             },
-            { value: "2",
+            { value: "1",
               name: "txlvl4",
               desc: "4 characters"
             },
-            { value: "3",
+            { value: "2",
               name: "txlvl8",
               desc: "8 characters"
             },
-            { value: "4",
+            { value: "3",
               name: "txlvl16",
               desc: "16 characters"
-            },
+            }
           ]
         }
       ]
@@ -413,11 +254,11 @@
       hwaccess: "hwo",
       hwext: "true",
       fields: [
-        { bits: "7:0",
+        { bits: "5:0",
           name: "TXLVL",
           desc: "Current fill level of TX fifo"
         }
-        { bits: "23:16",
+        { bits: "21:16",
           name: "RXLVL",
           desc: "Current fill level of RX fifo"
         }

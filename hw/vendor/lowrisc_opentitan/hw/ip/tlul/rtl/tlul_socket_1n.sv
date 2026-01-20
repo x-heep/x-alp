@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -22,11 +22,6 @@
 //                  default 2
 //   DRspDepth:     (one per device_count) Depth of device i response FIFO,
 //                  default 2
-//   ExplicitErrs:  This module always returns a request error if dev_select_i
-//                  is greater than N-1. If ExplicitErrs is set then the width
-//                  of the dev_select_i signal will be chosen to make sure that
-//                  this is possible. This only makes a difference if N is a
-//                  power of 2.
 //
 // Requests must stall to one device until all responses from other devices
 // have returned.  Need to keep a counter of all outstanding requests and
@@ -37,26 +32,21 @@
 // can indicate error by any illegal value of dev_select_i. 4'b1111 is
 // recommended for visibility
 //
-// The maximum value of N is 63
+// The maximum value of N is 15
 
 `include "prim_assert.sv"
 
 module tlul_socket_1n #(
-  parameter int unsigned  N            = 4,
-  parameter bit           HReqPass     = 1'b1,
-  parameter bit           HRspPass     = 1'b1,
-  parameter bit [N-1:0]   DReqPass     = {N{1'b1}},
-  parameter bit [N-1:0]   DRspPass     = {N{1'b1}},
-  parameter bit [3:0]     HReqDepth    = 4'h1,
-  parameter bit [3:0]     HRspDepth    = 4'h1,
-  parameter bit [N*4-1:0] DReqDepth    = {N{4'h1}},
-  parameter bit [N*4-1:0] DRspDepth    = {N{4'h1}},
-  parameter bit           ExplicitErrs = 1'b1,
-
-  // The width of dev_select_i. We must be able to select any of the N devices
-  // (i.e. values 0..N-1). If ExplicitErrs is set, we also need to be able to
-  // represent N.
-  localparam int unsigned NWD = $clog2(ExplicitErrs ? N+1 : N)
+  parameter int unsigned  N         = 4,
+  parameter bit           HReqPass  = 1'b1,
+  parameter bit           HRspPass  = 1'b1,
+  parameter bit [N-1:0]   DReqPass  = {N{1'b1}},
+  parameter bit [N-1:0]   DRspPass  = {N{1'b1}},
+  parameter bit [3:0]     HReqDepth = 4'h2,
+  parameter bit [3:0]     HRspDepth = 4'h2,
+  parameter bit [N*4-1:0] DReqDepth = {N{4'h2}},
+  parameter bit [N*4-1:0] DRspDepth = {N{4'h2}},
+  localparam int unsigned NWD       = $clog2(N+1) // derived parameter
 ) (
   input                     clk_i,
   input                     rst_ni,
@@ -67,7 +57,7 @@ module tlul_socket_1n #(
   input  [NWD-1:0]          dev_select_i
 );
 
-  `ASSERT_INIT(maxN, N < 64)
+  `ASSERT_INIT(maxN, N < 32)
 
   // Since our steering is done after potential FIFOing, we need to
   // shove our device select bits into spare bits of reqfifo
@@ -102,7 +92,7 @@ module tlul_socket_1n #(
   // We need to keep track of how many requests are outstanding,
   // and to which device. New requests are compared to this and
   // stall until that number is zero.
-  localparam int MaxOutstanding = 2**top_pkg::TL_AIW; // Up to 256 outstanding
+  localparam int MaxOutstanding = 2**top_pkg::TL_AIW; // Up to 256 ounstanding
   localparam int OutstandingW = $clog2(MaxOutstanding+1);
   logic [OutstandingW-1:0] num_req_outstanding;
   logic [NWD-1:0]          dev_select_outstanding;
@@ -118,6 +108,7 @@ module tlul_socket_1n #(
       dev_select_outstanding <= '0;
     end else if (accept_t_req) begin
       if (!accept_t_rsp) begin
+        `ASSERT_I(NotOverflowed_A, num_req_outstanding <= MaxOutstanding)
         num_req_outstanding <= num_req_outstanding + 1'b1;
       end
       dev_select_outstanding <= dev_select_t;
@@ -125,9 +116,6 @@ module tlul_socket_1n #(
       num_req_outstanding <= num_req_outstanding - 1'b1;
     end
   end
-
-  `ASSERT(NotOverflowed_A,
-          accept_t_req && !accept_t_rsp -> num_req_outstanding <= MaxOutstanding)
 
   assign hold_all_requests =
       (num_req_outstanding != '0) &
@@ -139,38 +127,19 @@ module tlul_socket_1n #(
   tlul_pkg::tl_h2d_t   tl_u_o [N+1];
   tlul_pkg::tl_d2h_t   tl_u_i [N+1];
 
-  // ensure that when a device is not selected, both command
-  // data integrity can never match
-  tlul_pkg::tl_a_user_t blanked_auser;
-  assign blanked_auser = '{
-    rsvd: tl_t_o.a_user.rsvd,
-    instr_type: tl_t_o.a_user.instr_type,
-    cmd_intg: tlul_pkg::get_bad_cmd_intg(tl_t_o),
-    data_intg: tlul_pkg::get_bad_data_intg(tlul_pkg::BlankedAData)
-  };
-
-  // if a host is not selected, or if requests are held off, blank the bus
   for (genvar i = 0 ; i < N ; i++) begin : gen_u_o
-    logic dev_select;
-    assign dev_select = dev_select_t == NWD'(i) & ~hold_all_requests;
-
-    assign tl_u_o[i].a_valid   = tl_t_o.a_valid & dev_select;
+    assign tl_u_o[i].a_valid   = tl_t_o.a_valid &
+                                 (dev_select_t == NWD'(i)) &
+                                 ~hold_all_requests;
     assign tl_u_o[i].a_opcode  = tl_t_o.a_opcode;
     assign tl_u_o[i].a_param   = tl_t_o.a_param;
     assign tl_u_o[i].a_size    = tl_t_o.a_size;
     assign tl_u_o[i].a_source  = tl_t_o.a_source;
     assign tl_u_o[i].a_address = tl_t_o.a_address;
     assign tl_u_o[i].a_mask    = tl_t_o.a_mask;
-    assign tl_u_o[i].a_data    = dev_select ?
-                                 tl_t_o.a_data :
-                                 tlul_pkg::BlankedAData;
-    assign tl_u_o[i].a_user    = dev_select ?
-                                 tl_t_o.a_user :
-                                 blanked_auser;
-
-    assign tl_u_o[i].d_ready   = tl_t_o.d_ready;
+    assign tl_u_o[i].a_data    = tl_t_o.a_data;
+    assign tl_u_o[i].a_user    = tl_t_o.a_user;
   end
-
 
   tlul_pkg::tl_d2h_t tl_t_p ;
 
@@ -204,7 +173,13 @@ module tlul_socket_1n #(
   assign tl_t_i.d_user   = tl_t_p.d_user  ;
   assign tl_t_i.d_error  = tl_t_p.d_error ;
 
-  // Instantiate all the device FIFOs
+
+  // accept responses from devices when selected if upstream is accepting
+  for (genvar i = 0 ; i < N+1 ; i++) begin : gen_u_o_d_ready
+    assign tl_u_o[i].d_ready = tl_t_o.d_ready;
+  end
+
+  // finally instantiate all device FIFOs and the error responder
   for (genvar i = 0 ; i < N ; i++) begin : gen_dfifo
     tlul_fifo_sync #(
       .ReqPass(DReqPass[i]),
@@ -224,32 +199,21 @@ module tlul_socket_1n #(
       .spare_rsp_o ());
   end
 
-  // Instantiate the error responder. It's only needed if a value greater than
-  // N-1 is actually representable in NWD bits.
-  if ($clog2(N+1) <= NWD) begin : gen_err_resp
-    assign tl_u_o[N].d_ready     = tl_t_o.d_ready;
-    assign tl_u_o[N].a_valid     = tl_t_o.a_valid &
-                                   (dev_select_t >= NWD'(N)) &
-                                   ~hold_all_requests;
-    assign tl_u_o[N].a_opcode    = tl_t_o.a_opcode;
-    assign tl_u_o[N].a_param     = tl_t_o.a_param;
-    assign tl_u_o[N].a_size      = tl_t_o.a_size;
-    assign tl_u_o[N].a_source    = tl_t_o.a_source;
-    assign tl_u_o[N].a_address   = tl_t_o.a_address;
-    assign tl_u_o[N].a_mask      = tl_t_o.a_mask;
-    assign tl_u_o[N].a_data      = tl_t_o.a_data;
-    assign tl_u_o[N].a_user      = tl_t_o.a_user;
-    tlul_err_resp err_resp (
-      .clk_i,
-      .rst_ni,
-      .tl_h_i     (tl_u_o[N]),
-      .tl_h_o     (tl_u_i[N])
-    );
-  end else begin : gen_no_err_resp // block: gen_err_resp
-    assign tl_u_o[N] = '0;
-    assign tl_u_i[N] = '0;
-    logic unused_sig;
-    assign unused_sig = ^tl_u_o[N];
-  end
+  assign tl_u_o[N].a_valid     = tl_t_o.a_valid &
+                                 (dev_select_t == NWD'(N)) &
+                                 ~hold_all_requests;
+  assign tl_u_o[N].a_opcode    = tl_t_o.a_opcode;
+  assign tl_u_o[N].a_param     = tl_t_o.a_param;
+  assign tl_u_o[N].a_size      = tl_t_o.a_size;
+  assign tl_u_o[N].a_source    = tl_t_o.a_source;
+  assign tl_u_o[N].a_address   = tl_t_o.a_address;
+  assign tl_u_o[N].a_mask      = tl_t_o.a_mask;
+  assign tl_u_o[N].a_data      = tl_t_o.a_data;
+  assign tl_u_o[N].a_user      = tl_t_o.a_user;
+  tlul_err_resp err_resp (
+    .clk_i,
+    .rst_ni,
+    .tl_h_i     (tl_u_o[N]),
+    .tl_h_o     (tl_u_i[N]));
 
 endmodule

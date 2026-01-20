@@ -1,9 +1,9 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
 // test all hosts use same source id for each iteration
-// reduce to 5-20 trans per iteration and increase iteration number by x10
+// reduce to 5-20 trans per iteration and increase interation number by x10
 class xbar_same_source_vseq extends xbar_random_vseq;
 
   `uvm_object_utils(xbar_same_source_vseq)

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -35,7 +35,7 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
   constraint baud_rate_c {
     // when the uart frequency is very close to core freq, disable noise filter and glitch,
     // otherwise, not enough timing margin to predict status correctly in scb
-    if (baud_rate == BaudRate1p5Mbps && p_sequencer.cfg.clk_freq_mhz < 48) {
+    if (baud_rate == BaudRate1p5Mbps && p_sequencer.cfg.clk_freq_mhz == ClkFreq24Mhz) {
       en_noise_filter == 0;
       uart_period_glitch_pct == 0;
     }
@@ -69,10 +69,10 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
   virtual task uart_init();
     int nco = get_nco(baud_rate, cfg.clk_freq_mhz, ral.ctrl.nco.get_n_bits());
 
-    // we skip writing some CSRs at the last 1-2 uart cycles, when baud rate is 1.5Mbps, uart
+    // we skip writting some CSRs at the last 1-2 uart cycles, when baud rate is 1.5Mbps, uart
     // cycle is small, need to reduce the TL delay, so that the write doesn't happen at the
     // ignore period
-    if (baud_rate == BaudRate1p5Mbps && p_sequencer.cfg.clk_freq_mhz < 48) begin
+    if (baud_rate == BaudRate1p5Mbps && p_sequencer.cfg.clk_freq_mhz == ClkFreq24Mhz) begin
       if (cfg.m_tl_agent_cfg.d_ready_delay_max > 5) cfg.m_tl_agent_cfg.d_ready_delay_max = 5;
     end
 
@@ -102,8 +102,9 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
       `DV_CHECK_RANDOMIZE_FATAL(ral.timeout_ctrl.en)
       csr_update(ral.timeout_ctrl);
 
-      `DV_CHECK_RANDOMIZE_WITH_FATAL(ral.fifo_ctrl.rxilvl, value <=  $clog2(RxFifoDepth);)
-      `DV_CHECK_RANDOMIZE_WITH_FATAL(ral.fifo_ctrl.txilvl, value <= ($clog2(TxFifoDepth) - 1);)
+      `DV_CHECK_RANDOMIZE_WITH_FATAL(ral.fifo_ctrl.rxilvl,
+                                     value <= 4;)
+      `DV_CHECK_RANDOMIZE_FATAL(ral.fifo_ctrl.txilvl)
       csr_update(ral.fifo_ctrl);
     end
   endtask
@@ -134,51 +135,19 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
     cfg.m_uart_agent_cfg.set_baud_rate(baud_rate);
   endtask
 
-  task wait_if_stop_transaction_generators();
-    if (cfg.stop_transaction_generators()) begin
-      // Increase polling interval to allow requested reset without breaking test sequence
-      cfg.clk_rst_vif.wait_clks(CyclesWithNoAccessesThreshold * 2);
+  virtual task spinwait_txidle();
+    if (ral.ctrl.tx.get_mirrored_value()) begin
+      // use a very big timeout as it takes long time to flush all the items
+      csr_spinwait(.ptr(ral.status.txidle), .exp_data(1'b1), .timeout_ns(40_000_000),
+                   .spinwait_delay_ns($urandom_range(0, 1000)));
     end
   endtask
 
-  task reset_aware_simple_spinwait(input uvm_object ptr,
-                                   input uvm_reg_data_t exp_data,
-                                   input uint spinwait_delay_ns = 0,
-                                   input uint timeout_ns = 10_000_000);
-    fork
-      begin : isolation_fork
-        bit [TL_DW-1:0] rdata;
-        csr_field_t csr_or_fld = decode_csr_or_field(ptr);
-        fork
-          while (!cfg.under_reset) begin
-            if (spinwait_delay_ns) #(spinwait_delay_ns * 1ns);
-            wait_if_stop_transaction_generators();
-            csr_rd(.ptr(ptr), .value(rdata));
-            if (rdata == exp_data) break;
-          end
-          begin
-            `DV_WAIT_TIMEOUT(timeout_ns, `gfn,
-                             $sformatf("timeout %0s (addr=0x%0h) == 0x%0h",
-                                       ptr.get_full_name(), csr_or_fld.csr.get_address(), exp_data))
-          end
-        join_any
-        disable fork;
-      end : isolation_fork
-    join
-  endtask
-
-  virtual task spinwait_txidle();
-    if (!ral.ctrl.tx.get_mirrored_value()) return;
-    // use a very big timeout as it takes long time to flush all the items
-    reset_aware_simple_spinwait(.ptr(ral.status.txidle), .exp_data(1'b1),
-                                .timeout_ns(TxFifoDepth * 1_250_000),
-                                .spinwait_delay_ns($urandom_range(0, 1000)));
-  endtask
-
   virtual task spinwait_rxidle();
-    if (!ral.ctrl.rx.get_mirrored_value()) return;
-    reset_aware_simple_spinwait(.ptr(ral.status.rxidle), .exp_data(1'b1),
-                                .spinwait_delay_ns($urandom_range(0, 1000)));
+    if (ral.ctrl.rx.get_mirrored_value()) begin
+      csr_spinwait(.ptr(ral.status.rxidle), .exp_data(1'b1),
+                   .spinwait_delay_ns($urandom_range(0, 1000)));
+    end
   endtask
 
   // task to send a byte of data out of dut
@@ -255,13 +224,13 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
     endcase
   endtask : rand_read_rx_byte
 
-  // read rx data from CSR rdata, but wait until it's not in ignored period
+  // read rx data from CSR rdata, but wait until it's not in igored period
   virtual task wait_ignored_period_and_read_rdata(ref bit [TL_DW-1:0] rdata);
     wait_when_in_ignored_period(.rx(1));
     csr_rd(.ptr(ral.rdata), .value(rdata));
   endtask
 
-  // task to wait for all tx bytes to be sent
+  // task to wait for all rx bytes to be sent
   virtual task wait_for_all_tx_bytes();
     bit [TL_DW-1:0] fifo_status, status;
 
@@ -270,7 +239,6 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
         if (cfg.under_reset) break;
         `DV_CHECK_MEMBER_RANDOMIZE_FATAL(dly_to_access_fifo)
         cfg.clk_rst_vif.wait_clks(dly_to_access_fifo);
-        wait_if_stop_transaction_generators();
         csr_rd(.ptr(ral.fifo_status), .value(fifo_status));
         csr_rd(.ptr(ral.status),      .value(status));
       end while (get_field_val(ral.fifo_status.txlvl, fifo_status) > 0 ||
@@ -282,22 +250,24 @@ class uart_base_vseq extends cip_base_vseq #(.CFG_T               (uart_env_cfg)
 
   // task to wait for tx fifo not full
   virtual task wait_for_tx_fifo_not_full();
+    bit [TL_DW-1:0] status;
+
     if (ral.ctrl.tx.get_mirrored_value()) begin
       `DV_CHECK_MEMBER_RANDOMIZE_FATAL(dly_to_access_fifo)
-      reset_aware_simple_spinwait(.ptr(ral.status.txfull), .exp_data(1'b0),
-                                  .spinwait_delay_ns(dly_to_access_fifo));
+      csr_spinwait(.ptr(ral.status.txfull), .exp_data(1'b0),
+                   .spinwait_delay_ns(dly_to_access_fifo));
     end
+
     `uvm_info(`gfn, "wait_for_tx_fifo_not_full is done", UVM_HIGH)
   endtask : wait_for_tx_fifo_not_full
 
-  // task to wait for rx fifo not full, will be overridden in overflow test
+  // task to wait for rx fifo not full, will be overriden in overflow test
   virtual task wait_for_rx_fifo_not_full();
     if (ral.ctrl.rx.get_mirrored_value()) begin
       `DV_CHECK_MEMBER_RANDOMIZE_FATAL(dly_to_access_fifo)
-       // use longer timeout as uart freq is low
-      reset_aware_simple_spinwait(.ptr(ral.status.rxfull), .exp_data(1'b0),
-                                  .spinwait_delay_ns(dly_to_access_fifo),
-                                  .timeout_ns(50_000_000));
+      csr_spinwait(.ptr(ral.status.rxfull), .exp_data(1'b0),
+                   .spinwait_delay_ns(dly_to_access_fifo),
+                   .timeout_ns(50_000_000)); // use longer timeout as uart freq is low
     end
     `uvm_info(`gfn, "wait_for_rx_fifo_not_full is done", UVM_HIGH)
   endtask : wait_for_rx_fifo_not_full

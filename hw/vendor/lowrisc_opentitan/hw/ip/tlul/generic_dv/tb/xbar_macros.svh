@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -18,13 +18,13 @@
 `define DRIVE_TL_DEVICE_IF(tl_name, path = dut, clk, rst_n, i_sfx = i, o_sfx = o) \
      force ``tl_name``_tl_if.h2d = ``path``.tl_``tl_name``_``o_sfx``; \
      force ``path``.tl_``tl_name``_``i_sfx`` = ``tl_name``_tl_if.d2h; \
-     uvm_config_db#(virtual tl_if)::set(null, $sformatf("*env.%0s_agent", `"tl_name`"), "vif", \
+     uvm_config_db#(virtual tl_if)::set(null, $sformatf("*%0s*", `"tl_name`"), "vif", \
                                         ``tl_name``_tl_if);
 
 `define DRIVE_TL_HOST_IF(tl_name, path = dut, clk, rst_n, i_sfx = i, o_sfx = o) \
      force ``tl_name``_tl_if.d2h = ``path``.tl_``tl_name``_``o_sfx``; \
      force ``path``.tl_``tl_name``_``i_sfx`` = ``tl_name``_tl_if.h2d; \
-     uvm_config_db#(virtual tl_if)::set(null, $sformatf("*env.%0s_agent", `"tl_name`"), "vif", \
+     uvm_config_db#(virtual tl_if)::set(null, $sformatf("*%0s*", `"tl_name`"), "vif", \
                                         ``tl_name``_tl_if);
 
 `define CONNECT_TL_DEVICE_IF(tl_name, path = dut, clk, rst_n, i_sfx = i, o_sfx = o) \
@@ -47,3 +47,4 @@
      uvm_config_db#(virtual tl_if)::set(null, $sformatf("*%0s*", `"tl_name`"), "vif", \
                                         ``tl_name``_tl_if); \
    end
+

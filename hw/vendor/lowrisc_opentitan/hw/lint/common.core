@@ -1,5 +1,5 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 name: "lowrisc:lint:common:0.1"
@@ -17,8 +17,8 @@ filesets:
 
   files_veriblelint:
     files:
-      - tools/veriblelint/lowrisc-styleguide.rules.verible_lint: {file_type: veribleLintRules}
-      - tools/veriblelint/common.vbl: {file_type: veribleLintWaiver}
+      - tools/veriblelint/rules.vbl: {file_type: veribleLintRules}
+
 
 targets:
   default: &default_target

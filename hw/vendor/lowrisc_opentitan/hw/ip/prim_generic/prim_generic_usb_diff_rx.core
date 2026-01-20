@@ -1,30 +1,30 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 name: "lowrisc:prim_generic:usb_diff_rx"
 description: "Generic differential USB receiver for emulation purposes"
-virtual:
-  - lowrisc:prim:usb_diff_rx
-
 filesets:
   files_rtl:
     files:
-      - rtl/prim_usb_diff_rx.sv
+      - rtl/prim_generic_usb_diff_rx.sv
     file_type: systemVerilogSource
 
   files_verilator_waiver:
     depend:
       # common waivers
       - lowrisc:lint:common
+    files:
+      #- lint/prim_generic_usb_diff_rx.vlt
+    file_type: vlt
 
   files_ascentlint_waiver:
     depend:
       # common waivers
       - lowrisc:lint:common
     files:
-      - lint/prim_generic_usb_diff_rx.waiver
+      #- lint/prim_generic_usb_diff_rx.waiver
     file_type: waiver
 
   files_veriblelint_waiver:

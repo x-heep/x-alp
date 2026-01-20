@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -25,20 +25,12 @@ class uart_long_xfer_wo_dly_vseq extends uart_fifo_full_vseq;
     dly_to_access_fifo < 100;
   }
 
-  constraint dly_to_next_rx_trans_c {
-    dly_to_next_rx_trans == 0;
+  constraint dly_to_next_trans_c {
+    dly_to_next_trans == 0;
   }
 
-  constraint dly_to_next_tx_trans_c {
-    dly_to_next_tx_trans == 0;
-  }
-
-  constraint wait_for_rx_idle_c {
-    wait_for_rx_idle == 0;
-  }
-
-  constraint wait_for_tx_idle_c {
-    wait_for_tx_idle == 0;
+  constraint wait_for_idle_c {
+    wait_for_idle == 0;
   }
 
   constraint weight_to_skip_rx_read_c {

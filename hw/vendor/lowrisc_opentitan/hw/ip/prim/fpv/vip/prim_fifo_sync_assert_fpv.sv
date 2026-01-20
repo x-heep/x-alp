@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -16,22 +16,17 @@ module prim_fifo_sync_assert_fpv #(
   localparam int unsigned DepthWNorm = $clog2(Depth+1),
   localparam int unsigned DepthW = (DepthWNorm == 0) ? 1 : DepthWNorm
 ) (
-  input              clk_i,
-  input              rst_ni,
-  input              clr_i,
-  input              wvalid_i,
-  input              wready_o,
-  input [Width-1:0]  wdata_i,
-  input              rvalid_o,
-  input              rready_i,
-  input [Width-1:0]  rdata_o,
-  input              full_o,
-  input [DepthW-1:0] depth_o,
-  input              err_o
+  input  clk_i,
+  input  rst_ni,
+  input  clr_i,
+  input  wvalid_i,
+  input  wready_o,
+  input [Width-1:0] wdata_i,
+  input  rvalid_o,
+  input  rready_i,
+  input [Width-1:0] rdata_o,
+  input [DepthW-1:0] depth_o
 );
-
-  localparam bit [DepthW+2:0] WideOne = (DepthW + 3)'(1'b1);
-  localparam int unsigned PtrW = prim_util_pkg::vbits(Depth);
 
   /////////////////
   // Assumptions //
@@ -68,9 +63,9 @@ module prim_fifo_sync_assert_fpv #(
               fifo <= wdata_i;
             end else if (wvalid_i && wready_o) begin
               fifo <= wdata_i;
-              ref_depth <= ref_depth + (DepthW+2)'(1);
+              ref_depth <= ref_depth + 1;
             end else if (rvalid_o && rready_i) begin
-              ref_depth <= ref_depth - (DepthW+2)'(1);
+              ref_depth <= ref_depth - 1;
             end
           end
         end
@@ -78,7 +73,7 @@ module prim_fifo_sync_assert_fpv #(
 
       if (Pass) begin : gen_pass
         assign ref_rdata = (ref_depth == 0) ? wdata_i : fifo;
-      end else begin : gen_no_pass
+      end else begin : no_pass
         assign ref_rdata = fifo;
       end
 
@@ -91,7 +86,7 @@ module prim_fifo_sync_assert_fpv #(
       // implements (++val) mod Depth
       function automatic logic [DepthW+2:0] modinc(logic [DepthW+2:0] val, int modval);
         if (val == Depth-1) return 0;
-        else                return val + WideOne;
+        else                return val + 1;
       endfunction
 
       // this only models the data flow, since the control logic is tested below
@@ -107,25 +102,25 @@ module prim_fifo_sync_assert_fpv #(
             ref_depth <= 0;
           end else begin
             if (wvalid_i && wready_o && rvalid_o && rready_i) begin
-              fifo[wptr[PtrW-1:0]] <= wdata_i;
+              fifo[wptr] <= wdata_i;
               wptr <= modinc(wptr, Depth);
               rptr <= modinc(rptr, Depth);
             end else if (wvalid_i && wready_o) begin
-              fifo[wptr[PtrW-1:0]] <= wdata_i;
+              fifo[wptr] <= wdata_i;
               wptr <= modinc(wptr, Depth);
-              ref_depth <= ref_depth + WideOne;
+              ref_depth <= ref_depth + 1;
             end else if (rvalid_o && rready_i) begin
               rptr <= modinc(rptr, Depth);
-              ref_depth <= ref_depth - WideOne;
+              ref_depth <= ref_depth - 1;
             end
           end
         end
       end
 
       if (Pass) begin : gen_pass
-        assign ref_rdata = (ref_depth == 0) ? wdata_i : fifo[rptr[PtrW-1:0]];
-      end else begin : gen_no_pass
-        assign ref_rdata = fifo[rptr[PtrW-1:0]];
+        assign ref_rdata = (ref_depth == 0) ? wdata_i : fifo[rptr];
+      end else begin : no_pass
+        assign ref_rdata = fifo[rptr];
       end
 
     end
@@ -141,9 +136,6 @@ module prim_fifo_sync_assert_fpv #(
   // Forward Assertions //
   ////////////////////////
 
-  // The full_o port should be high iff the depth is maximal.
-  `ASSERT(FullIffFullDepth_A, (depth_o == Depth) <-> (full_o))
-
   // assert depth of FIFO
   `ASSERT(Depth_A, depth_o <= Depth)
   // if we clear the FIFO, it must be empty in the next cycle
@@ -158,8 +150,7 @@ module prim_fifo_sync_assert_fpv #(
   // this is unreachable in depth 1 no-pass through mode
   if (Depth == 1 && Pass) begin : gen_d1_passthru
     // check simultaneous write and read
-    `ASSERT(WriteAndRead_A,
-        wready_o && wvalid_i && rvalid_o && rready_i |=> depth_o == $past(depth_o),
+    `ASSERT(WriteAndRead_A, wready_o && wvalid_i && rvalid_o && rready_i |=> depth_o == $past(depth_o),
         clk_i, !rst_ni || clr_i)
   end
 
@@ -178,12 +169,7 @@ module prim_fifo_sync_assert_fpv #(
     `ASSERT(UnusedClr_A, prim_fifo_sync.gen_passthru_fifo.unused_clr == clr_i)
   end else begin : gen_depth_gt0
     // check wready
-
-    // The wready_o signal should be high (saying that we can accept an item in the fifo) if the
-    // FIFO is not currently full, which can be checked my seeing that depth_o < Depth. This
-    // property is delayed for a single cycle after coming out of reset (because of an under_rst
-    // signal that gets cleared on the first clock afterwards).
-    `ASSERT(Wready_A, 1 |=> depth_o < Depth -> wready_o)
+    `ASSERT(Wready_A, depth_o < Depth |-> wready_o)
     // check rvalid
     `ASSERT(Rvalid_A, depth_o > 0 |-> rvalid_o)
     // check write only
@@ -219,14 +205,9 @@ module prim_fifo_sync_assert_fpv #(
     `ASSERT(RvalidElemskBkwd_A, rvalid_o |-> depth_o > 0)
   end
 
-  // If the wready_o signal is not high, the FIFO should be full. As with Wready_A, this property is
-  // delayed by a cycle after coming out of reset, to handle the clearing of the under_rst signal.
-  `ASSERT(WreadyNoSpaceBkwd_A, 1 |=> !wready_o -> depth_o == Depth)
+  // no more space in the FIFO
+  `ASSERT(WreadyNoSpaceBkwd_A, !wready_o |-> depth_o == Depth)
   // elements ready to be read
   `ASSERT(RvalidNoElemskBkwd_A, !rvalid_o |-> depth_o == 0)
-
-  // The err_o signal should never go high. This isn't supposed to be triggerable without fault
-  // injection (which isn't modelled in FPV so the output should be constant zero).
-  `ASSERT(NoErrSignal_A, !err_o)
 
 endmodule : prim_fifo_sync_assert_fpv

@@ -1,21 +1,18 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 name: "lowrisc:prim_generic:ram_1p"
 description: "Single port RAM"
-virtual:
-  - lowrisc:prim:ram_1p
-
 filesets:
   files_rtl:
     depend:
       - lowrisc:prim:assert
-      - lowrisc:prim_generic:ram_1p_pkg
+      - lowrisc:prim:ram_1p_pkg
       - lowrisc:prim:util_memload
     files:
-      - rtl/prim_ram_1p.sv
+      - rtl/prim_generic_ram_1p.sv
     file_type: systemVerilogSource
 
   files_verilator_waiver:

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -17,31 +17,18 @@ module prim_edn_req
   import prim_alert_pkg::*;
 #(
   parameter int OutWidth = 32,
-  // Repetition check for incoming edn data
-  parameter bit RepCheck = 0,
-  // Disable reset-related assertion checks inside prim_sync_reqack primitives.
-  parameter bit EnRstChks = 0,
 
-  // EDN Request latency checker
-  //
-  //  Each consumer IP may have the maximum expected latency. MaxLatency
-  //  parameter describes the expected latency in terms of the consumer clock
-  //  cycles. If the edn request comes later than that, the assertion will be
-  //  fired.
-  //
-  //  The default value is 0, which disables the assertion.
-  parameter int unsigned MaxLatency = 0
+  // Non-functional parameter to switch on the request stability assertion.
+  // Used in submodule `prim_sync_reqack`.
+  parameter bit EnReqStabA = 1
 ) (
   // Design side
   input                       clk_i,
   input                       rst_ni,
-  input                       req_chk_i, // Used for gating assertions. Drive to 1 during normal
-                                         // operation.
   input                       req_i,
   output logic                ack_o,
   output logic [OutWidth-1:0] data_o,
   output logic                fips_o,
-  output logic                err_o,  // current data_o failed repetition check
   // EDN side
   input                       clk_edn_i,
   input                       rst_edn_ni,
@@ -58,15 +45,14 @@ module prim_edn_req
   localparam int SyncWidth = $bits({edn_i.edn_fips, edn_i.edn_bus});
   prim_sync_reqack_data #(
     .Width(SyncWidth),
-    .EnRstChks(EnRstChks),
     .DataSrc2Dst(1'b0),
-    .DataReg(1'b0)
+    .DataReg(1'b0),
+    .EnReqStabA(EnReqStabA)
   ) u_prim_sync_reqack_data (
     .clk_src_i  ( clk_i                           ),
     .rst_src_ni ( rst_ni                          ),
     .clk_dst_i  ( clk_edn_i                       ),
     .rst_dst_ni ( rst_edn_ni                      ),
-    .req_chk_i  ( req_chk_i                       ),
     .src_req_i  ( word_req                        ),
     .src_ack_o  ( word_ack                        ),
     .dst_req_o  ( edn_o.edn_req                   ),
@@ -75,47 +61,9 @@ module prim_edn_req
     .data_o     ( {word_fips,      word_data}     )
   );
 
-  if (RepCheck) begin : gen_rep_chk
-    logic [edn_pkg::ENDPOINT_BUS_WIDTH-1:0] word_data_q;
-    always_ff @(posedge clk_i) begin
-      if (word_ack) begin
-        word_data_q <= word_data;
-      end
-    end
-
-    // do not check until we have received at least the first entry
-    logic chk_rep;
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-      if (!rst_ni) begin
-        chk_rep <= '0;
-      end else if (word_ack) begin
-        chk_rep <= 1'b1;
-      end
-    end
-
-    // Need to track if any of the packed words has failed the repetition check, i.e., is identical
-    // to the last packed word.
-    logic err_d, err_q;
-    assign err_d = (req_i && ack_o)                                  ? 1'b0 : // clear
-                   (chk_rep && word_ack && word_data == word_data_q) ? 1'b1 : // set
-                                                                       err_q; // keep
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-      if (!rst_ni) begin
-        err_q <= 1'b0;
-      end else begin
-        err_q <= err_d;
-      end
-    end
-    assign err_o = err_q;
-
-  end else begin : gen_no_rep_chk // block: gen_rep_chk
-    assign err_o = '0;
-  end
-
   prim_packer_fifo #(
     .InW(edn_pkg::ENDPOINT_BUS_WIDTH),
-    .OutW(OutWidth),
-    .ClearOnRead(1'b0)
+    .OutW(OutWidth)
   ) u_prim_packer_fifo (
     .clk_i,
     .rst_ni,
@@ -147,69 +95,5 @@ module prim_edn_req
     end
   end
   assign fips_o = fips_q;
-
-  ////////////////
-  // Assertions //
-  ////////////////
-
-  // Check EDN data is valid: Not all zeros, all ones, or not the same as previous data.
-`ifdef INC_ASSERT
-  //VCS coverage off
-  // pragma coverage off
-
-  logic [OutWidth-1:0] data_prev, data_curr;
-
-  always_ff @(posedge ack_o or negedge rst_ni) begin
-    if (!rst_ni) begin
-      data_prev <= '0;
-      data_curr <= '0;
-    end else if (ack_o) begin
-      data_curr <= data_o;
-      data_prev <= data_curr;
-    end
-  end
-  //VCS coverage on
-  // pragma coverage on
-
-  `ASSERT(DataOutputValid_A, ack_o |-> (data_o != 0) && (data_o != '1))
-  `ASSERT(DataOutputDiffFromPrev_A, data_prev != 0 |-> data_prev != data_o)
-`endif
-
-  // EDN Max Latency Checker
-`ifndef SYNTHESIS
-  if (MaxLatency != 0) begin: g_maxlatency_assertion
-    //VCS coverage off
-    // pragma coverage off
-    localparam int unsigned LatencyW = $clog2(MaxLatency+1);
-    logic [LatencyW-1:0] latency_counter;
-    logic reset_counter;
-    logic enable_counter;
-
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-      if (!rst_ni) latency_counter <= '0;
-      else if (reset_counter) latency_counter <= '0;
-      else if (enable_counter) latency_counter <= latency_counter + 1'b1;
-    end
-
-    assign reset_counter  = ack_o;
-    assign enable_counter = req_i;
-    //VCS coverage on
-    // pragma coverage on
-
-    `ASSERT(MaxLatency_A, latency_counter <= MaxLatency)
-
-    // TODO: Is it worth to check req & ack pair?
-    //         _________________________________
-    // req  __/                                 \______
-    //                                           ____
-    // ack  ____________________________________/    \_
-    //
-    //                                          | error
-
-  end // g_maxlatency_assertion
-`else // SYNTHESIS
-  logic unused_param_maxlatency;
-  assign unused_param_maxlatency = ^MaxLatency;
-`endif // SYNTHESIS
 
 endmodule : prim_edn_req

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -8,7 +8,7 @@ class uart_smoke_vseq extends uart_tx_rx_vseq;
   `uvm_object_utils(uart_smoke_vseq)
 
   constraint num_trans_c {
-    num_trans == 2;
+    num_trans == 10;
   }
 
   constraint num_tx_bytes_c {
@@ -48,7 +48,7 @@ class uart_smoke_vseq extends uart_tx_rx_vseq;
     end
   endtask : process_tx
 
-  // sequentially send one Rx byte, then immediately read from register and check it
+  // sequencally send one Rx byte, then immediately read from register and check it
   virtual task process_rx();
     for (int j = 1; j <= num_rx_bytes; j++) begin
       byte rx_byte;

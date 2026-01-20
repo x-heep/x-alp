@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -26,12 +26,12 @@ module tlul_socket_m1 #(
   parameter int unsigned  M         = 4,
   parameter bit [M-1:0]   HReqPass  = {M{1'b1}},
   parameter bit [M-1:0]   HRspPass  = {M{1'b1}},
-  parameter bit [M*4-1:0] HReqDepth = {M{4'h1}},
-  parameter bit [M*4-1:0] HRspDepth = {M{4'h1}},
+  parameter bit [M*4-1:0] HReqDepth = {M{4'h2}},
+  parameter bit [M*4-1:0] HRspDepth = {M{4'h2}},
   parameter bit           DReqPass  = 1'b1,
   parameter bit           DRspPass  = 1'b1,
-  parameter bit [3:0]     DReqDepth = 4'h1,
-  parameter bit [3:0]     DRspDepth = 4'h1
+  parameter bit [3:0]     DReqDepth = 4'h2,
+  parameter bit [3:0]     DRspDepth = 4'h2
 ) (
   input                     clk_i,
   input                     rst_ni,
@@ -168,34 +168,34 @@ module tlul_socket_m1 #(
   if (tlul_pkg::ArbiterImpl == "PPC") begin : gen_arb_ppc
     prim_arbiter_ppc #(
       .N          (M),
-      .DW         ($bits(tlul_pkg::tl_h2d_t))
+      .DW         ($bits(tlul_pkg::tl_h2d_t)),
+      .EnReqStabA (0)
     ) u_reqarb (
       .clk_i,
       .rst_ni,
-      .req_chk_i ( 1'b0        ), // TL-UL allows dropping valid without ready. See #3354.
-      .req_i     ( hrequest    ),
-      .data_i    ( hreq_fifo_o ),
-      .gnt_o     ( hgrant      ),
-      .idx_o     (             ),
-      .valid_o   ( arb_valid   ),
-      .data_o    ( arb_data    ),
-      .ready_i   ( arb_ready   )
+      .req_i   ( hrequest    ),
+      .data_i  ( hreq_fifo_o ),
+      .gnt_o   ( hgrant      ),
+      .idx_o   (             ),
+      .valid_o ( arb_valid   ),
+      .data_o  ( arb_data    ),
+      .ready_i ( arb_ready   )
     );
   end else if (tlul_pkg::ArbiterImpl == "BINTREE") begin : gen_tree_arb
     prim_arbiter_tree #(
       .N          (M),
-      .DW         ($bits(tlul_pkg::tl_h2d_t))
+      .DW         ($bits(tlul_pkg::tl_h2d_t)),
+      .EnReqStabA (0)
     ) u_reqarb (
       .clk_i,
       .rst_ni,
-      .req_chk_i ( 1'b0        ), // TL-UL allows dropping valid without ready. See #3354.
-      .req_i     ( hrequest    ),
-      .data_i    ( hreq_fifo_o ),
-      .gnt_o     ( hgrant      ),
-      .idx_o     (             ),
-      .valid_o   ( arb_valid   ),
-      .data_o    ( arb_data    ),
-      .ready_i   ( arb_ready   )
+      .req_i   ( hrequest    ),
+      .data_i  ( hreq_fifo_o ),
+      .gnt_o   ( hgrant      ),
+      .idx_o   (             ),
+      .valid_o ( arb_valid   ),
+      .data_o  ( arb_data    ),
+      .ready_i ( arb_ready   )
     );
   end else begin : gen_unknown
     `ASSERT_INIT(UnknownArbImpl_A, 0)

@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,20 +12,12 @@ class uart_perf_vseq extends uart_fifo_full_vseq;
     dly_to_access_fifo == 0;
   }
 
-  constraint dly_to_next_rx_trans_c {
-    dly_to_next_rx_trans == 0;
+  constraint dly_to_next_trans_c {
+    dly_to_next_trans == 0;
   }
 
-  constraint dly_to_next_tx_trans_c {
-    dly_to_next_tx_trans == 0;
-  }
-
-  constraint wait_for_rx_idle_c {
-    wait_for_rx_idle == 0;
-  }
-
-  constraint wait_for_tx_idle_c {
-    wait_for_tx_idle == 0;
+  constraint wait_for_idle_c {
+    wait_for_idle == 0;
   }
 
   constraint dly_to_rx_read_c {
@@ -40,8 +32,4 @@ class uart_perf_vseq extends uart_fifo_full_vseq;
     };
   }
 
-  // don't use the slowest baud rate, otherwise, it may take over 1hr
-  constraint baud_rate_extra_c {
-    baud_rate >= BaudRate115200;
-  }
 endclass : uart_perf_vseq

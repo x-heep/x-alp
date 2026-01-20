@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,6 +8,7 @@
 //   N:           Number of request ports
 //   DW:          Data width
 //   DataPort:    Set to 1 to enable the data port. Otherwise that port will be ignored.
+//   EnReqStabA:  Checks whether requests remain asserted until granted
 //
 // This is the original implementation of the arbiter which relies on parallel prefix computing
 // optimization to optimize the request / arbiter tree. Not all synthesis tools may support this.
@@ -17,8 +18,8 @@
 // this behavior.
 //
 // Also, this module contains a request stability assertion that checks that requests stay asserted
-// until they have been served. This assertion can be gated by driving the req_chk_i low. This is
-// a non-functional input and does not affect the designs behavior.
+// until they have been served. This assertion can be optionally disabled by setting EnReqStabA to
+// zero. This is a non-functional parameter and does not affect the designs behavior.
 //
 // See also: prim_arbiter_tree
 
@@ -32,14 +33,15 @@ module prim_arbiter_ppc #(
   // EnDataPort: {0, 1}, if 0, input data will be ignored
   parameter bit EnDataPort = 1,
 
+  // Non-functional parameter to switch on the request stability assertion
+  parameter bit EnReqStabA = 1,
+
   // Derived parameters
-  localparam int IdxW = prim_util_pkg::vbits(N)
+  localparam int IdxW = $clog2(N)
 ) (
   input clk_i,
   input rst_ni,
 
-  input                    req_chk_i, // Used for gating assertions. Drive to 1 during normal
-                                      // operation.
   input        [ N-1:0]    req_i,
   input        [DW-1:0]    data_i [N],
   output logic [ N-1:0]    gnt_o,
@@ -49,10 +51,6 @@ module prim_arbiter_ppc #(
   output logic [DW-1:0]    data_o,
   input                    ready_i
 );
-
-  // req_chk_i is used for gating assertions only.
-  logic unused_req_chk;
-  assign unused_req_chk = req_chk_i;
 
   `ASSERT_INIT(CheckNGreaterZero_A, N > 0)
 
@@ -65,6 +63,7 @@ module prim_arbiter_ppc #(
     assign idx_o    = '0;
 
   end else begin : gen_normal_case
+
     logic [N-1:0] masked_req;
     logic [N-1:0] ppc_out;
     logic [N-1:0] arb_req;
@@ -74,15 +73,20 @@ module prim_arbiter_ppc #(
     assign masked_req = mask & req_i;
     assign arb_req = (|masked_req) ? masked_req : req_i;
 
-    prim_leading_one_ppc #(
-      .N ( N )
-    ) u_leading_one (
-      .in_i          ( arb_req ),
-      .leading_one_o ( winner  ),
-      .ppc_out_o     ( ppc_out ),
-      .idx_o         ( idx_o   )
-    );
-    assign gnt_o   = (ready_i) ? winner : '0;
+    // PPC
+    //   Even below code looks O(n) but DC optimizes it to O(log(N))
+    //   Using Parallel Prefix Computation
+    always_comb begin
+      ppc_out[0] = arb_req[0];
+      for (int i = 1 ; i < N ; i++) begin
+        ppc_out[i] = ppc_out[i-1] | arb_req[i];
+      end
+    end
+
+    // Grant Generation: Leading-One detector
+    assign winner = ppc_out ^ {ppc_out[N-2:0], 1'b0};
+    assign gnt_o    = (ready_i) ? winner : '0;
+
     assign valid_o = |req_i;
     // Mask Generation
     assign mask_next = {ppc_out[N-2:0], 1'b0};
@@ -113,6 +117,15 @@ module prim_arbiter_ppc #(
       logic [DW-1:0] unused_data [N];
       assign unused_data = data_i;
     end
+
+    always_comb begin
+      idx_o = '0;
+      for (int unsigned i = 0 ; i < N ; i++) begin
+        if (winner[i]) begin
+          idx_o = i[IdxW-1:0];
+        end
+      end
+    end
   end
 
   ////////////////
@@ -130,7 +143,7 @@ module prim_arbiter_ppc #(
       ##1 valid_o && ready_i && $past(ready_i) && $past(valid_o) &&
       |(req_i & ~((N'(1) << $past(idx_o)+1) - 1)) |->
       idx_o > $past(idx_o))
-  // we can only grant one requester at a time
+  // we can only grant one requestor at a time
   `ASSERT(CheckHotOne_A, $onehot0(gnt_o))
   // A grant implies that the sink is ready
   `ASSERT(GntImpliesReady_A, |gnt_o |-> ready_i)
@@ -152,17 +165,18 @@ if (EnDataPort) begin: gen_data_port_assertion
   `ASSERT(DataFlow_A, ready_i && valid_o |-> data_o == data_i[idx_o])
 end
 
+if (EnReqStabA) begin : gen_lock_assertion
   // requests must stay asserted until they have been granted
-  `ASSUME(ReqStaysHighUntilGranted0_M, |req_i && !ready_i |=>
-      (req_i & $past(req_i)) == $past(req_i), clk_i, !rst_ni || !req_chk_i)
+  `ASSUME(ReqStaysHighUntilGranted0_M, (|req_i) && !ready_i |=>
+      (req_i & $past(req_i)) == $past(req_i))
   // check that the arbitration decision is held if the sink is not ready
-  `ASSERT(LockArbDecision_A, |req_i && !ready_i |=> idx_o == $past(idx_o),
-      clk_i, !rst_ni || !req_chk_i)
+  `ASSERT(LockArbDecision_A, |req_i && !ready_i |=> idx_o == $past(idx_o))
+end
 
 // FPV-only assertions with symbolic variables
 `ifdef FPV_ON
   // symbolic variables
-  bit [IdxW-1:0] k;
+  int unsigned k;
   bit ReadyIsStable;
   bit ReqsAreStable;
 
@@ -170,7 +184,7 @@ end
   `ASSUME(KStable_M, ##1 $stable(k))
   `ASSUME(KRange_M, k < N)
   // this is used enable checking for stable and unstable ready_i and req_i signals in the same run.
-  // the symbolic variables act like a switch that the solver can turn on and off.
+  // the symbolic variables act like a switch that the solver can trun on and off.
   `ASSUME(ReadyIsStable_M, ##1 $stable(ReadyIsStable))
   `ASSUME(ReqsAreStable_M, ##1 $stable(ReqsAreStable))
   `ASSUME(ReadyStable_M, ##1 !ReadyIsStable || $stable(ready_i))
@@ -202,9 +216,11 @@ end
     end
   end
 
-  // requests must stay asserted until they have been granted
-  `ASSUME(ReqStaysHighUntilGranted1_M, req_i[k] && !gnt_o[k] |=>
-      req_i[k], clk_i, !rst_ni || !req_chk_i)
+  if (EnReqStabA) begin : gen_lock_assertion_fpv
+    // requests must stay asserted until they have been granted
+    `ASSUME(ReqStaysHighUntilGranted1_M, req_i[k] & !gnt_o[k] |=>
+        req_i[k], clk_i, !rst_ni)
+  end
 `endif
 
 endmodule : prim_arbiter_ppc

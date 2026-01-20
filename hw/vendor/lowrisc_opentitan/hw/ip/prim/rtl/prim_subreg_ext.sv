@@ -1,8 +1,8 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
-// Register slice conforming to Comportability guide.
+// Register slice conforming to Comportibility guide.
 
 module prim_subreg_ext #(
   parameter int unsigned DW = 32
@@ -17,13 +17,9 @@ module prim_subreg_ext #(
   output logic          qe,
   output logic          qre,
   output logic [DW-1:0] q,
-  output logic [DW-1:0] ds,
   output logic [DW-1:0] qs
 );
 
-  // for external registers, there is no difference
-  // between qs and ds
-  assign ds = d;
   assign qs = d;
   assign q = wd;
   assign qe = we;

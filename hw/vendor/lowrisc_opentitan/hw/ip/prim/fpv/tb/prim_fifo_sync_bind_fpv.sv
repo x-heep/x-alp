@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -29,9 +29,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_nopass7 prim_fifo_sync_assert_fpv #(
@@ -49,9 +47,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_nopass8 prim_fifo_sync_assert_fpv #(
@@ -69,9 +65,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_nopass15 prim_fifo_sync_assert_fpv #(
@@ -89,9 +83,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_nopass16 prim_fifo_sync_assert_fpv #(
@@ -109,9 +101,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   ////////////////
@@ -133,9 +123,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_pass1 prim_fifo_sync_assert_fpv #(
@@ -153,9 +141,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_pass7 prim_fifo_sync_assert_fpv #(
@@ -173,9 +159,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_pass8 prim_fifo_sync_assert_fpv #(
@@ -193,9 +177,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_pass15 prim_fifo_sync_assert_fpv #(
@@ -213,9 +195,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
   bind i_pass16 prim_fifo_sync_assert_fpv #(
@@ -233,9 +213,7 @@ module prim_fifo_sync_bind_fpv;
     .rvalid_o,
     .rready_i,
     .rdata_o,
-    .full_o,
-    .depth_o,
-    .err_o
+    .depth_o
   );
 
 endmodule : prim_fifo_sync_bind_fpv

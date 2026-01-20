@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -18,7 +18,7 @@ module prim_prince_tb;
 //////////////////////////////////////////////////////
 
 // Default to {data_width:64, key_width:128} configuration.
-// Data width and key width can be overridden from command-line if desired.
+// Data width and key width can be overriden from command-line if desired.
 
 `ifdef DATA_WIDTH
   localparam int unsigned DataWidth = `DATA_WIDTH;
@@ -31,8 +31,6 @@ module prim_prince_tb;
 `else
   localparam int unsigned KeyWidth = 128;
 `endif
-
-  localparam string MSG_ID = $sformatf("%m");
 
   // Max number of half-rounds according to spec.
   // Duplicate parameter definition here to avoid clutter due to long identifier.
@@ -126,7 +124,7 @@ module prim_prince_tb;
     // Drive input into encryption instances.
     key_in    = key;
     dec_in    = 0;
-    valid_in = 0;
+    valid_in  = 1;
     for (int unsigned i = 0; i < 2; i++) begin
       for (int unsigned j = 0; j < 2; j++) begin
         for (int unsigned k = 0; k < NumRoundsHalf; k++) begin
@@ -134,14 +132,10 @@ module prim_prince_tb;
         end
       end
     end
-    // wait some time before signaling that the inputs are valid
-    clk_if.wait_clks($urandom_range(0, 10));
-    valid_in  = 1;
     // Wait for the DUTs to finish calculations.
     clk_if.wait_clks(2);
     wait(&valid_out == 1);
     valid_in = 0;
-    clk_if.wait_clks(1);
     // query DPI model for expected encrypted output.
     for (int i = 0; i < 2; i++) begin
       for (int j = 0; j < 2; j++) begin
@@ -168,7 +162,7 @@ module prim_prince_tb;
     // Drive input into decryption instances.
     key_in = key;
     dec_in = 1;
-    valid_in = 0;
+    valid_in = 1;
     for (int unsigned i = 0; i < 2; i++) begin
       for (int unsigned j = 0; j < 2; j++) begin
         for (int unsigned k = 0; k < NumRoundsHalf; k++) begin
@@ -176,9 +170,6 @@ module prim_prince_tb;
         end
       end
     end
-    // wait some time before signaling that the inputs are valid
-    clk_if.wait_clks($urandom_range(0, 10));
-    valid_in = 1;
     // Wait for the DUTs to finish calculations.
     clk_if.wait_clks(2);
     wait(&valid_out == 1);
@@ -246,21 +237,17 @@ module prim_prince_tb;
 
   initial begin : p_stimuli
     int num_trans;
+    string msg_id = $sformatf("%m");
 
     // The key and plaintext/ciphertext to be fed into PRINCE instances.
     bit [KeyWidth/2-1:0] k0, k1;
     bit [DataWidth-1:0] plaintext;
 
-    $timeformat(-12, 0, " ps", 12);
     clk_if.set_period_ps(ClkPeriod);
     clk_if.set_active();
-    // Toggle reset twice at start of the test to hit a small toggle coverage point:
-    // - rst_ni: 1 -> 0
-    // No additional functional impact
     clk_if.apply_reset();
-    clk_if.wait_clks(5);
-    clk_if.apply_reset();
-    clk_if.wait_clks(5);
+    $timeformat(-12, 0, " ps", 12);
+    clk_if.wait_clks(10);
 
     /////////////////////////////
     // Test the 5 golden vectors.
@@ -295,9 +282,9 @@ module prim_prince_tb;
     void'($value$plusargs("smoke_test=%0b", smoke_test));
     num_trans = smoke_test ? 1 : $urandom_range(5000, 25000);
     for (int i = 0; i < num_trans; i++) begin
-      `DV_CHECK_STD_RANDOMIZE_FATAL(plaintext, "", MSG_ID)
-      `DV_CHECK_STD_RANDOMIZE_FATAL(k0, "", MSG_ID)
-      `DV_CHECK_STD_RANDOMIZE_FATAL(k1, "", MSG_ID)
+      `DV_CHECK_STD_RANDOMIZE_FATAL(plaintext, "", msg_id)
+      `DV_CHECK_STD_RANDOMIZE_FATAL(k0, "", msg_id)
+      `DV_CHECK_STD_RANDOMIZE_FATAL(k1, "", msg_id)
       test_prince(plaintext, {k1, k0});
     end
 
@@ -309,12 +296,9 @@ module prim_prince_tb;
 
   // TODO: perhaps wrap this in a macro?
   initial begin
-    bit poll_for_stop;
-    int unsigned poll_for_stop_interval_ns;
-
-    poll_for_stop = 1'b1;
+    bit poll_for_stop = 1'b1;
+    int unsigned poll_for_stop_interval_ns = 1000;
     void'($value$plusargs("poll_for_stop=%0b", poll_for_stop));
-    poll_for_stop_interval_ns = 1000;
     void'($value$plusargs("poll_for_stop_interval_ns=%0d", poll_for_stop_interval_ns));
     if (poll_for_stop) dv_utils_pkg::poll_for_stop(.interval_ns(poll_for_stop_interval_ns));
   end

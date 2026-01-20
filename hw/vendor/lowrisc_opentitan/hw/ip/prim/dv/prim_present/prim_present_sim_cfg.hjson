@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 {
@@ -23,9 +23,6 @@
   // Default iterations for all tests - each test entry can override this.
   reseed: 50
 
-  // Enable cdc instrumentation
-  run_opts: ["+cdc_instrumentation_enabled=1"]
-
   overrides: [
     {
       name: vcs_cov_cfg_file
@@ -48,3 +45,4 @@
     }
   ]
 }
+

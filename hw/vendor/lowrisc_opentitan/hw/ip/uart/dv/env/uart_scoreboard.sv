@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -7,8 +7,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
                                                     .COV_T(uart_env_cov));
   `uvm_component_utils(uart_scoreboard)
 
-  virtual uart_if    uart_vif;
-  virtual uart_nf_if uart_nf_vif;
+  virtual uart_if uart_vif;
 
   // local variables
   local bit tx_enabled;
@@ -20,11 +19,15 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
   local bit tx_full_exp, rx_full_exp, tx_empty_exp, rx_empty_exp, tx_idle_exp, rx_idle_exp;
   local int txlvl_exp, rxlvl_exp;
   local bit [NumUartIntr-1:0] intr_exp;
-  local bit [NumUartIntr-1:0] status_intr_test;
   local bit [7:0] rdata_exp;
   // store tx/rx_q at TL address phase
   local int tx_q_size_at_addr_phase, rx_q_size_at_addr_phase;
   local bit [NumUartIntr-1:0] intr_exp_at_addr_phase;
+
+  // non sticky interrupts are edge-triggered
+  // set it when interrupt is triggered, clear it when interrupt condition is no longer true
+  local bit tx_watermark_triggered = 1;
+  local bit rx_watermark_triggered = 0;
 
   // TLM fifos to pick up the packets
   uvm_tlm_analysis_fifo #(uart_item)    uart_tx_fifo;
@@ -37,7 +40,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
   uart_item rx_q[$];
 
   // it takes 3 cycles to move item from fifo to process, which delays reg status change
-  // and it also takes 3 cycles to trigger tx watermark interrupt
+  // and it also takes 3 cycles to trigger tx matermark interrupt
   parameter uint NUM_CLK_DLY_TO_UPDATE_TX_WATERMARK = 3;
 
   `uvm_component_new
@@ -51,10 +54,6 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
   function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     uart_vif = cfg.m_uart_agent_cfg.vif;
-
-    if (!uvm_config_db#(virtual uart_nf_if)::get(this, "", "uart_nf_vif", uart_nf_vif)) begin
-      `uvm_fatal(`gfn, "failed to get uart_nf_if handle from uvm_config_db")
-    end
   endfunction
 
   task run_phase(uvm_phase phase);
@@ -62,22 +61,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
     fork
       process_uart_tx_fifo();
       process_uart_rx_fifo();
-      process_nf_cov();
     join_none
-  endtask
-
-  virtual task process_nf_cov();
-    if (!cfg.en_cov) begin
-      return;
-    end
-
-    forever begin
-      @(uart_nf_vif.cb);
-      if (uart_nf_vif.cb.rx_enable) begin
-        cov.noise_filter_cg.sample(uart_nf_vif.cb.rx_sync, uart_nf_vif.cb.rx_sync_q1,
-          uart_nf_vif.cb.rx_sync_q2);
-      end
-    end
   endtask
 
   virtual task process_uart_tx_fifo();
@@ -98,7 +82,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
       predict_tx_watermark_intr();
 
       if (tx_q.size() == 0 && tx_processing_item_q.size() == 0) begin
-        intr_exp[TxDone] = 1;
+        intr_exp[TxEmpty] = 1;
       end
     end
   endtask
@@ -115,7 +99,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
 
         if (parity_err) begin
           intr_exp[RxParityErr] = 1;
-          `uvm_info(`gfn, $sformatf("dropped uart rx item due to parity err:\n%0s",
+          `uvm_info(`gfn, $sformatf("dropped uart rx item due to partiy err:\n%0s",
                                     item.sprint()), UVM_HIGH)
         end
         if (!item.stop_bit) begin
@@ -124,7 +108,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
                                     item.sprint()), UVM_HIGH)
         end
         if (!parity_err && item.stop_bit == 1) begin // no parity/frame error
-          if (rx_q.size < RxFifoDepth) begin
+          if (rx_q.size < UART_FIFO_DEPTH) begin
             rx_q.push_back(item);
             predict_rx_watermark_intr();
           end
@@ -138,18 +122,34 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
     end // forever
   endtask
 
+  // when interrupt is non-sticky, interrupt will be triggered once unless it exits interrupt
+  // condition
+  virtual function bit get_non_sticky_interrupt(bit cur_intr, bit new_intr, ref bit triggered);
+    bit final_intr = cur_intr || (new_intr & ~triggered);
+    if (!new_intr)       triggered = 0;
+    else if (final_intr) triggered = 1;
+
+    return final_intr;
+  endfunction
+
   virtual function void predict_tx_watermark_intr(uint tx_q_size = tx_q.size);
-    uint watermark = get_tx_watermark_bytes_by_level(ral.fifo_ctrl.txilvl.get_mirrored_value());
-    intr_exp[TxWatermark] = (tx_q_size < watermark) || status_intr_test[TxWatermark];
-    intr_exp[TxEmpty] = (tx_q_size == 0) || status_intr_test[TxEmpty];
+    uint watermark = get_watermark_bytes_by_level(ral.fifo_ctrl.txilvl.get_mirrored_value(),
+                                                  UartTx);
+    intr_exp[TxWatermark] = get_non_sticky_interrupt(.cur_intr(intr_exp[TxWatermark]),
+                                                     .new_intr(tx_q_size < watermark),
+                                                     .triggered(tx_watermark_triggered));
   endfunction
 
   virtual function void predict_rx_watermark_intr(uint rx_q_size = rx_q.size);
-    uint watermark = get_rx_watermark_bytes_by_level(ral.fifo_ctrl.rxilvl.get_mirrored_value());
-    intr_exp[RxWatermark] = (rx_q_size >= watermark) || status_intr_test[RxWatermark];
+    uint watermark = get_watermark_bytes_by_level(ral.fifo_ctrl.rxilvl.get_mirrored_value(),
+                                                  UartRx);
+    intr_exp[RxWatermark] = get_non_sticky_interrupt(
+        .cur_intr(intr_exp[RxWatermark]),
+        .new_intr(rx_q_size >= watermark && rx_enabled),
+        .triggered(rx_watermark_triggered));
   endfunction
 
-  // we don't model uart cycle-accurately, ignore checking when item is just/almost finished
+  // we don't model uart cycle-acurrately, ignore checking when item is just/almost finished
   function bit is_in_ignored_period(uart_dir_e dir);
     case (dir)
       UartTx: return uart_tx_clk_pulses inside `TX_IGNORED_PERIOD;
@@ -161,11 +161,11 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
     uvm_reg csr;
     bit     do_read_check   = 1'b1;
     bit     write           = item.is_write();
-    uvm_reg_addr_t csr_addr = cfg.ral_models[ral_name].get_word_aligned_addr(item.a_addr);
+    uvm_reg_addr_t csr_addr = ral.get_word_aligned_addr(item.a_addr);
 
     // if access was to a valid csr, get the csr handle
-    if (csr_addr inside {cfg.ral_models[ral_name].csr_addrs}) begin
-      csr = cfg.ral_models[ral_name].default_map.get_reg_by_offset(csr_addr);
+    if (csr_addr inside {cfg.csr_addrs[ral_name]}) begin
+      csr = ral.default_map.get_reg_by_offset(csr_addr);
       `DV_CHECK_NE_FATAL(csr, null)
     end else begin
       `uvm_fatal(`gfn, $sformatf("Access unexpected addr 0x%0h", csr_addr))
@@ -187,7 +187,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
 
     // process the csr req
     // for write, update local variable and fifo at address phase
-    // for read, update prediction at address phase and compare at data phase
+    // for read, update predication at address phase and compare at data phase
     case (csr.get_name())
       "ctrl": begin
         if (write && channel == AddrChannel) begin
@@ -215,58 +215,31 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
         if (write && channel == AddrChannel) begin
           uart_item tx_item = uart_item::type_id::create("tx_item");
 
+          tx_item.data = item.a_data;
+          if (tx_q.size() < UART_FIFO_DEPTH) begin
+            tx_q.push_back(tx_item);
+            `uvm_info(`gfn, $sformatf("After push one item, tx_q size: %0d", tx_q.size), UVM_HIGH)
+          end else begin
+            `uvm_info(`gfn, $sformatf(
+                "Drop tx item: %0h, tx_q size: %0d, uart_tx_clk_pulses: %0d",
+                csr.get_mirrored_value(), tx_q.size(), uart_tx_clk_pulses), UVM_MEDIUM)
+          end
           fork begin
-            int loc_tx_q_size;
-            bit dec_q_size;
-
-            // Don't update tx_q til next negedge. The TX FIFO doesn't get written til the cycle
-            // after the write transaction so an immediate read of 'fifo_status' after the write
-            // doesn't see the increased depth. Waiting here ensures this is modeled correctly.
-            cfg.clk_rst_vif.wait_n_clks(1);
-
-            tx_item.data = item.a_data;
-            if (tx_q.size() < TxFifoDepth) begin
-              tx_q.push_back(tx_item);
-              `uvm_info(`gfn, $sformatf("After push one item, tx_q size: %0d", tx_q.size), UVM_HIGH)
-            end else begin
-              `uvm_info(`gfn, $sformatf(
-                  "Drop tx item: %0h, tx_q size: %0d, uart_tx_clk_pulses: %0d",
-                  csr.get_mirrored_value(), tx_q.size(), uart_tx_clk_pulses), UVM_MEDIUM)
-            end
-
-            loc_tx_q_size = tx_q.size();
-            dec_q_size = 1'b0;
+            int loc_tx_q_size = tx_q.size();
             // remove 1 when it's abort to be popped for transfer
-            if (tx_enabled && tx_processing_item_q.size == 0 && tx_q.size > 0) begin
-              // Must decide if we're reducing the queue size used for watermark modelling now based
-              // upon the tx_q size immediately after the push. The actual watermark prediction
-              // occurs after update delay
-              dec_q_size = 1'b1;
-            end
-
-            // use negedge to avoid race condition with -1 as we've already waited a cycle above.
-            cfg.clk_rst_vif.wait_n_clks(NUM_CLK_DLY_TO_UPDATE_TX_WATERMARK - 1);
+            if (tx_enabled && tx_processing_item_q.size == 0 && tx_q.size > 0) loc_tx_q_size--;
+            // use negedge to avoid race condition
+            cfg.clk_rst_vif.wait_n_clks(NUM_CLK_DLY_TO_UPDATE_TX_WATERMARK);
             if (ral.ctrl.slpbk.get_mirrored_value()) begin
               // if sys loopback is on, tx item isn't sent to uart pin but rx fifo
               uart_item tx_item = tx_q.pop_front();
-              if (rx_enabled && (rx_q.size < RxFifoDepth)) begin
+              if (rx_enabled && (rx_q.size < UART_FIFO_DEPTH)) begin
                 rx_q.push_back(tx_item);
                 predict_rx_watermark_intr();
               end
             end else if (tx_enabled && tx_processing_item_q.size == 0 && tx_q.size > 0) begin
               tx_processing_item_q.push_back(tx_q.pop_front());
             end
-
-            if (dec_q_size) begin
-              // Predict the TX watermark/empty interrupts before waiting and decrementing
-              // to model the scenario where: a TX watermark (or empty) interrupt is briefly
-              // triggered due to the TX FIFO level going above the watermark threshold (or zero),
-              // then dropping below again one cycle later when the TX item gets popped.
-              predict_tx_watermark_intr(loc_tx_q_size);
-              cfg.clk_rst_vif.wait_n_clks(1);
-              loc_tx_q_size--;
-            end
-
             predict_tx_watermark_intr(loc_tx_q_size);
           end join_none
         end // write && channel == AddrChannel
@@ -284,16 +257,18 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
             tx_q.delete();
             void'(ral.fifo_ctrl.txrst.predict(.value(0), .kind(UVM_PREDICT_WRITE)));
             if (cfg.en_cov) begin
-              cov.tx_fifo_level_cg.sample(.lvl(ral.fifo_status.txlvl.get_mirrored_value()),
-                                          .rst(1));
+              cov.fifo_level_cg.sample(.dir(UartTx),
+                                       .lvl(ral.fifo_status.txlvl.get_mirrored_value()),
+                                       .rst(1));
             end
           end
           if (rxrst_val) begin
             rx_q.delete();
             void'(ral.fifo_ctrl.rxrst.predict(.value(0), .kind(UVM_PREDICT_WRITE)));
             if (cfg.en_cov) begin
-              cov.rx_fifo_level_cg.sample(.lvl(ral.fifo_status.rxlvl.get_mirrored_value()),
-                                          .rst(1));
+              cov.fifo_level_cg.sample(.dir(UartRx),
+                                       .lvl(ral.fifo_status.rxlvl.get_mirrored_value()),
+                                       .rst(1));
             end
           end
           // recalculate watermark when RXILVL/TXILVL is updated
@@ -308,21 +283,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
       "intr_test": begin
         if (write && channel == AddrChannel) begin
           bit [TL_DW-1:0] intr_en = ral.intr_enable.get_mirrored_value();
-          // TxWatermark and RxWatermark are status type interrupts. When `intr_test` is set for
-          // these interrupts it acts as if the status for the interrupt is true. In turn when
-          // `intr_test` is cleared the interrupt will drop, but only if the underlying status isn't
-          // true. So record what's been written to `intr_test` for status type interrupts here and
-          // then call the prediction functions for those interrupts to determine the interrupt
-          // status.
-          status_intr_test[TxWatermark] = item.a_data[TxWatermark];
-          status_intr_test[TxEmpty] = item.a_data[TxEmpty];
-          status_intr_test[RxWatermark] = item.a_data[RxWatermark];
-
           intr_exp |= item.a_data;
-
-          predict_tx_watermark_intr();
-          predict_rx_watermark_intr();
-
           if (cfg.en_cov) begin
             foreach (intr_exp[i]) begin
               cov.intr_test_cg.sample(i, item.a_data[i], intr_en[i], intr_exp[i]);
@@ -334,10 +295,10 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
         if (!write) begin // read
           case (channel)
             AddrChannel: begin // predict at address phase
-              tx_full_exp  = tx_q.size >= TxFifoDepth;
+              tx_full_exp  = tx_q.size >= UART_FIFO_DEPTH;
               tx_empty_exp = tx_q.size == 0;
               tx_idle_exp  = tx_q.size == 0 && tx_processing_item_q.size == 0;
-              rx_full_exp  = rx_q.size == RxFifoDepth;
+              rx_full_exp  = rx_q.size == UART_FIFO_DEPTH;
               rx_empty_exp = rx_q.size == 0;
               rx_idle_exp  = (uart_rx_clk_pulses == 0) || !rx_enabled;
             end
@@ -353,14 +314,14 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
 
               // ignore corner case when item is about to complete, also fifo is changing from
               // full to not full and it's at ignored period
-              if (!(tx_enabled && tx_q_size_at_addr_phase == TxFifoDepth
+              if (!(tx_enabled && tx_q_size_at_addr_phase == UART_FIFO_DEPTH
                     && is_in_ignored_period(UartTx))) begin
                 `DV_CHECK_EQ(get_field_val(ral.status.txfull, item.d_data), tx_full_exp, $sformatf(
                     "check tx_full fail: tx_en = %0d, tx_q.size = %0d, uart_tx_clk_pulses = %0d",
                     tx_enabled, tx_q_size_at_addr_phase, uart_tx_clk_pulses))
               end
               if (!(rx_enabled && is_in_ignored_period(UartRx) &&
-                    rx_q_size_at_addr_phase inside {RxFifoDepth - 1, RxFifoDepth})) begin
+                    rx_q_size_at_addr_phase inside {UART_FIFO_DEPTH - 1, UART_FIFO_DEPTH})) begin
                 `DV_CHECK_EQ(get_field_val(ral.status.rxfull, item.d_data), rx_full_exp, $sformatf(
                     "check rx_full fail: rx_en = %0d, rx_q.size = %0d, uart_rx_clk_pulses = %0d",
                     rx_enabled, rx_q_size_at_addr_phase, uart_rx_clk_pulses))
@@ -406,11 +367,6 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
             // add 1 cycle delay to avoid race condition when fifo changing and interrupt clearing
             // occur simultaneously
             cfg.clk_rst_vif.wait_clks(1);
-            // Watermark interrupt state based upon current level of TX/RX fifos. They cannot be
-            // cleared by writes to intr_state.
-            intr_wdata[TxWatermark] = 1'b0;
-            intr_wdata[TxEmpty] = 1'b0;
-            intr_wdata[RxWatermark] = 1'b0;
             intr_exp &= ~intr_wdata;
           end join_none
         end else if (!write && channel == AddrChannel) begin // read & addr phase
@@ -424,14 +380,9 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
             if (cfg.en_cov) begin
               cov.intr_cg.sample(intr, intr_en[intr], intr_exp[intr]);
               cov.intr_pins_cg.sample(intr, cfg.intr_vif.pins[intr]);
-              // Check interrupt from intr_status read value rather than expected as RxTimeout and
-              // RxBreakErr aren't predicted here
-              if (item.d_data[i]) begin
-                sample_detail_intr_cov(intr);
-              end
             end
             // don't check it when it's in ignored period
-            if (intr inside {TxWatermark, TxEmpty, TxDone}) begin // TX interrupts
+            if (intr inside {TxWatermark, TxEmpty}) begin // TX interrupts
               if (is_in_ignored_period(UartTx)) continue;
             end else begin // RX interrupts
               // RxTimeout, RxBreakErr is checked in seq
@@ -470,11 +421,11 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
         if (!write) begin
           case (channel)
             AddrChannel: begin // predict at address phase
-              txlvl_exp = tx_q.size() > TxFifoDepth ? TxFifoDepth : tx_q.size();
+              txlvl_exp = tx_q.size() > UART_FIFO_DEPTH ? UART_FIFO_DEPTH : tx_q.size();
               rxlvl_exp = rx_q.size();
             end
             DataChannel: begin // check at data phase
-              bit [7:0] txlvl_act, rxlvl_act;
+              bit [5:0] txlvl_act, rxlvl_act;
 
               void'(csr.predict(.value(item.d_data), .kind(UVM_PREDICT_READ)));
               txlvl_act = ral.fifo_status.txlvl.get_mirrored_value();
@@ -504,8 +455,8 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
               do_read_check = 1'b0;
 
               if (cfg.en_cov) begin
-                cov.tx_fifo_level_cg.sample(.lvl(txlvl_act), .rst(0));
-                cov.rx_fifo_level_cg.sample(.lvl(rxlvl_act), .rst(0));
+                cov.fifo_level_cg.sample(.dir(UartTx), .lvl(txlvl_act), .rst(0));
+                cov.fifo_level_cg.sample(.dir(UartRx), .lvl(rxlvl_act), .rst(0));
               end
             end
           endcase
@@ -517,8 +468,8 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
           do_read_check = 1'b0;
         end
       end
-      "ovrd", "intr_enable", "timeout_ctrl", "alert_test": begin
-        // no special handling is needed
+      "ovrd", "intr_enable", "timeout_ctrl": begin
+        // no speical handle is needed
       end
       default: begin
         `uvm_fatal(`gfn, $sformatf("invalid csr: %0s", csr.get_full_name()))
@@ -546,19 +497,6 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
     end
   endfunction
 
-  // Interrupt has occurred, sample relevant covergroup for interrupts that have associated
-  // control/configuration values
-  function void sample_detail_intr_cov(uart_intr_e intr);
-    case (intr)
-      TxWatermark: cov.tx_watermark_cg.sample(ral.fifo_ctrl.txilvl.get_mirrored_value());
-      RxWatermark: cov.rx_watermark_cg.sample(ral.fifo_ctrl.rxilvl.get_mirrored_value());
-      RxBreakErr:  cov.rx_break_err_cg.sample(ral.ctrl.rxblvl.get_mirrored_value());
-      RxTimeout:   cov.rx_timeout_cg.sample(ral.timeout_ctrl.val.get_mirrored_value());
-      RxParityErr: cov.rx_parity_err_cg.sample(ral.ctrl.parity_odd.get_mirrored_value());
-      default: ;
-    endcase
-  endfunction
-
   virtual function void reset(string kind = "HARD");
     super.reset(kind);
     // reset the ral model and local fifos and queues
@@ -572,6 +510,8 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
     uart_rx_clk_pulses   = 0;
     tx_q_size_at_addr_phase = 0;
     rx_q_size_at_addr_phase = 0;
+    tx_watermark_triggered  = 1;
+    rx_watermark_triggered  = 0;
     tx_enabled           = ral.ctrl.tx.get_reset();
     rx_enabled           = ral.ctrl.rx.get_reset();
     tx_full_exp          = ral.status.txfull.get_reset();
@@ -583,14 +523,7 @@ class uart_scoreboard extends cip_base_scoreboard #(.CFG_T(uart_env_cfg),
     txlvl_exp            = ral.fifo_status.txlvl.get_reset();
     rxlvl_exp            = ral.fifo_status.rxlvl.get_reset();
     intr_exp             = ral.intr_state.get_reset();
-    status_intr_test     = '0;
     rdata_exp            = ral.rdata.get_reset();
-
-
-    // Predict watermark interrupts now as they're status types. This ensures the expected
-    // interrupts reflect the UART state on reset.
-    predict_tx_watermark_intr();
-    predict_rx_watermark_intr();
   endfunction
 
   function void check_phase(uvm_phase phase);

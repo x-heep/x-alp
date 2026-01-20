@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -19,13 +19,7 @@
 
 module prim_diff_decode #(
   // enables additional synchronization logic
-  parameter bit AsyncOn = 1'b0,
-  // Number of cycles a differential skew is tolerated before a signal integrity issue is flagged.
-  // Only has an effect if AsyncOn = 1
-  // 0 means no skew is tolerated (any mismatch is an immediate signal integrity error).
-  // 1 means a one-cycle skew is tolerated.
-  // Values larger than 1 are also supported.
-  parameter int unsigned SkewCycles = 1
+  parameter bit AsyncOn = 1'b0
 ) (
   input        clk_i,
   input        rst_ni,
@@ -50,16 +44,12 @@ module prim_diff_decode #(
   ///////////////////////////////////////////////////////////////
   if (AsyncOn) begin : gen_async
 
-    typedef enum logic [1:0] {IsStd, IsSkewing, SigInt} state_e;
+    typedef enum logic [1:0] {IsStd, IsSkewed, SigInt} state_e;
     state_e state_d, state_q;
     logic diff_p_edge, diff_n_edge, diff_check_ok, level;
 
     // 2 sync regs, one reg for edge detection
     logic diff_pq, diff_nq, diff_pd, diff_nd;
-
-    // Counter for skew cycles tolerated before flagging an issue
-    // The width needs to accommodate SkewCycles + 1 to count up to SkewCycles.
-    logic [prim_util_pkg::vbits(SkewCycles + 1)-1:0] skew_cnt_d, skew_cnt_q;
 
     prim_flop_2sync #(
       .Width(1),
@@ -97,7 +87,7 @@ module prim_diff_decode #(
 
     // sigint detection is a bit more involved in async case since
     // we might have skew on the diff pair, which can result in a
-    // N cycle sampling delay between the two wires
+    // one cycle sampling delay between the two wires
     // so we need a simple pattern matcher
     // the following waves are legal
     // clk    |   |   |   |   |   |   |   |
@@ -110,18 +100,17 @@ module prim_diff_decode #(
     //   _______                     ________
     // n        \_______ ... _______/
     //
-    // i.e., level changes may be off by N cycle - which is permissible
-    // as long as this condition is only N cycle long.
+    // i.e., level changes may be off by one cycle - which is permissible
+    // as long as this condition is only one cycle long.
 
 
     always_comb begin : p_diff_fsm
       // default
-      state_d    = state_q;
-      level_d    = level_q;
-      skew_cnt_d = skew_cnt_q;
-      rise_o     = 1'b0;
-      fall_o     = 1'b0;
-      sigint_o   = 1'b0;
+      state_d  = state_q;
+      level_d  = level_q;
+      rise_o   = 1'b0;
+      fall_o   = 1'b0;
+      sigint_o = 1'b0;
 
       unique case (state_q)
         // we remain here as long as
@@ -137,49 +126,33 @@ module prim_diff_decode #(
               end
             end
           end else begin
-            if (SkewCycles == 0) begin
-              // If no skew is tolerated, immediate signal integrity error
-              state_d  = SigInt;
-              sigint_o = 1'b1;
+            if (diff_p_edge || diff_n_edge) begin
+              state_d = IsSkewed;
             end else begin
-              // Mismatch with an edge: likely start of a tolerated skew
-              state_d    = IsSkewing;
-              skew_cnt_d = 1;
+              state_d = SigInt;
+              sigint_o = 1'b1;
             end
           end
         end
         // diff pair must be correctly encoded, otherwise we got a sigint
-        IsSkewing: begin
+        IsSkewed: begin
           if (diff_check_ok) begin
-            state_d    = IsStd;
-            level_d    = level;
-            // Reset the skew counter
-            skew_cnt_d = '0;
-            // Assert event that was delayed due to skew resolution
+            state_d = IsStd;
+            level_d = level;
             if (level) rise_o = 1'b1;
             else       fall_o = 1'b1;
           end else begin
-            if (skew_cnt_q < SkewCycles) begin
-              // Still within tolerated skew cycles
-              skew_cnt_d = skew_cnt_q + 1;
-            end else begin
-              // Maximum skew cycles exceeded, raise an integrity issue
-              state_d    = SigInt;
-              sigint_o   = 1'b1;
-              skew_cnt_d = '0;
-            end
+            state_d  = SigInt;
+            sigint_o = 1'b1;
           end
         end
-        // Signal integrity issue detected, remain here until resolved
+        // Signal integrity issue detected, remain here
+        // until resolved
         SigInt: begin
           sigint_o = 1'b1;
           if (diff_check_ok) begin
             state_d  = IsStd;
             sigint_o = 1'b0;
-            level_d  = level;
-            // Assert any event that was pending while in SigInt
-            if (level) rise_o = 1'b1;
-            else       fall_o = 1'b1;
           end
         end
         default : ;
@@ -188,17 +161,15 @@ module prim_diff_decode #(
 
     always_ff @(posedge clk_i or negedge rst_ni) begin : p_sync_reg
       if (!rst_ni) begin
-        state_q    <= IsStd;
-        diff_pq    <= 1'b0;
-        diff_nq    <= 1'b1;
-        level_q    <= 1'b0;
-        skew_cnt_q <= '0;
+        state_q  <= IsStd;
+        diff_pq  <= 1'b0;
+        diff_nq  <= 1'b1;
+        level_q  <= 1'b0;
       end else begin
-        state_q    <= state_d;
-        diff_pq    <= diff_pd;
-        diff_nq    <= diff_nd;
-        level_q    <= level_d;
-        skew_cnt_q <= skew_cnt_d;
+        state_q  <= state_d;
+        diff_pq  <= diff_pd;
+        diff_nq  <= diff_nd;
+        level_q  <= level_d;
       end
     end
 
@@ -211,16 +182,8 @@ module prim_diff_decode #(
     // one reg for edge detection
     assign diff_pd = diff_pi;
 
-    // Raise a signal integrity error when the differential signals have equal values.  This is
-    // implemented with a `prim_xnor2` instead of behavioral code to prevent the synthesis tool from
-    // optimizing away combinational logic on the complementary differential signals.
-    prim_xnor2 #(
-      .Width (1)
-    ) u_xnor2_sigint (
-      .in0_i (diff_pi),
-      .in1_i (diff_ni),
-      .out_o (sigint_o)
-    );
+    // incorrect encoding -> signal integrity issue
+    assign sigint_o = ~(diff_pi ^ diff_ni);
 
     assign level_o = (sigint_o) ? level_q : diff_pi;
     assign level_d = level_o;
@@ -256,72 +219,36 @@ module prim_diff_decode #(
 
   if (AsyncOn) begin : gen_async_assert
     // assertions for asynchronous case
-`ifdef INC_ASSERT
-  `ifndef FPV_ALERT_NO_SIGINT_ERR
-    // Correctly detect signal integrity issue:
-    // If diff_pd and diff_nd are equal for (SkewCycles + 1) consecutive cycles, sigint_o must be
-    // asserted.
-    `ASSERT(SigintCheck0_A,
-            gen_async.diff_pd == gen_async.diff_nd [* (SkewCycles + 1)] |-> sigint_o)
-
-    // The following assertions (SigintCheck1_A to SigintCheck4_A) describe specific
-    // 1-cycle skew patterns that should lead to an edge. These are highly
-    // specific to SkewCycles = 1. Therefore, they are only included when SkewCycles is 1.
-    // the synchronizer adds 2 cycles of latency with respect to input signals.
-    if (SkewCycles == 1) begin : gen_specific_skew_asserts
-      `ASSERT(SigintCheck1_A,
-          ##1 (gen_async.diff_pd ^ gen_async.diff_nd) &&
-          $stable(gen_async.diff_pd) && $stable(gen_async.diff_nd) ##1
-          $rose(gen_async.diff_pd) && $stable(gen_async.diff_nd) ##1
-          $stable(gen_async.diff_pd) && $fell(gen_async.diff_nd)
-          |-> rise_o)
-      `ASSERT(SigintCheck2_A,
-          ##1 (gen_async.diff_pd ^ gen_async.diff_nd) &&
-          $stable(gen_async.diff_pd) && $stable(gen_async.diff_nd) ##1
-          $fell(gen_async.diff_pd) && $stable(gen_async.diff_nd) ##1
-          $stable(gen_async.diff_pd) && $rose(gen_async.diff_nd)
-          |-> fall_o)
-      `ASSERT(SigintCheck3_A,
-          ##1 (gen_async.diff_pd ^ gen_async.diff_nd) &&
-          $stable(gen_async.diff_pd) && $stable(gen_async.diff_nd) ##1
-          $rose(gen_async.diff_nd) && $stable(gen_async.diff_pd) ##1
-          $stable(gen_async.diff_nd) && $fell(gen_async.diff_pd)
-          |-> fall_o)
-      `ASSERT(SigintCheck4_A,
-          ##1 (gen_async.diff_pd ^ gen_async.diff_nd) &&
-          $stable(gen_async.diff_pd) && $stable(gen_async.diff_nd) ##1
-          $fell(gen_async.diff_nd) && $stable(gen_async.diff_pd) ##1
-          $stable(gen_async.diff_nd) && $rose(gen_async.diff_pd)
-          |-> rise_o)
-    end
-    `endif
-    // Correctly detect edges: an event should be asserted within SkewCycles cycles after a valid
-    // transition
-    `ASSERT(RiseCheck_A,
-        !sigint_o ##1 $rose(gen_async.diff_pd) && (gen_async.diff_pd ^ gen_async.diff_nd) |->
-        ##[0:SkewCycles] rise_o,  clk_i, !rst_ni || sigint_o)
-    `ASSERT(FallCheck_A,
-        !sigint_o ##1 $fell(gen_async.diff_pd) && (gen_async.diff_pd ^ gen_async.diff_nd) |->
-        ##[0:SkewCycles] fall_o,  clk_i, !rst_ni || sigint_o)
-    `ASSERT(EventCheck_A,
-        !sigint_o ##1 $changed(gen_async.diff_pd) && (gen_async.diff_pd ^ gen_async.diff_nd) |->
-        ##[0:SkewCycles] event_o, clk_i, !rst_ni || sigint_o)
-    // Correctly detect level: the output level should match diff_pd once the differential pair is
-    // stable
-    `ASSERT(LevelCheck0_A,
-        // Stable for SkewCycles + 1 cycles
-        !sigint_o && (gen_async.diff_pd ^ gen_async.diff_nd) [* (SkewCycles + 1)] |->
-        gen_async.diff_pd == level_o,
+    // correctly detect sigint issue (only one transition cycle of permissible due to skew)
+    `ASSERT(SigintCheck0_A, diff_pi == diff_ni [*2] |-> ##[1:2] sigint_o)
+    // the synchronizer adds 2 cycles of latency
+    `ASSERT(SigintCheck1_A, ##1 (diff_pi ^ diff_ni) && $stable(diff_pi) && $stable(diff_ni) ##1
+        $rose(diff_pi) && $stable(diff_ni) ##1 $stable(diff_pi) && $fell(diff_ni) |->
+        ##2 rise_o)
+    `ASSERT(SigintCheck2_A, ##1 (diff_pi ^ diff_ni) && $stable(diff_pi) && $stable(diff_ni) ##1
+        $fell(diff_pi) && $stable(diff_ni) ##1 $stable(diff_pi) && $rose(diff_ni) |->
+        ##2 fall_o)
+    `ASSERT(SigintCheck3_A, ##1 (diff_pi ^ diff_ni) && $stable(diff_pi) && $stable(diff_ni) ##1
+        $rose(diff_ni) && $stable(diff_pi) ##1 $stable(diff_ni) && $fell(diff_pi) |->
+        ##2 fall_o)
+    `ASSERT(SigintCheck4_A, ##1 (diff_pi ^ diff_ni) && $stable(diff_pi) && $stable(diff_ni) ##1
+        $fell(diff_ni) && $stable(diff_pi) ##1 $stable(diff_ni) && $rose(diff_pi) |->
+        ##2 rise_o)
+    // correctly detect edges
+    `ASSERT(RiseCheck_A,  ##1 $rose(diff_pi)     && (diff_pi ^ diff_ni) |->
+        ##[2:3] rise_o,  clk_i, !rst_ni || sigint_o)
+    `ASSERT(FallCheck_A,  ##1 $fell(diff_pi)     && (diff_pi ^ diff_ni) |->
+        ##[2:3] fall_o,  clk_i, !rst_ni || sigint_o)
+    `ASSERT(EventCheck_A, ##1 $changed(diff_pi)  && (diff_pi ^ diff_ni) |->
+        ##[2:3] event_o, clk_i, !rst_ni || sigint_o)
+    // correctly detect level
+    `ASSERT(LevelCheck0_A, !sigint_o && (diff_pi ^ diff_ni) [*3] |=> $past(diff_pi, 2) == level_o,
         clk_i, !rst_ni || sigint_o)
-`endif
+
   end else begin : gen_sync_assert
     // assertions for synchronous case
-
-  `ifndef FPV_ALERT_NO_SIGINT_ERR
     // correctly detect sigint issue
     `ASSERT(SigintCheck_A, diff_pi == diff_ni |-> sigint_o)
-  `endif
-
     // correctly detect edges
     `ASSERT(RiseCheck_A,  ##1 $rose(diff_pi)    && (diff_pi ^ diff_ni) |->  rise_o)
     `ASSERT(FallCheck_A,  ##1 $fell(diff_pi)    && (diff_pi ^ diff_ni) |->  fall_o)

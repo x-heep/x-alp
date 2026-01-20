@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,6 +8,7 @@
 //   N:           Number of request ports
 //   DW:          Data width
 //   DataPort:    Set to 1 to enable the data port. Otherwise that port will be ignored.
+//   EnReqStabA:  Checks whether requests remain asserted until granted
 //
 // This is a tree implementation of a round robin arbiter. It has the same behavior as the PPC
 // implementation in prim_arbiter_ppc, and also uses a prefix summing approach to determine the next
@@ -17,15 +18,15 @@
 // each node of the arbiter tree. This means that the data can propagate through the tree
 // simultaneously with the requests, instead of waiting for the arbitration to determine the winner
 // index first. As a result, this design has a shorter critical path than other implementations,
-// leading to better overall timing.
+// leading to better ovberall timing.
 //
 // Note that the currently winning request is held if the data sink is not ready. This behavior is
 // required by some interconnect protocols (AXI, TL). The module contains an assertion that checks
 // this behavior.
 //
 // Also, this module contains a request stability assertion that checks that requests stay asserted
-// until they have been served. This assertion can be gated by driving the req_chk_i low. This is
-// a non-functional input and does not affect the designs behavior.
+// until they have been served. This assertion can be optionally disabled by setting EnReqStabA to
+// zero. This is a non-functional parameter and does not affect the designs behavior.
 //
 // See also: prim_arbiter_ppc
 
@@ -39,14 +40,15 @@ module prim_arbiter_tree #(
   // EnDataPort: {0, 1}, if 0, input data will be ignored
   parameter bit EnDataPort = 1,
 
+  // Non-functional parameter to switch on the request stability assertion
+  parameter bit EnReqStabA = 1,
+
   // Derived parameters
   localparam int IdxW = $clog2(N)
 ) (
   input clk_i,
   input rst_ni,
 
-  input                    req_chk_i, // Used for gating assertions. Drive to 1 during normal
-                                      // operation.
   input        [ N-1:0]    req_i,
   input        [DW-1:0]    data_i [N],
   output logic [ N-1:0]    gnt_o,
@@ -56,10 +58,6 @@ module prim_arbiter_tree #(
   output logic [DW-1:0]    data_o,
   input                    ready_i
 );
-
-  // req_chk_i is used for gating assertions only.
-  logic unused_req_chk;
-  assign unused_req_chk = req_chk_i;
 
   `ASSERT_INIT(CheckNGreaterZero_A, N > 0)
 
@@ -142,26 +140,25 @@ module prim_arbiter_tree #(
         end else begin : gen_nodes
           // local helper variable
           logic sel;
+          always_comb begin : p_node
+            // forward path (requests and data)
+            // each node looks at its two children, and selects the one with higher priority
+            sel = ~req_tree[C0] | ~prio_tree[C0] & prio_tree[C1];
+            // propagate requests
+            req_tree[Pa]  = req_tree[C0] | req_tree[C1];
+            prio_tree[Pa] = prio_tree[C1] | prio_tree[C0];
+            // data and index muxes
+            idx_tree[Pa]  = (sel) ? idx_tree[C1]  : idx_tree[C0];
+            data_tree[Pa] = (sel) ? data_tree[C1] : data_tree[C0];
 
-          // forward path (requests and data)
-          // each node looks at its two children, and selects the one with higher priority
-          assign sel = ~req_tree[C0] | ~prio_tree[C0] & prio_tree[C1];
-          // propagate requests
-          assign req_tree[Pa]  = req_tree[C0] | req_tree[C1];
-          assign prio_tree[Pa] = prio_tree[C1] | prio_tree[C0];
-          // data and index muxes
-          // Note: these ternaries have triggered a synthesis bug in Vivado versions older
-          // than 2020.2. If the problem resurfaces again, have a look at issue #1408.
-          assign idx_tree[Pa]  = (sel) ? idx_tree[C1]  : idx_tree[C0];
-          assign data_tree[Pa] = (sel) ? data_tree[C1] : data_tree[C0];
-
-          // backward path (grants and prefix sum)
-          // this propagates the selection index back and computes a hot one mask
-          assign sel_tree[C0] = sel_tree[Pa] & ~sel;
-          assign sel_tree[C1] = sel_tree[Pa] &  sel;
-          // this performs a prefix sum for masking the input requests in the next cycle
-          assign mask_tree[C0] = mask_tree[Pa];
-          assign mask_tree[C1] = mask_tree[Pa] | sel_tree[C0];
+            // backward path (grants and prefix sum)
+            // this propagates the selction index back and computes a hot one mask
+            sel_tree[C0] = sel_tree[Pa] & ~sel;
+            sel_tree[C1] = sel_tree[Pa] &  sel;
+            // this performs a prefix sum for masking the input requests in the next cycle
+            mask_tree[C0] = mask_tree[Pa];
+            mask_tree[C1] = mask_tree[Pa] | sel_tree[C0];
+          end
         end
       end : gen_level
     end : gen_tree
@@ -211,7 +208,7 @@ module prim_arbiter_tree #(
       ##1 valid_o && ready_i && $past(ready_i) && $past(valid_o) &&
       |(req_i & ~((N'(1) << $past(idx_o)+1) - 1)) |->
       idx_o > $past(idx_o))
-  // we can only grant one requester at a time
+  // we can only grant one requestor at a time
   `ASSERT(CheckHotOne_A, $onehot0(gnt_o))
   // A grant implies that the sink is ready
   `ASSERT(GntImpliesReady_A, |gnt_o |-> ready_i)
@@ -233,12 +230,13 @@ if (EnDataPort) begin: gen_data_port_assertion
   `ASSERT(DataFlow_A, ready_i && valid_o |-> data_o == data_i[idx_o])
 end
 
+if (EnReqStabA) begin : gen_lock_assertion
   // requests must stay asserted until they have been granted
-  `ASSUME(ReqStaysHighUntilGranted0_M, |req_i && !ready_i |=>
-      (req_i & $past(req_i)) == $past(req_i), clk_i, !rst_ni || !req_chk_i)
+  `ASSUME(ReqStaysHighUntilGranted0_M, (|req_i) && !ready_i |=>
+      (req_i & $past(req_i)) == $past(req_i))
   // check that the arbitration decision is held if the sink is not ready
-  `ASSERT(LockArbDecision_A, |req_i && !ready_i |=> idx_o == $past(idx_o),
-      clk_i, !rst_ni || !req_chk_i)
+  `ASSERT(LockArbDecision_A, |req_i && !ready_i |=> idx_o == $past(idx_o))
+end
 
 // FPV-only assertions with symbolic variables
 `ifdef FPV_ON
@@ -251,7 +249,7 @@ end
   `ASSUME(KStable_M, ##1 $stable(k))
   `ASSUME(KRange_M, k < N)
   // this is used enable checking for stable and unstable ready_i and req_i signals in the same run.
-  // the symbolic variables act like a switch that the solver can turn on and off.
+  // the symbolic variables act like a switch that the solver can trun on and off.
   `ASSUME(ReadyIsStable_M, ##1 $stable(ReadyIsStable))
   `ASSUME(ReqsAreStable_M, ##1 $stable(ReqsAreStable))
   `ASSUME(ReadyStable_M, ##1 !ReadyIsStable || $stable(ready_i))
@@ -283,9 +281,11 @@ end
     end
   end
 
-  // requests must stay asserted until they have been granted
-  `ASSUME(ReqStaysHighUntilGranted1_M, req_i[k] && !gnt_o[k] |=>
-      req_i[k], clk_i, !rst_ni || !req_chk_i)
+  if (EnReqStabA) begin : gen_lock_assertion_fpv
+    // requests must stay asserted until they have been granted
+    `ASSUME(ReqStaysHighUntilGranted1_M, req_i[k] & !gnt_o[k] |=>
+        req_i[k], clk_i, !rst_ni)
+  end
 `endif
 
 endmodule : prim_arbiter_tree

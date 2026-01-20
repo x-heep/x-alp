@@ -1,4 +1,4 @@
-// Copyright lowRISC contributors (OpenTitan project).
+// Copyright lowRISC contributors.
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +12,7 @@ class uart_rx_start_bit_filter_vseq extends uart_smoke_vseq;
   // when start bit is detected, design will check it again after 0.5 uart clock
   // if it's not low, consider it as glitch and ignore it
   virtual task send_rx_byte(byte data);
-    uint uart_clk_period_ps = cfg.m_uart_agent_cfg.vif.uart_clk_period / 1ps;
+    uint64 uart_clk_period_ps = cfg.m_uart_agent_cfg.vif.uart_clk_period_ns * 1000;
 
     // monitor doesn't have start bit filter, need to disable it while driving filtered start bit
     cfg.m_uart_agent_cfg.en_rx_monitor = 0;

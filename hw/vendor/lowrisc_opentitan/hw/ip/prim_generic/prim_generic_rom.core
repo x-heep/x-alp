@@ -1,21 +1,18 @@
 CAPI=2:
-# Copyright lowRISC contributors (OpenTitan project).
+# Copyright lowRISC contributors.
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
 name: "lowrisc:prim_generic:rom"
 description: "Technology-independent Read-Only Memory (ROM) implementation"
-virtual:
-  - lowrisc:prim:rom
-
 filesets:
   files_rtl:
     depend:
       - lowrisc:prim:assert
-      - lowrisc:prim_generic:rom_pkg
+      - lowrisc:prim:rom_pkg
       - lowrisc:prim:util_memload
     files:
-      - rtl/prim_rom.sv
+      - rtl/prim_generic_rom.sv
     file_type: systemVerilogSource
 
   files_verilator_waiver:

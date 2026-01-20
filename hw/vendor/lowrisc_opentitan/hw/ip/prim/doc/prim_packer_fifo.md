@@ -1,4 +1,6 @@
-# Primitive Component: Packer FIFO
+---
+title: "Primitive Component: Packer FIFO"
+---
 
 # Overview
 
@@ -8,7 +10,7 @@ data width is less than the output data width. Unpacking mode is where the input
 data width is greater than the output data width. Single depth FIFO is where
 the input and output data widths are the same. Because masking options are not
 supported, the larger data size must be an even multiple of the smaller size.
-The controls for this module are modelled after the `prim_fifo_sync` module,
+The controls for this module are modeled after the `prim_fifo_sync` module,
 both in name and functional behavior.
 It is one of a set of shared primitive modules
 available for use within OpenTitan as referred to in the Comportability
@@ -36,7 +38,7 @@ rdata_o[OutW]| output | Output data.
 rready_i     | input  | Output data is popped from the FIFO.
 depth_o      | output | Indicates the fullness of the FIFO.
 
-# Theory of Operations
+# Theory of Opeations
 
 ```code
            /----------\
@@ -45,8 +47,8 @@ wvalid_i   |          |      rvalid_o
 wdata_i    |   Flop   |      rdata_o
 =====/====>|   FIFO   |=======/=======>
   [InW]    |          |      [OutW]
-           |          |      depth_o
-           |          |--------------->
+           |          |      depth_o    
+           |          |--------------->   
 wready_o   |          |      rready_i
 <----------|          |<---------------
            |          |
@@ -60,5 +62,6 @@ rvalid_o and rready_i are coincident), will clear the data and depth values on
 the next clock cycle. The complimentary flow occurs when the`prim_packer_fifo`
 module is in unpack mode.
 
-The internal register size is the greater of `InW` and `OutW` bits.
+The internal register size is the greate of `InW` and `OutW` bits.
 Timing diagrams are shown in the header of the `prim_packer_fifo` module.
+
