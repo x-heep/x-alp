@@ -123,8 +123,7 @@ task tb_write_entry_address;
 endtask
 
 task tb_preload_force;
-  // Write scratch_2 reg bit 0 to inform preload is complete and start execution
-  // `TOP.tb_force_sim_start_de[0] = 1'b1;
+  u_x_alp.u_core_v_mcu.u_soc_ctrl.testbench_set_exit_loop[0] = 1'b1;
 endtask
 
 

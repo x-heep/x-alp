@@ -3,7 +3,7 @@
 ******************************* H SOURCE FILE *******************************
 **                            *******************                          **
 **                                                                         **
-** project  : x-heep                                                       **
+** project  : x-alp                                                        **
 ** filename : ${peripheral_name}_structs.h                                 **
 ** date     : ${date}                                                      **
 **                                                                         **
@@ -26,7 +26,7 @@
 */
 
 #ifndef _${peripheral_name_upper}_STRUCTS_H
-#define ${peripheral_name_upper}_STRUCTS
+#define _${peripheral_name_upper}_STRUCTS_H
 
 /****************************************************************************/
 /**                                                                        **/
@@ -35,7 +35,7 @@
 /****************************************************************************/
 
 #include <inttypes.h>
-#include "core_v_mini_mcu.h"
+#include "core_v_mcu.h"
 
 /****************************************************************************/
 /**                                                                        **/
