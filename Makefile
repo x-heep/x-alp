@@ -81,6 +81,22 @@ conda:
 	@conda env create -f util/conda_environment.yml
 
 # ============================================================================
+# MCU Code Generation
+# ============================================================================
+
+## @section MCU Code Generation
+mcu-gen: reg-gen boot-rom format
+
+## @section Register Generation
+reg-gen:
+	@cd hw/ip/fast_intr_ctrl && ./fast_intr_ctrl_gen.sh && cd - > /dev/null
+	@cd hw/ip/soc_ctrl && ./soc_ctrl_gen.sh && cd - > /dev/null
+
+## @section Boot ROM Build
+boot-rom:
+	@$(MAKE) -C hw/ip/bootrom clean all
+
+# ============================================================================
 # Application Firmware Build
 # ============================================================================
 

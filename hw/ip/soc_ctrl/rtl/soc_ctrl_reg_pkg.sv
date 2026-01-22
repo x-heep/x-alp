@@ -6,85 +6,75 @@
 
 package soc_ctrl_reg_pkg;
 
-  // Address widths within the block
-  parameter int BlockAw = 5;
+    // Address widths within the block
+    parameter int BlockAw = 5;
 
-  ////////////////////////////
-  // Typedefs for registers //
-  ////////////////////////////
+    ////////////////////////////
+    // Typedefs for registers //
+    ////////////////////////////
 
-  typedef struct packed {
-    logic        q;
-  } soc_ctrl_reg2hw_exit_valid_reg_t;
+    typedef struct packed {logic q;} soc_ctrl_reg2hw_exit_valid_reg_t;
 
-  typedef struct packed {
-    logic [31:0] q;
-  } soc_ctrl_reg2hw_exit_value_reg_t;
+    typedef struct packed {logic [31:0] q;} soc_ctrl_reg2hw_exit_value_reg_t;
 
-  typedef struct packed {
-    logic        q;
-  } soc_ctrl_reg2hw_boot_select_reg_t;
+    typedef struct packed {logic [1:0] q;} soc_ctrl_reg2hw_boot_select_reg_t;
 
-  typedef struct packed {
-    logic        q;
-  } soc_ctrl_reg2hw_boot_exit_loop_reg_t;
+    typedef struct packed {logic q;} soc_ctrl_reg2hw_boot_exit_loop_reg_t;
 
-  typedef struct packed {
-    logic [31:0] q;
-  } soc_ctrl_reg2hw_boot_address_reg_t;
+    typedef struct packed {logic [31:0] q;} soc_ctrl_reg2hw_boot_address_reg_t;
 
-  typedef struct packed {
-    logic        d;
-    logic        de;
-  } soc_ctrl_hw2reg_boot_select_reg_t;
+    typedef struct packed {
+        logic [1:0] d;
+        logic       de;
+    } soc_ctrl_hw2reg_boot_select_reg_t;
 
-  typedef struct packed {
-    logic        d;
-    logic        de;
-  } soc_ctrl_hw2reg_boot_exit_loop_reg_t;
+    typedef struct packed {
+        logic d;
+        logic de;
+    } soc_ctrl_hw2reg_boot_exit_loop_reg_t;
 
-  // Register -> HW type
-  typedef struct packed {
-    soc_ctrl_reg2hw_exit_valid_reg_t exit_valid; // [66:66]
-    soc_ctrl_reg2hw_exit_value_reg_t exit_value; // [65:34]
-    soc_ctrl_reg2hw_boot_select_reg_t boot_select; // [33:33]
-    soc_ctrl_reg2hw_boot_exit_loop_reg_t boot_exit_loop; // [32:32]
-    soc_ctrl_reg2hw_boot_address_reg_t boot_address; // [31:0]
-  } soc_ctrl_reg2hw_t;
+    // Register -> HW type
+    typedef struct packed {
+        soc_ctrl_reg2hw_exit_valid_reg_t exit_valid;  // [67:67]
+        soc_ctrl_reg2hw_exit_value_reg_t exit_value;  // [66:35]
+        soc_ctrl_reg2hw_boot_select_reg_t boot_select;  // [34:33]
+        soc_ctrl_reg2hw_boot_exit_loop_reg_t boot_exit_loop;  // [32:32]
+        soc_ctrl_reg2hw_boot_address_reg_t boot_address;  // [31:0]
+    } soc_ctrl_reg2hw_t;
 
-  // HW -> register type
-  typedef struct packed {
-    soc_ctrl_hw2reg_boot_select_reg_t boot_select; // [3:2]
-    soc_ctrl_hw2reg_boot_exit_loop_reg_t boot_exit_loop; // [1:0]
-  } soc_ctrl_hw2reg_t;
+    // HW -> register type
+    typedef struct packed {
+        soc_ctrl_hw2reg_boot_select_reg_t boot_select;  // [4:2]
+        soc_ctrl_hw2reg_boot_exit_loop_reg_t boot_exit_loop;  // [1:0]
+    } soc_ctrl_hw2reg_t;
 
-  // Register offsets
-  parameter logic [BlockAw-1:0] SOC_CTRL_EXIT_VALID_OFFSET = 5'h 0;
-  parameter logic [BlockAw-1:0] SOC_CTRL_EXIT_VALUE_OFFSET = 5'h 4;
-  parameter logic [BlockAw-1:0] SOC_CTRL_BOOT_SELECT_OFFSET = 5'h 8;
-  parameter logic [BlockAw-1:0] SOC_CTRL_BOOT_EXIT_LOOP_OFFSET = 5'h c;
-  parameter logic [BlockAw-1:0] SOC_CTRL_BOOT_ADDRESS_OFFSET = 5'h 10;
-  parameter logic [BlockAw-1:0] SOC_CTRL_SYSTEM_FREQUENCY_HZ_OFFSET = 5'h 14;
+    // Register offsets
+    parameter logic [BlockAw-1:0] SOC_CTRL_EXIT_VALID_OFFSET = 5'h0;
+    parameter logic [BlockAw-1:0] SOC_CTRL_EXIT_VALUE_OFFSET = 5'h4;
+    parameter logic [BlockAw-1:0] SOC_CTRL_BOOT_SELECT_OFFSET = 5'h8;
+    parameter logic [BlockAw-1:0] SOC_CTRL_BOOT_EXIT_LOOP_OFFSET = 5'hc;
+    parameter logic [BlockAw-1:0] SOC_CTRL_BOOT_ADDRESS_OFFSET = 5'h10;
+    parameter logic [BlockAw-1:0] SOC_CTRL_SYSTEM_FREQUENCY_HZ_OFFSET = 5'h14;
 
-  // Register index
-  typedef enum int {
-    SOC_CTRL_EXIT_VALID,
-    SOC_CTRL_EXIT_VALUE,
-    SOC_CTRL_BOOT_SELECT,
-    SOC_CTRL_BOOT_EXIT_LOOP,
-    SOC_CTRL_BOOT_ADDRESS,
-    SOC_CTRL_SYSTEM_FREQUENCY_HZ
-  } soc_ctrl_id_e;
+    // Register index
+    typedef enum int {
+        SOC_CTRL_EXIT_VALID,
+        SOC_CTRL_EXIT_VALUE,
+        SOC_CTRL_BOOT_SELECT,
+        SOC_CTRL_BOOT_EXIT_LOOP,
+        SOC_CTRL_BOOT_ADDRESS,
+        SOC_CTRL_SYSTEM_FREQUENCY_HZ
+    } soc_ctrl_id_e;
 
-  // Register width information to check illegal writes
-  parameter logic [3:0] SOC_CTRL_PERMIT [6] = '{
-    4'b 0001, // index[0] SOC_CTRL_EXIT_VALID
-    4'b 1111, // index[1] SOC_CTRL_EXIT_VALUE
-    4'b 0001, // index[2] SOC_CTRL_BOOT_SELECT
-    4'b 0001, // index[3] SOC_CTRL_BOOT_EXIT_LOOP
-    4'b 1111, // index[4] SOC_CTRL_BOOT_ADDRESS
-    4'b 1111  // index[5] SOC_CTRL_SYSTEM_FREQUENCY_HZ
-  };
+    // Register width information to check illegal writes
+    parameter logic [3:0] SOC_CTRL_PERMIT[6] = '{
+        4'b0001,  // index[0] SOC_CTRL_EXIT_VALID
+        4'b1111,  // index[1] SOC_CTRL_EXIT_VALUE
+        4'b0001,  // index[2] SOC_CTRL_BOOT_SELECT
+        4'b0001,  // index[3] SOC_CTRL_BOOT_EXIT_LOOP
+        4'b1111,  // index[4] SOC_CTRL_BOOT_ADDRESS
+        4'b1111  // index[5] SOC_CTRL_SYSTEM_FREQUENCY_HZ
+    };
 
 endpackage
 

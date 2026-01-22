@@ -21,48 +21,48 @@ module soc_ctrl #(
     output logic [31:0] exit_value_o
 );
 
-  import soc_ctrl_reg_pkg::*;
+    import soc_ctrl_reg_pkg::*;
 
-  logic enable_spi_sel;
+    logic             enable_spi_sel;
 
-  soc_ctrl_reg2hw_t reg2hw;
-  soc_ctrl_hw2reg_t hw2reg;
-  reg_rsp_t reg_rsp_int;
+    soc_ctrl_reg2hw_t reg2hw;
+    soc_ctrl_hw2reg_t hw2reg;
+    reg_rsp_t         reg_rsp_int;
 
 `ifndef SYNTHESIS
-  logic testbench_set_exit_loop[1];
-  //forced by simulation for preloading, do not touch
-  //only arrays can be "forced" in verilator, thus array of 1 element is done
-  //At synthesis time this signal will get removed
-  always_ff @(posedge clk_i or negedge rst_ni) begin : proc_
-    if (~rst_ni) begin
-      testbench_set_exit_loop[0] <= '0;
+    logic testbench_set_exit_loop[1];
+    //forced by simulation for preloading, do not touch
+    //only arrays can be "forced" in verilator, thus array of 1 element is done
+    //At synthesis time this signal will get removed
+    always_ff @(posedge clk_i or negedge rst_ni) begin : proc_
+        if (~rst_ni) begin
+            testbench_set_exit_loop[0] <= '0;
+        end
     end
-  end
-  assign hw2reg.boot_exit_loop.d  = testbench_set_exit_loop[0];
-  assign hw2reg.boot_exit_loop.de = testbench_set_exit_loop[0];
+    assign hw2reg.boot_exit_loop.d  = testbench_set_exit_loop[0];
+    assign hw2reg.boot_exit_loop.de = testbench_set_exit_loop[0];
 `else
-  assign hw2reg.boot_exit_loop.d  = 1'b0;
-  assign hw2reg.boot_exit_loop.de = 1'b0;
+    assign hw2reg.boot_exit_loop.d  = 1'b0;
+    assign hw2reg.boot_exit_loop.de = 1'b0;
 `endif
 
-  assign hw2reg.boot_select.de  = 1'b1;
-  assign hw2reg.boot_select.d   = boot_select_i;
+    assign hw2reg.boot_select.de = 1'b1;
+    assign hw2reg.boot_select.d  = {1'b0, boot_select_i};
 
-  soc_ctrl_reg_top #(
-      .reg_req_t(reg_req_t),
-      .reg_rsp_t(reg_rsp_t)
-  ) soc_ctrl_reg_top_i (
-      .clk_i,
-      .rst_ni,
-      .reg_req_i,
-      .reg_rsp_o(reg_rsp_int),
-      .reg2hw,
-      .hw2reg,
-      .devmode_i(1'b1)
-  );
+    soc_ctrl_reg_top #(
+        .reg_req_t(reg_req_t),
+        .reg_rsp_t(reg_rsp_t)
+    ) soc_ctrl_reg_top_i (
+        .clk_i,
+        .rst_ni,
+        .reg_req_i,
+        .reg_rsp_o(reg_rsp_int),
+        .reg2hw,
+        .hw2reg,
+        .devmode_i(1'b1)
+    );
 
-  assign exit_valid_o   = reg2hw.exit_valid.q;
-  assign exit_value_o   = reg2hw.exit_value.q;
+    assign exit_valid_o = reg2hw.exit_valid.q;
+    assign exit_value_o = reg2hw.exit_value.q;
 
 endmodule : soc_ctrl

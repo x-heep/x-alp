@@ -29,11 +29,15 @@
       ]
     }
     { name:     "BOOT_SELECT"
-      desc:     "Boot Select Value - Used to decide whether to boot from JTAG or FLASH"
+      desc:     "Boot Select Value - Used to decide boot mode"
       swaccess: "ro"
       hwaccess: "hrw"
       fields: [
-        { bits: "0", name: "BOOT_SELECT", desc: "Boot Select Reg" }
+        { bits: "1:0", name: "BOOT_SELECT", desc: "Boot Select Reg", 
+          enum: [
+            { name: "BOOT_SELECT_PASSIVE",   value: "0", desc: "Passive Boot (wait for JTAG or UART commands)" }
+          ]
+        }
       ]
     }
     { name:     "BOOT_EXIT_LOOP"
