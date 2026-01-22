@@ -33,6 +33,7 @@ targets:
     - tool_verilator ? (LOG_LEVEL)
     - tool_verilator ? (trace)
     - tool_verilator ? (no_err)
+    - tool_verilator ? (VERILATOR)
     - BINARY
     - BOOTMODE
     - HPDCACHE_ASSERT_OFF
@@ -174,3 +175,8 @@ parameters:
     paramtype: vlogdefine
     description: |
       Enable optimizations for fast simulation (e.g., force DRAM code preload). For now only works in post-synthesis
+  VERILATOR:
+    datatype: bool
+    paramtype: vlogdefine
+    description: |
+      Can isolate code that is (or is not) meant for Verilator only
