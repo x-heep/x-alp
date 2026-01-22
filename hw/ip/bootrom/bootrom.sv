@@ -24,9 +24,10 @@ module bootrom #(
 
     /* verilator lint_off WIDTHEXPAND */
     /* verilator lint_off UNUSEDPARAM */
+    /* verilator lint_off WIDTHTRUNC */
 
     localparam unsigned NumWords = 64;
-    logic [AddrWidth-1:0] word;
+    logic [$clog2(NumWords)-1:0] word;
 
     assign word = addr_i / (DataWidth / 8);
 
@@ -66,16 +67,16 @@ module bootrom #(
             030:     data_o = 32'h00000013  /* 0x0078 */;
             031:     data_o = 32'h00000013  /* 0x007c */;
             032:     data_o = 32'h00000013  /* 0x0080 */;
-            033:     data_o = 32'h17f24785  /* 0x0084 */;
-            034:     data_o = 32'h47854798  /* 0x0088 */;
-            035:     data_o = 32'h07b117f2  /* 0x008c */;
-            036:     data_o = 32'heb99439c  /* 0x0090 */;
-            037:     data_o = 32'h17f24785  /* 0x0094 */;
-            038:     data_o = 32'h07c14b88  /* 0x0098 */;
-            039:     data_o = 32'h91011502  /* 0x009c */;
-            040:     data_o = 32'h00000317  /* 0x00a0 */;
-            041:     data_o = 32'hfd030067  /* 0x00a4 */;
-            042:     data_o = 32'h80824501  /* 0x00a8 */;
+            033:     data_o = 32'h100007b7  /* 0x0084 */;
+            034:     data_o = 32'h07b14798  /* 0x0088 */;
+            035:     data_o = 32'heb91439c  /* 0x008c */;
+            036:     data_o = 32'h100007b7  /* 0x0090 */;
+            037:     data_o = 32'h15024b88  /* 0x0094 */;
+            038:     data_o = 32'h03179101  /* 0x0098 */;
+            039:     data_o = 32'h00670000  /* 0x009c */;
+            040:     data_o = 32'h4501fd63  /* 0x00a0 */;
+            041:     data_o = 32'h00008082  /* 0x00a4 */;
+            042:     data_o = 32'h00000000  /* 0x00a8 */;
             043:     data_o = 32'h00000000  /* 0x00ac */;
             044:     data_o = 32'h00000000  /* 0x00b0 */;
             045:     data_o = 32'h00000000  /* 0x00b4 */;
@@ -103,5 +104,6 @@ module bootrom #(
 
     /* verilator lint_on WIDTHEXPAND */
     /* verilator lint_on UNUSEDPARAM */
+    /* verilator lint_on WIDTHTRUNC */
 
 endmodule

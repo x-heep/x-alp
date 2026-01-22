@@ -122,9 +122,10 @@ module {module_name} #(
           
     /* verilator lint_off WIDTHEXPAND */
     /* verilator lint_off UNUSEDPARAM */
+    /* verilator lint_off WIDTHTRUNC */
 
     localparam unsigned NumWords = {num_words};
-    logic [AddrWidth-1:0] word;
+    logic [$clog2(NumWords)-1:0] word;
 
     assign word = addr_i / (DataWidth / 8);
 
@@ -138,6 +139,7 @@ module {module_name} #(
           
     /* verilator lint_on WIDTHEXPAND */
     /* verilator lint_on UNUSEDPARAM */
+    /* verilator lint_on WIDTHTRUNC */
           
 endmodule
     """.strip().format(
