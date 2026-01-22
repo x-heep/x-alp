@@ -50,9 +50,11 @@ package core_v_mcu_pkg;
 
     // Slave addresses
     localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t MEM_BUS_END_ADDR = 64'h0000_0000_0FFF_FFFF;
-    localparam addr_t PERIPH_BUS_BASE_ADDR = 64'h1000_0000_0000_0000;
-    localparam addr_t PERIPH_BUS_END_ADDR = 64'h1000_F000_0000_0000;
+    localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_1000_0000;
+    localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
+    localparam addr_t PERIPH_BUS_BASE_ADDR = 64'h0000_0000_1000_0000;
+    localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_0FFF_FFFF;
+    localparam addr_t PERIPH_BUS_END_ADDR = PERIPH_BUS_BASE_ADDR + PERIPH_BUS_SIZE;
 
     // Register indexes
     localparam int unsigned SOC_CTRL_REG_IDX = 0;
@@ -61,23 +63,23 @@ package core_v_mcu_pkg;
     localparam int unsigned UART_REG_IDX = 3;
 
     // Register addresses
-    localparam addr_t SOC_CTRL_REG_START_ADDR = 64'h1000_0000_0000_0000;
-    localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000_1000_0000_0000;
+    localparam addr_t SOC_CTRL_REG_START_ADDR = PERIPH_BUS_BASE_ADDR + 64'h0000_0000_0000_0000;
+    localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t SOC_CTRL_REG_END_ADDR = SOC_CTRL_REG_START_ADDR + SOC_CTRL_REG_SIZE;
     localparam addr_t BOOT_ROM_REG_START_ADDR = SOC_CTRL_REG_END_ADDR;
-    localparam addr_t BOOT_ROM_REG_SIZE = 64'h0000_1000_0000_0000;
+    localparam addr_t BOOT_ROM_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t BOOT_ROM_REG_END_ADDR = BOOT_ROM_REG_START_ADDR + BOOT_ROM_REG_SIZE;
     localparam addr_t FAST_INTR_CTRL_REG_START_ADDR = BOOT_ROM_REG_END_ADDR;
-    localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000_1000_0000_0000;
+    localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = FAST_INTR_CTRL_REG_START_ADDR + FAST_INTR_CTRL_REG_SIZE;
     localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
-    localparam addr_t UART_REG_SIZE = 64'h0000_1000_0000_0000;
+    localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t UART_REG_END_ADDR = UART_REG_START_ADDR + UART_REG_SIZE;
 
     // Address mapping rules
     localparam rule_t [NumAxiSlaves-1:0] addr_rules = '{
-        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR},
-        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR}
+        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
+        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR}
     };
 
     localparam rule_t [NumRegSlaves-1:0] RegMap = '{

@@ -36,9 +36,9 @@ package cva6_config_pkg;
     localparam int CVA6ConfigHExtEn = 0;
     localparam int CVA6ConfigRVZiCond = 1;
 
-    localparam int CVA6ConfigAxiIdWidth = 4;
-    localparam int CVA6ConfigAxiAddrWidth = 64;
-    localparam int CVA6ConfigAxiDataWidth = 64;
+    localparam int CVA6ConfigAxiIdWidth = core_v_mcu_pkg::AxiMstIdWidth;
+    localparam int CVA6ConfigAxiAddrWidth = core_v_mcu_pkg::AxiAddrWidth;
+    localparam int CVA6ConfigAxiDataWidth = core_v_mcu_pkg::AxiDataWidth;
     localparam int CVA6ConfigFetchUserEn = 0;
     localparam int CVA6ConfigFetchUserWidth = CVA6ConfigXlen;
     localparam int CVA6ConfigDataUserEn = 0;
@@ -77,7 +77,7 @@ package cva6_config_pkg;
 
     localparam config_pkg::cache_type_t CVA6ConfigDcacheType = config_pkg::WT;
 
-    localparam int CVA6ConfigMmuPresent = 1;
+    localparam int CVA6ConfigMmuPresent = 0;
 
     localparam int CVA6ConfigRvfiTrace = 1;
 
@@ -138,15 +138,35 @@ package cva6_config_pkg;
         PMPEntryReadOnly: 64'd0,
         PMPNapotEn: bit'(1),
         NOCType: config_pkg::NOC_TYPE_AXI4_ATOP,
-        NrNonIdempotentRules: unsigned'(2),
-        NonIdempotentAddrBase: 1024'({64'b0, 64'b0}),
-        NonIdempotentLength: 1024'({64'b0, 64'b0}),
-        NrExecuteRegionRules: unsigned'(3),
-        ExecuteRegionAddrBase: 1024'({64'h8000_0000, 64'h1_0000, 64'h0}),
-        ExecuteRegionLength: 1024'({64'h40000000, 64'h10000, 64'h1000}),
+        NrNonIdempotentRules: unsigned'(1),
+        NonIdempotentAddrBase:
+        1024'(
+        {
+            core_v_mcu_pkg::SOC_CTRL_REG_START_ADDR,
+            core_v_mcu_pkg::FAST_INTR_CTRL_REG_START_ADDR,
+            core_v_mcu_pkg::UART_REG_START_ADDR
+        }
+        ),
+        NonIdempotentLength:
+        1024'(
+        {
+            core_v_mcu_pkg::SOC_CTRL_REG_SIZE,
+            core_v_mcu_pkg::FAST_INTR_CTRL_REG_SIZE,
+            core_v_mcu_pkg::UART_REG_SIZE
+        }
+        ),
+        NrExecuteRegionRules: unsigned'(2),
+        ExecuteRegionAddrBase:
+        1024'(
+        {core_v_mcu_pkg::BOOT_ROM_REG_START_ADDR, core_v_mcu_pkg::MEM_BUS_BASE_ADDR}
+        ),
+        ExecuteRegionLength:
+        1024'(
+        {core_v_mcu_pkg::BOOT_ROM_REG_SIZE, core_v_mcu_pkg::MEM_BUS_SIZE}
+        ),
         NrCachedRegionRules: unsigned'(1),
-        CachedRegionAddrBase: 1024'({64'h8000_0000}),
-        CachedRegionLength: 1024'({64'h40000000}),
+        CachedRegionAddrBase: 1024'({core_v_mcu_pkg::MEM_BUS_BASE_ADDR}),
+        CachedRegionLength: 1024'({core_v_mcu_pkg::MEM_BUS_SIZE}),
         MaxOutstandingStores: unsigned'(7),
         DebugEn: bit'(1),
         SDTRIG: bit'(0),
