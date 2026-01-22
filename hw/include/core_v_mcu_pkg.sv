@@ -9,7 +9,7 @@ package core_v_mcu_pkg;
     localparam int unsigned NumMasters = 1;
 
     localparam int unsigned NumAxiSlaves = 2;
-    localparam int unsigned NumRegSlaves = 3;  // UART + ext only for now
+    localparam int unsigned NumRegSlaves = 4;
     localparam int unsigned NumSlaves = NumAxiSlaves + NumRegSlaves;
 
     // AXI configuration parameters
@@ -56,14 +56,18 @@ package core_v_mcu_pkg;
 
     // Register indexes
     localparam int unsigned SOC_CTRL_REG_IDX = 0;
-    localparam int unsigned FAST_INTR_CTRL_REG_IDX = 1;
-    localparam int unsigned UART_REG_IDX = 2;
+    localparam int unsigned BOOT_ROM_REG_IDX = 1;
+    localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
+    localparam int unsigned UART_REG_IDX = 3;
 
     // Register addresses
     localparam addr_t SOC_CTRL_REG_START_ADDR = 64'h1000_0000_0000_0000;
     localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000_1000_0000_0000;
     localparam addr_t SOC_CTRL_REG_END_ADDR = SOC_CTRL_REG_START_ADDR + SOC_CTRL_REG_SIZE;
-    localparam addr_t FAST_INTR_CTRL_REG_START_ADDR = SOC_CTRL_REG_END_ADDR;
+    localparam addr_t BOOT_ROM_REG_START_ADDR = SOC_CTRL_REG_END_ADDR;
+    localparam addr_t BOOT_ROM_REG_SIZE = 64'h0000_1000_0000_0000;
+    localparam addr_t BOOT_ROM_REG_END_ADDR = BOOT_ROM_REG_START_ADDR + BOOT_ROM_REG_SIZE;
+    localparam addr_t FAST_INTR_CTRL_REG_START_ADDR = BOOT_ROM_REG_END_ADDR;
     localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000_1000_0000_0000;
     localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = FAST_INTR_CTRL_REG_START_ADDR + FAST_INTR_CTRL_REG_SIZE;
     localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
@@ -75,12 +79,17 @@ package core_v_mcu_pkg;
         '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR},
         '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR}
     };
-    
+
     localparam rule_t [NumRegSlaves-1:0] RegMap = '{
         '{
             idx : SOC_CTRL_REG_IDX,
             start_addr : SOC_CTRL_REG_START_ADDR,
             end_addr : SOC_CTRL_REG_END_ADDR
+        },
+        '{
+            idx : BOOT_ROM_REG_IDX,
+            start_addr : BOOT_ROM_REG_START_ADDR,
+            end_addr : BOOT_ROM_REG_END_ADDR
         },
         '{
             idx : FAST_INTR_CTRL_REG_IDX,
@@ -106,5 +115,8 @@ package core_v_mcu_pkg;
         AxiDataWidth     : AxiDataWidth,
         NoAddrRules      : NumAxiSlaves
     };
+
+    // Boot address
+    localparam addr_t BOOT_ADDR = BOOT_ROM_REG_START_ADDR;
 
 endpackage : core_v_mcu_pkg
