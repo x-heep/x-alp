@@ -49,8 +49,8 @@ TARGET ?= sim
 LINKER ?= on_chip
 LINK_FOLDER := $(mkfile_path)/sw/linker
 COMPILER ?= gcc
-COMPILER_PREFIX ?= riscv64-unknown-
-COMPILER_FLAGS ?=
+COMPILER_PREFIX ?= riscv32-corev-
+COMPILER_FLAGS ?= -mabi=lp64d
 ARCH ?= rv64gc_zifencei
 SOURCE ?=
 
@@ -129,6 +129,7 @@ app: clean-app
 	echo "\033[0;31mI would start by checking b) or c) if I were you!\033[0m"; \
 	exit 1; \
 	}
+	@cp -r sw/build build/sw
 # 	@python scripts/building/mem_usage.py
 
 ## Just list the different application names available
