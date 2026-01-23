@@ -57,6 +57,7 @@ set(CMAKE_CXX_STANDARD 14)
 # Set MAIN file
 SET(MAINFILE "main")
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 #######################################################################
 #      FIND HEADER FILES TO BE INCLUDED
@@ -347,18 +348,23 @@ endif()
 if(NOT ${PROJECT} MATCHES "coremark")
   set(BASE_COMPILER_FLAGS "\
     -march=${CMAKE_SYSTEM_PROCESSOR} \
+    ${COMPILER_FLAGS} \
+    -Wall -Wextra -static -fdata-sections \
+    -fuse-linker-plugin -flto -Wl,-flto \
     -w -O2 -g \
     -nostartfiles \
     -ffunction-sections \
+    -ggdb -mcmodel=medany -mexplicit-relocs -fno-builtin -fverbose-asm -pipe \
+    -mstrict-align \
     -DHOST_BUILD \
     -D${CRT_TYPE} \
     -D${CRTO} \
     -DportasmHANDLE_INTERRUPT=vSystemIrqHandler\
-    ${COMPILER_FLAGS}\
   ")
 else()
   set(BASE_COMPILER_FLAGS "\
     -march=${CMAKE_SYSTEM_PROCESSOR} \
+    ${COMPILER_FLAGS} \
     -w -O3 -g -falign-functions=16 -funroll-all-loops -falign-jumps=4 -finline-functions -Wall -static -pedantic -DPERFORMANCE_RUN=1 -DITERATIONS=1 -DHAS_STDIO=1 -DHAS_PRINTF=1 \
     -nostartfiles \
     -ffunction-sections \
@@ -375,7 +381,7 @@ set(CMAKE_ASM_FLAGS ${BASE_COMPILER_FLAGS})
 message( "${Yellow}Compiler flags: ${BASE_COMPILER_FLAGS}${ColourReset}")
 
 if (${COMPILER} MATCHES "clang")
-     set( CLANG_EXTRA_FLAGS "--target=riscv32 \
+     set( CLANG_EXTRA_FLAGS "--target=riscv64 \
                              --gcc-toolchain=${RISCV_XALP} \
                              --sysroot=${RISCV_XALP}/${COMPILER_PREFIX}elf \
                              -static \
@@ -447,20 +453,21 @@ if (${COMPILER} MATCHES "clang" AND NOT CLANG_LINKER_USE_LD)
                               -lc -lm -lgcc -flto \
                               -fpermissive -fno-rtti -fno-exceptions -fno-threadsafe-statics \
                               -ffunction-sections -fdata-sections \
-                              --target=riscv32 \
+                              --target=riscv64 \
                               -fuse-ld=lld")
 else()
   # Linker flags for GCC
   message (STATUS "${Magenta}Using GCC specific linker flags${ColourReset}")
   # Linker control
+  # Note: -specs=nano.specs removed for multilib 64-bit compatibility
+  # GCC multilib will automatically select the correct library path based on -march and -mabi
   SET(CMAKE_EXE_LINKER_FLAGS  "-T ${LINKER_SCRIPT}  \
                               -static \
                               -Wl,-Map=${MAINFILE}.map \
                               -Wl,--gc-sections \
-                              -L ${RISCV_XALP}/${COMPILER_PREFIX}elf/lib \
-                              -lc -lm -lgcc -flto \
+                              -lc_nano -lm -lgcc -flto \
                               -fpermissive -fno-rtti -fno-exceptions -fno-threadsafe-statics \
-                              -ffunction-sections -fdata-sections -specs=nano.specs")
+                              -ffunction-sections -fdata-sections")
 endif()
 message( "${Green}RISCV_XALP env variable: ${RISCV_XALP}")
 message( "${Magenta}Lib Folder RISCV-GCC: ${RISCV_XALP}/${COMPILER_PREFIX}elf/lib${ColourReset}")
