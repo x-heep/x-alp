@@ -11,20 +11,14 @@
 #include "core_v_mcu.h"
 #include "soc_ctrl_regs.h"
 
-
 extern int boot_next_stage(void *);
 
 int boot_passive(uint64_t core_freq) {
-    // Initialize UART with debug settings
-    // uart_debug_init(&__base_uart, core_freq);
-    // scratch[0] provides an entry point, scratch[1] a start signal
-    volatile uint32_t *main_address = reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
-    // While we poll bit 2 of scratch[2], check for incoming UART debug requests
-    while (*reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0)
-        // if (uart_debug_check(&__base_uart)) return uart_debug_serve(&__base_uart);
-    // No UART (or JTAG) requests came in, but scratch[2][2] was set --> run code at scratch[1:0]
-    // scratch[2] = 0;
-    return boot_next_stage((void *)(uintptr_t)(*main_address));
+    volatile uint32_t main_address = *reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
+    
+    while (*reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0) ;
+    
+    return boot_next_stage((void *)(main_address));
 }
 
 int boot_spi_sdcard(uint64_t core_freq, uint64_t rtc_freq) {
@@ -62,19 +56,11 @@ int boot_i2c_24fc1025(uint64_t core_freq) {
 }
 
 int main() {
-    // Read boot mode
-    uint32_t bootmode = *reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_SELECT_REG_OFFSET);
-    // In case of reentry, store return in scratch0 as is convention
-    switch (bootmode) {
-    case 0:
-        return boot_passive(0);
-    // case 1:
-    //     return boot_spi_sdcard(core_freq, rtc_freq);
-    // case 2:
-    //     return boot_spi_s25fs512s(core_freq, rtc_freq);
-    // case 3:
-    //     return boot_i2c_24fc1025(core_freq);
-    default:
-        return boot_passive(0);
-    }
+    volatile uint32_t main_address = *reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
+    
+    while (*reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0) ;
+    
+    boot_next_stage((void *)(main_address));
+
+    return 0;
 }

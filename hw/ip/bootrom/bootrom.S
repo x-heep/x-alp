@@ -56,7 +56,19 @@ _boot:
     li t1, 0
     fence
     fence.i
-    call main
+    // loop until SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET is not 0
+    lui  a1, SOC_CTRL_START_ADDRESS_20bit
+_boot_wait_loop:
+    lw t0, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET(a1)
+    bne t0, zero, _boot_continue
+    j _boot_wait_loop
+_boot_continue:
+    fence
+    lw a0, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET(a1)
+    fence.i
+    jalr 0(a0)
+    
+
 
 // If main returns, we end up here
 .global _exit
