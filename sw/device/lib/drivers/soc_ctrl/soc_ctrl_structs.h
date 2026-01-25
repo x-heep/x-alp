@@ -5,7 +5,7 @@
 **                                                                         **
 ** project  : x-alp                                                        **
 ** filename : soc_ctrl_structs.h                                 **
-** date     : 23/01/2026                                                      **
+** date     : 25/01/2026                                                      **
 **                                                                         **
 *****************************************************************************
 **                                                                         **
@@ -16,7 +16,7 @@
 
 /**
 * @file   soc_ctrl_structs.h
-* @date   23/01/2026
+* @date   25/01/2026
 * @brief  Contains structs for every register
 *
 * This file contains the structs of the registes of the peripheral.

@@ -106,9 +106,6 @@ task automatic tb_writetoSram;
   // logic [SpmBankAddrRange-1:0] bank_addr;
   // logic [$clog2(cheshire_pkg::DefaultCfg.LlcSetAssoc)-1:0] set_id;
     // Write to SRAM
-    $display("[TB] INFO: Writing at addr 0x%0h data 0x%0h%0h%0h%0h%0h%0h%0h%0h",
-             addr,
-             val7, val6, val5, val4, val3, val2, val1, val0);
     u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[addr] = {val7, val6, val5, val4, val3, val2, val1, val0};
 endtask
 
