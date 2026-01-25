@@ -50,7 +50,7 @@
     }
     { name:     "BOOT_ADDRESS"
       desc:     "Boot Address Value - Used in the boot rom or power-on-reset functions"
-      resval:   "0x00000180"
+      resval:   "0x00000300"
       swaccess: "rw"
       hwaccess: "hro"
       fields: [

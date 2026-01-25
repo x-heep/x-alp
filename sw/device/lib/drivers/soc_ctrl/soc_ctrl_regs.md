@@ -88,7 +88,7 @@ Boot Exit Loop Value - Set externally (e.g. JTAG, TESTBENCH, or another MASTER) 
 ## BOOT_ADDRESS
 Boot Address Value - Used in the boot rom or power-on-reset functions
 - Offset: `0x10`
-- Reset default: `0x180`
+- Reset default: `0x300`
 - Reset mask: `0xffffffff`
 
 ### Fields
@@ -99,7 +99,7 @@ Boot Address Value - Used in the boot rom or power-on-reset functions
 
 |  Bits  |  Type  |  Reset  | Name         | Description      |
 |:------:|:------:|:-------:|:-------------|:-----------------|
-|  31:0  |   rw   |  0x180  | BOOT_ADDRESS | Boot Address Reg |
+|  31:0  |   rw   |  0x300  | BOOT_ADDRESS | Boot Address Reg |
 
 ## SYSTEM_FREQUENCY_HZ
 System Frequency Value - Used to know and set at which frequency the system is running (in Hz)

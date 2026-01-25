@@ -24,7 +24,7 @@ MEMORY
 SECTIONS
 {
   /* we want a fixed entry point */
-  PROVIDE(__boot_address = 0x180);
+  PROVIDE(__boot_address = 0x300);
 
   /* stack and heap related settings */
   __stack_size = DEFINED(__stack_size) ? __stack_size : 0x800;
