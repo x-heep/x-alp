@@ -50,7 +50,7 @@ task automatic tb_loadChunk;
   input byte chunk[SectionChunkLength];  // chunk to write
   input int unsigned EffChunkLength;  // actual chunk size
   localparam int unsigned BytesPerMemWord = core_v_mcu_pkg::AxiDataWidth / 8;
-  logic [31:0] MemBaseAddr = '0;
+  logic [63:0] MemBaseAddr = '0;
   int unsigned i, w_addr, base_addr;
 
   // Write to DRAM or SPM
@@ -69,7 +69,7 @@ task automatic tb_loadChunk(input bit MemType,  // 0: DRAM, 1: SPM
                             input longint unsigned EffChunkLength);
   localparam int unsigned BytesPerMemWord = cheshire_pkg::DefaultCfg.AxiDataWidth / 8;
 
-  logic [63:0] MemBaseAddr = (MemType) ? AmSpm : DefaultCfg.LlcOutRegionStart;
+  logic [63:0] MemBaseAddr = 0;
 
   longint unsigned i, w_addr, base_addr;
 
@@ -86,7 +86,7 @@ endtask
 
 task automatic tb_writetoSram;
   input bit MemType;  // 0: DRAM, 1: SPM
-  input int unsigned addr;
+  input longint unsigned addr;
   input [7:0] val7;
   input [7:0] val6;
   input [7:0] val5;
@@ -106,6 +106,9 @@ task automatic tb_writetoSram;
   // logic [SpmBankAddrRange-1:0] bank_addr;
   // logic [$clog2(cheshire_pkg::DefaultCfg.LlcSetAssoc)-1:0] set_id;
     // Write to SRAM
+    $display("[TB] INFO: Writing at addr 0x%0h data 0x%0h%0h%0h%0h%0h%0h%0h%0h",
+             addr,
+             val7, val6, val5, val4, val3, val2, val1, val0);
     u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[addr] = {val7, val6, val5, val4, val3, val2, val1, val0};
 endtask
 

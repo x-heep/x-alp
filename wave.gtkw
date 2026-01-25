@@ -1,0 +1,488 @@
+[*]
+[*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
+[*] Fri Jan 23 18:38:54 2026
+[*]
+[dumpfile] "/Users/gigi/workspace/x-heep/x-alp/build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/waveform.fst"
+[dumpfile_mtime] "Fri Jan 23 18:30:49 2026"
+[dumpfile_size] 8569363
+[savefile] "/Users/gigi/workspace/x-heep/x-alp/wave.gtkw"
+[timestart] 11153900
+[size] 2560 1317
+[pos] 1080 126
+*-15.672823 11298500 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+[markername] AA
+[markername] BB
+[markername] CC
+[markername] DD
+[markername] EE
+[markername] FF
+[markername] GG
+[markername] HH
+[markername] II
+[markername] JJ
+[markername] KK
+[markername] LL
+[markername] MM
+[markername] NN
+[markername] OO
+[markername] PP
+[markername] QQ
+[markername] RR
+[markername] SS
+[markername] TT
+[markername] UU
+[markername] VV
+[markername] WW
+[markername] XX
+[markername] YY
+[markername] ZZ
+[treeopen] TOP.
+[treeopen] TOP.testharness.
+[treeopen] TOP.testharness.u_x_alp.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.axi_slave_req[0].
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.axi_slave_req[1].
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.reg_in_req.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.gen_cache_wt.i_cache_subsystem.i_cva6_icache.gen_sram[0].data_sram.genblk1.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.id_stage_i.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.i_issue_read_operands.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.i_issue_read_operands.gen_asic_regfile.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.i_issue_read_operands.gen_asic_regfile.i_ariane_regfile.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.bus_req_i.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.bus_rsp_o.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_soc_ctrl.reg_req_i.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_soc_ctrl.reg_rsp_o.
+[treeopen] TOP.testharness.u_x_alp.u_core_v_mcu.u_soc_ctrl.soc_ctrl_reg_top_i.
+[sst_width] 404
+[signals_width] 365
+[sst_expanded] 1
+[sst_vpaned_height] 700
+@100000028
+TOP.clk_i
+@28
+TOP.rst_ni
+@800200
+-CPU REQ/RSP
+-AR
+@22
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.addr[63:0]
+@28
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.burst[1:0]
+@22
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.cache[3:0]
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.id[3:0]
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.len[7:0]
+@28
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.lock
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.prot[2:0]
+@22
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.qos[3:0]
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.region[3:0]
+@28
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.size[2:0]
+@22
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar.user[63:0]
+@28
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.ar_valid
+[color] 5
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.ar_ready
+@1000200
+-AR
+@c00200
+-AW
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.addr[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.atop[5:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.burst[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.cache[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.id[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.len[7:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.lock
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.prot[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.qos[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.region[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.size[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.aw_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.aw_ready
+@1401200
+-AW
+@c00200
+-W
+@22
+[color] 1
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.w.data[63:0]
+@28
+[color] 1
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.w.last
+@22
+[color] 1
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.w.strb[7:0]
+[color] 1
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.w.user[63:0]
+@28
+[color] 1
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.w_valid
+[color] 1
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.w_ready
+@1401200
+-W
+@c00200
+-B
+@22
+[color] 3
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.b.id[3:0]
+@28
+[color] 3
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.b.resp[1:0]
+@22
+[color] 3
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.b.user[63:0]
+@28
+[color] 3
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.b_ready
+[color] 3
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.b_valid
+@1401200
+-B
+@800200
+-R
+@22
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.r.data[63:0]
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.r.id[3:0]
+@28
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.r.last
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.r.resp[1:0]
+@22
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.r.user[63:0]
+@28
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_req_o.r_ready
+[color] 2
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.bus_rsp_i.r_valid
+@1000200
+-R
+-CPU REQ/RSP
+@c00200
+-AXI-XBAR
+-M0
+-AR
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.addr[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.burst[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.cache[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.id[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.len[7:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.lock
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.prot[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.qos[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.region[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.size[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].ar_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].ar_ready
+@1401200
+-AR
+@c00200
+-AW
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.addr[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.atop[5:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.burst[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.cache[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.id[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.len[7:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.lock
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.prot[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.qos[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.region[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.size[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].aw_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].aw_ready
+@1401200
+-AW
+@c00200
+-W
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].w.data[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].w.last
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].w.strb[7:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].w.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].w_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].w_ready
+@1401200
+-W
+@c00200
+-B
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].b.id[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].b.resp[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].b.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].b_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].b_ready
+@1401200
+-B
+@c00200
+-R
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].r.data[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].r.id[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].r.last
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].r.resp[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].r.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[0].r_ready
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[0].r_valid
+@1401200
+-R
+-M0
+@800200
+-M1
+@c00200
+-AR
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.addr[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.burst[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.cache[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.id[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.len[7:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.lock
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.prot[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.qos[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.region[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.size[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].ar_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].ar_ready
+@1401200
+-AR
+@c00200
+-AW
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.addr[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.atop[5:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.burst[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.cache[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.id[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.len[7:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.lock
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.prot[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.qos[3:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.region[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.size[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].aw_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].aw_ready
+@1401200
+-AW
+@c00200
+-W
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].w.data[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].w.last
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].w.strb[7:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].w.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].w_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].w_ready
+@1401200
+-W
+@c00200
+-B
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].b.id[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].b.resp[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].b.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].b_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].b_ready
+@1401200
+-B
+@c00200
+-R
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].r.data[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].r.id[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].r.last
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].r.resp[1:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].r.user[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_req_o[1].r_ready
+TOP.testharness.u_x_alp.u_core_v_mcu.u_bus_subsystem.i_axi_xbar.mst_ports_resp_i[1].r_valid
+@1401200
+-R
+@1000200
+-M1
+@1401200
+-AXI-XBAR
+@800200
+-ID(0)
+@100000028
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].fu[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].is_compressed
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].is_double_rd_macro_instr
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].is_last_macro_instr
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].is_macro_instr
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].is_zcmt
+@100000028
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].op[7:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].pc[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].rd[4:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].result[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].rs1[4:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].rs2[4:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].trans_id[2:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].use_imm
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].use_pc
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].use_zimm
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[0].vfp
+@1000200
+-ID(0)
+@800200
+-ID(1)
+@100000028
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].bp.cf[2:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].bp.predict_address[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].ex.cause[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].ex.gva
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].ex.tinst[31:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].ex.tval2[40:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].ex.tval[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].ex.valid
+@100000028
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].fu[3:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].is_compressed
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].is_double_rd_macro_instr
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].is_last_macro_instr
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].is_macro_instr
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].is_zcmt
+@100000028
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].op[7:0]
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].pc[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].rd[4:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].result[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].rs1[4:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].rs2[4:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].trans_id[2:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].use_imm
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].use_pc
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].use_zimm
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.commit_instr_id_commit[1].vfp
+@1000200
+-ID(1)
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.i_issue_read_operands.gen_asic_regfile.i_ariane_regfile.mem[10][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.bus_req_i.ar.addr[63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.bus_req_i.ar_valid
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.bus_rsp_o.r_valid
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.bus_rsp_o.r.data[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.mem_addr[12:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[3][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[15][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[74][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[566][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[945][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[1376][63:0]
+@23
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[1411][63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.mem_gnt
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.mem_rdata[63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.i_issue_read_operands.gen_asic_regfile.i_ariane_regfile.mem[0][63:0]
+TOP.testharness.u_x_alp.u_core_v_mcu.u_cpu_subsystem.cpu_inst.issue_stage_i.i_issue_read_operands.gen_asic_regfile.i_ariane_regfile.mem[8][63:0]
+@28
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.mem_req
+@22
+TOP.testharness.u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.addr_i[12:0]
+[pattern_trace] 1
+[pattern_trace] 0

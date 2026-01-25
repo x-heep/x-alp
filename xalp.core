@@ -46,9 +46,10 @@ targets:
         - '--trace'
         - '--trace-fst'
         - '--trace-structs'
-        - '--trace-max-array 128'
         - '--x-assign unique'
         - '--x-initial unique'
+        - '--trace-max-array 1048576'
+        - '--trace-max-width 1048576'
         #- '--threads 2' # only use with Verilator v5.XXX
         - '--exe tb_top.cpp'
         - '-Wall'
