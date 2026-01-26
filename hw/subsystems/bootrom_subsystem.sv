@@ -1,3 +1,12 @@
+// Copyright 2026 X-HEEP Contributors
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+//
+// Boot ROM subsystem module.
+// Author: Luigi Giuffrida <luigi.giuffrida@polito.it>
+//
+
+
 module bootrom_subsystem #(
     parameter type reg_req_t = logic,
     parameter type reg_rsp_t = logic

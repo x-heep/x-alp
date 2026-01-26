@@ -1,3 +1,11 @@
+// Copyright 2026 X-HEEP Contributors
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+//
+// UART Subsystem module.
+// Author: Luigi Giuffrida <luigi.giuffrida@polito.it>
+//
+
 module uart_subsystem (
     input logic clk_i,
     input logic rst_ni,

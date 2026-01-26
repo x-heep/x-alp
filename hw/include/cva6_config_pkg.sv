@@ -1,19 +1,11 @@
-// Copyright 2021 Thales DIS design services SAS
+// Copyright 2026 X-HEEP Contributors
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
-// Licensed under the Solderpad Hardware Licence, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.0
-// You may obtain a copy of the License at https://solderpad.org/licenses/
+// Package file for cva6 configuration parameters.
+// Author: Luigi Giuffrida <luigi.giuffrida@polito.it>
+// Based on cva6_config_pkg.sv from the CVA6 repository.
 //
-// Original Author: Jean-Roch COULON - Thales
-//
-// Copyright 2023 Commissariat a l'Energie Atomique et aux Energies
-//                Alternatives (CEA)
-//
-// Author: Cesar Fuguet - CEA
-// Date: August, 2023
-// Description: CVA6 configuration package using the HPDcache as cache subsystem
-
 
 package cva6_config_pkg;
 

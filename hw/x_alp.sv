@@ -1,3 +1,11 @@
+// Copyright 2026 X-HEEP Contributors
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+//
+// Top-level module for the X-ALP SoC design.
+// Author: Luigi Giuffrida <luigi.giuffrida@polito.it>
+//
+
 module x_alp (
 
     // Clock and Reset

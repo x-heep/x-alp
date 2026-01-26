@@ -5,7 +5,6 @@ name: x-heep:x-alp:x-alp:0.0.1
 filesets:
   x-alp:
     files:
-    - hw/include/x_alp_pkg.sv
     - hw/x_alp.sv
     file_type : systemVerilogSource
     depend:
