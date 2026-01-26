@@ -74,7 +74,7 @@ filesets:
       - src/axi_chan_compare.sv
       - src/axi_dumper.sv
       - src/axi_sim_mem.sv
-      # - src/axi_test.sv
+      - src/axi_test.sv
       # Level 5
       - src/axi_xbar.sv
       # Level 6
