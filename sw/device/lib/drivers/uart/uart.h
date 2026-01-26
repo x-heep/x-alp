@@ -92,7 +92,6 @@ size_t uart_read(const uart_t *uart, const uint8_t *data, size_t len);
 
 size_t uart_sink(void *uart, const char *data, size_t len);
 
-
 /**
  * @brief Attends the plic interrupt.
  */
