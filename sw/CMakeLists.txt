@@ -352,11 +352,10 @@ if(NOT ${PROJECT} MATCHES "coremark")
     -Wall -Wextra -static -fdata-sections \
     -fuse-linker-plugin -flto -Wl,-flto \
     -w -O2 -g \
-    -nostartfiles \
+    -nostartfiles -nostdlib \
     -ffunction-sections \
     -ggdb -mcmodel=medany -mexplicit-relocs -fno-builtin -fverbose-asm -pipe \
     -mstrict-align \
-    -DHOST_BUILD \
     -D${CRT_TYPE} \
     -D${CRTO} \
     -DportasmHANDLE_INTERRUPT=vSystemIrqHandler\
@@ -465,7 +464,7 @@ else()
                               -static \
                               -Wl,-Map=${MAINFILE}.map \
                               -Wl,--gc-sections \
-                              -lc_nano -lm -lgcc -flto \
+                              -lm -lgcc -flto \
                               -fpermissive -fno-rtti -fno-exceptions -fno-threadsafe-statics \
                               -ffunction-sections -fdata-sections")
 endif()
