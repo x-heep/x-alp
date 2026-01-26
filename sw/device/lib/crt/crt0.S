@@ -52,11 +52,6 @@ _init_bss:
     ori a0, a0, 0x1
     csrw mtvec, a0
 
-/* new-style constructors and destructors */
-    la a0, __libc_fini_array
-    call atexit
-    call __libc_init_array
-
 /* call main */
     lw a0, 0(sp)                    /* a0 = argc */
     addi a1, sp, __SIZEOF_POINTER__ /* a1 = argv */

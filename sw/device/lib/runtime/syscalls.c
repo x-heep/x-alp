@@ -35,12 +35,15 @@ extern "C"
 #include "core_v_mcu.h"
 #include "error.h"
 #include "x-alp.h"
-#include "mmio.h"
 
 #undef errno
-    extern int errno;
+    int errno;
 
 #define STDOUT_FILENO 1
+
+    // Global UART instance for _putchar
+    static uart_t g_uart;
+    static int g_uart_initialized = 0;
 
 #ifndef _LIBC
     /* Provide prototypes for most of the _<systemcall> names that are
@@ -282,7 +285,43 @@ extern "C"
 
     void _writestr(const void *ptr)
     {
-        _write(STDOUT_FILENO, ptr, strlen(ptr) + 1);
+        // Calculate string length manually to avoid strlen dependency
+        const char *str = (const char *)ptr;
+        size_t len = 0;
+        while (str[len] != '\0')
+        {
+            len++;
+        }
+        _write(STDOUT_FILENO, ptr, len + 1);
+    }
+
+    // Implementation of _putchar for printf support
+    void _putchar(char character)
+    {
+        if (!g_uart_initialized)
+        {
+            soc_ctrl_t soc_ctrl;
+            soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_START_ADDRESS);
+
+            g_uart.base_addr = mmio_region_from_addr((uintptr_t)UART_START_ADDRESS);
+            g_uart.baudrate = UART_BAUDRATE;
+            g_uart.clk_freq_hz = soc_ctrl_get_frequency(&soc_ctrl);
+#ifdef UART_NCO
+            g_uart.nco = UART_NCO;
+#else
+        g_uart.nco = ((uint64_t)g_uart.baudrate << (NCO_WIDTH + 4)) / g_uart.clk_freq_hz;
+#endif
+
+            if (uart_init(&g_uart) == kErrorOk)
+            {
+                g_uart_initialized = 1;
+            }
+        }
+
+        if (g_uart_initialized)
+        {
+            uart_putchar(&g_uart, (uint8_t)character);
+        }
     }
 
     extern char __heap_start[];
@@ -330,6 +369,11 @@ extern "C"
     void abort(void)
     {
         _exit(-1);
+    }
+
+    void exit(int status)
+    {
+        _exit(status);
     }
 
 #ifdef __cplusplus
