@@ -9,7 +9,9 @@
 export "DPI-C" task tb_loadChunk;
 export "DPI-C" task tb_writetoSram;
 // Force mode functions
+// export "DPI-C" task tb_write_entry_address;
 export "DPI-C" task tb_preload_force;
+// export "DPI-C" task tb_release_request;
 // Get parameters for tb
 export "DPI-C" task tb_get_entry_address;
 export "DPI-C" task tb_get_section_chunk_length;

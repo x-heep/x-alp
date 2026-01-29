@@ -239,11 +239,14 @@ void TbSimCtrl::ForceBoot() {
     dut->tb_get_entry_address(mem_type_,
                               &entry_point); // TODO: make it configurable
     unsigned req_accepted = 0;
+    // dut->tb_write_entry_address(entry_point);
     runCycles(1);
     dut->tb_preload_force();
     runCycles(1);
     TB_LOG(LOG_MEDIUM, "[TESTBENCH]: Wrote launch signal and entry point: @ %lu", sim_cycles_);
     runCycles(2);
+    // Release signals
+    // dut->tb_release_request();
   }
 }
 
