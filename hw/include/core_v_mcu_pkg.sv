@@ -14,15 +14,15 @@ package core_v_mcu_pkg;
     //-----------
     // BUS Config
     //-----------
-    localparam int unsigned NumMasters = 1;
+    localparam int unsigned NumAxiMasters = 2;
 
-    localparam int unsigned NumAxiSlaves = 2;
+    localparam int unsigned NumAxiSlaves = 3;
     localparam int unsigned NumRegSlaves = 4;
     localparam int unsigned NumSlaves = NumAxiSlaves + NumRegSlaves;
 
     // AXI configuration parameters
     localparam int unsigned AxiMstIdWidth = 4;
-    localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(NumMasters);
+    localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(NumAxiMasters);
     localparam int unsigned AxiAddrWidth = 64;
     localparam int unsigned AxiDataWidth = 64;
     localparam int unsigned AxiUserWidth = 64;
@@ -49,18 +49,25 @@ package core_v_mcu_pkg;
         addr_t end_addr;
     } rule_t;
 
+  localparam JTAG_IDCODE = 32'h10001c05;
+
     // Master indexes
     localparam int unsigned CPU_BUS_IDX = 0;
+    localparam int unsigned DEBUG_M_BUS_IDX = 1;
 
     // Slave indexes
     localparam int unsigned MEM_BUS_IDX = 0;
-    localparam int unsigned PERIPH_BUS_IDX = 1;
+    localparam int unsigned DEBUG_S_BUS_IDX = 1;
+    localparam int unsigned PERIPH_BUS_IDX = 2;
 
     // Slave addresses
     localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000_0000_0000_0000;
     localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_0001_0000;  // 64 KB
     localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
-    localparam addr_t PERIPH_BUS_BASE_ADDR = 64'h0000_0000_1000_0000;
+    localparam addr_t DEBUG_S_BUS_BASE_ADDR = MEM_BUS_END_ADDR;
+    localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t DEBUG_S_BUS_END_ADDR = DEBUG_S_BUS_BASE_ADDR + DEBUG_S_BUS_SIZE;
+    localparam addr_t PERIPH_BUS_BASE_ADDR = DEBUG_S_BUS_END_ADDR;
     localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_0FFF_FFFF;
     localparam addr_t PERIPH_BUS_END_ADDR = PERIPH_BUS_BASE_ADDR + PERIPH_BUS_SIZE;
 
@@ -95,6 +102,11 @@ package core_v_mcu_pkg;
     // Address mapping rules
     localparam rule_t [NumAxiSlaves-1:0] addr_rules = '{
         '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
+        '{
+            idx : DEBUG_S_BUS_IDX,
+            start_addr : DEBUG_S_BUS_BASE_ADDR,
+            end_addr : DEBUG_S_BUS_END_ADDR
+        },
         '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR}
     };
 
@@ -117,17 +129,16 @@ package core_v_mcu_pkg;
         '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR}
     };
 
-    // AXI Crossbar configuration
     localparam axi_pkg::xbar_cfg_t AxiXbarCfg = '{
-        NoSlvPorts        : NumMasters,
+        NoSlvPorts        : NumAxiMasters,
         NoMstPorts        : NumAxiSlaves,
         MaxMstTrans       : 16,
         MaxSlvTrans       : 16,
         FallThrough       : 1'b1,
         LatencyMode       : 10'b0000001111,  // Low latency
         PipelineStages    : 1,
-        AxiIdWidthSlvPorts: AxiSlvIdWidth,
-        AxiIdUsedSlvPorts : AxiSlvIdWidth,
+        AxiIdWidthSlvPorts: AxiMstIdWidth,
+        AxiIdUsedSlvPorts : AxiMstIdWidth,
         UniqueIds         : 1'b1,
         AxiAddrWidth     : AxiAddrWidth,
         AxiDataWidth     : AxiDataWidth,

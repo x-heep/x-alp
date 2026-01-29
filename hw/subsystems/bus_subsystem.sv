@@ -12,8 +12,8 @@ module bus_subsystem (
     input logic rst_ni,
 
     // AXI master
-    input  core_v_mcu_pkg::axi_mst_req_t [core_v_mcu_pkg::NumMasters-1:0] axi_master_req_i,
-    output core_v_mcu_pkg::axi_mst_rsp_t [core_v_mcu_pkg::NumMasters-1:0] axi_master_rsp_o,
+    input  core_v_mcu_pkg::axi_mst_req_t [core_v_mcu_pkg::NumAxiMasters-1:0] axi_master_req_i,
+    output core_v_mcu_pkg::axi_mst_rsp_t [core_v_mcu_pkg::NumAxiMasters-1:0] axi_master_rsp_o,
 
     // AXI slave
     output core_v_mcu_pkg::axi_slv_req_t [core_v_mcu_pkg::NumAxiSlaves-1:0] axi_slave_req_o,
@@ -66,10 +66,10 @@ module bus_subsystem (
         .mst_req_t    (axi_slv_req_t),
         .mst_resp_t   (axi_slv_rsp_t),
         .rule_t       (rule_t)
-    ) i_axi_xbar (
+    ) u_axi_xbar (
         .clk_i                (clk_i),
         .rst_ni               (rst_ni),
-        .test_i               ('0),
+        .test_i               (1'b0),
         .slv_ports_req_i      (axi_master_req_i),
         .slv_ports_resp_o     (axi_master_rsp_o),
         .mst_ports_req_o      (axi_slave_req),
@@ -134,11 +134,11 @@ module bus_subsystem (
         .AxiUserWidth(AxiUserWidth),
         .RegDataWidth(32),
         .CutMemReqs  (0),
-        .axi_req_t   (axi_mst_req_t),
-        .axi_rsp_t   (axi_mst_rsp_t),
+        .axi_req_t   (axi_slv_req_t),
+        .axi_rsp_t   (axi_slv_rsp_t),
         .reg_req_t   (reg_req_t),
         .reg_rsp_t   (reg_rsp_t)
-    ) i_axi_to_reg_v2 (
+    ) u_axi_to_reg_v2 (
         .clk_i    (clk_i),
         .rst_ni   (rst_ni),
         .axi_req_i(axi_slave_req[PERIPH_BUS_IDX]),
@@ -155,7 +155,7 @@ module bus_subsystem (
         .NoRules  (NumRegSlaves),
         .addr_t   (addr_t),
         .rule_t   (rule_t)
-    ) i_reg_demux_decode (
+    ) u_reg_demux_decode (
         .addr_i          (reg_in_req.addr),
         .addr_map_i      (RegMap),
         .idx_o           (reg_select),

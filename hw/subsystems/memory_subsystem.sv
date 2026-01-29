@@ -46,7 +46,7 @@ module memory_subsystem (
         .axi_req_i   (bus_req_i),
         .axi_resp_o  (bus_rsp_o),
         .mem_req_o   (mem_req),
-        .mem_gnt_i   (mem_gnt),
+        .mem_gnt_i   (mem_req),
         .mem_addr_o  (mem_addr),
         .mem_wdata_o (mem_wdata),
         .mem_strb_o  (),
@@ -58,7 +58,6 @@ module memory_subsystem (
 
     logic mem_valid_q;
     logic mem_valid;
-    logic mem_gnt;
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
@@ -68,7 +67,6 @@ module memory_subsystem (
         end
     end
 
-    assign mem_gnt   = 1'b1;
     assign mem_valid = mem_valid_q;
 
     sram_wrapper #(
