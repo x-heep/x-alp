@@ -18,6 +18,17 @@ module core_v_mcu (
     // Boot select
     input logic boot_select_i,
 
+    // JTAG Interface
+    input  logic jtag_tck_i,
+    input  logic jtag_tms_i,
+    input  logic jtag_trst_ni,
+    input  logic jtag_tdi_i,
+    output logic jtag_tdo_o,
+    output logic jtag_tdo_oe_o,
+
+    // Test mode
+    input  logic test_mode_i,
+
     // Exit interface
     output logic        exit_valid_o,
     output logic [31:0] exit_value_o
@@ -30,8 +41,8 @@ module core_v_mcu (
     import core_v_mcu_pkg::*;
 
     // Internal signals
-    core_v_mcu_pkg::axi_mst_req_t [  NumMasters-1:0] axi_master_req_sig;
-    core_v_mcu_pkg::axi_mst_rsp_t [  NumMasters-1:0] axi_master_rsp_sig;
+    core_v_mcu_pkg::axi_mst_req_t [  NumAxiMasters-1:0] axi_master_req_sig;
+    core_v_mcu_pkg::axi_mst_rsp_t [  NumAxiMasters-1:0] axi_master_rsp_sig;
     core_v_mcu_pkg::axi_slv_req_t [NumAxiSlaves-1:0] axi_slave_req_sig;
     core_v_mcu_pkg::axi_slv_rsp_t [NumAxiSlaves-1:0] axi_slave_rsp_sig;
 
@@ -40,6 +51,8 @@ module core_v_mcu (
 
     logic                         [            15:0] fast_intr;
     logic                         [            15:0] fast_irq;
+
+    logic debug_req;
 
     //
     //       █████████  ███████████  █████  █████
@@ -65,7 +78,7 @@ module core_v_mcu (
 
         .irq_i      (fast_irq[1:0]),
         .time_irq_i ('0),
-        .debug_req_i('0)
+        .debug_req_i(debug_req)
     );
 
     // 
@@ -185,5 +198,31 @@ module core_v_mcu (
         .uart_intr_rx_timeout_o   (),
         .uart_intr_rx_parity_err_o()
     );
+
+    debug_subsystem u_debug_subsystem (
+    .clk_i(clk_i),
+    .rst_ni(rst_ni),
+
+    // AXI Slave Interface
+    .axi_slv_req_i(axi_slave_req_sig[DEBUG_S_BUS_IDX]),
+    .axi_slv_rsp_o(axi_slave_rsp_sig[DEBUG_S_BUS_IDX]),
+
+    // AXI Master Interface
+    .axi_mst_req_o(axi_master_req_sig[DEBUG_M_BUS_IDX]),
+    .axi_mst_rsp_i(axi_master_rsp_sig[DEBUG_M_BUS_IDX]),
+    // JTAG Interface
+    .jtag_tck_i(jtag_tck_i),
+    .jtag_tms_i(jtag_tms_i),
+    .jtag_trst_ni(jtag_trst_ni),
+    .jtag_tdi_i(jtag_tdi_i),
+    .jtag_tdo_o(jtag_tdo_o),
+    .jtag_tdo_oe_o(jtag_tdo_oe_o),
+    // Test mode
+    .test_mode_i(test_mode_i),
+    // Debug signals
+    .dbg_active_o(),
+    .dbg_req_o(debug_req)
+
+);
 
 endmodule

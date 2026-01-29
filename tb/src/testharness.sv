@@ -14,12 +14,11 @@
 // Inspired by x-heep testharness.sv
 
 module testharness #(
-    parameter int unsigned CLK_FREQUENCY = 'd100_000,  //KHz
-    parameter bit USE_JTAG_DPI = 1'b0
+    parameter int unsigned CLK_FREQUENCY = 'd100_000  //KHz
 ) (
-    input logic       clk_i,
-    input logic       rst_ni,
-    
+    input logic clk_i,
+    input logic rst_ni,
+
     // Boot mode
     //----------
     input logic [1:0] boot_mode_i,
@@ -30,11 +29,11 @@ module testharness #(
 
     // JTAG
     // ----
-    input  logic        jtag_tck_i,
-    input  logic        jtag_tms_i,
-    input  logic        jtag_trst_ni,
-    input  logic        jtag_tdi_i,
-    output logic        jtag_tdo_o,
+    input  logic jtag_tck_i,
+    input  logic jtag_tms_i,
+    input  logic jtag_trst_ni,
+    input  logic jtag_tdi_i,
+    output logic jtag_tdo_o,
 
     // Exit sim
     // --------
@@ -50,23 +49,23 @@ module testharness #(
     // ----------------
 
     // JTAG
-    logic       sim_jtag_enable;
-    logic       sim_jtag_tck;
-    logic       sim_jtag_trst_n;
-    logic       sim_jtag_tms;
-    logic       sim_jtag_tdi;
-    logic       sim_jtag_tdo;
+    logic sim_jtag_enable;
+    logic sim_jtag_tck;
+    logic sim_jtag_trst_n;
+    logic sim_jtag_tms;
+    logic sim_jtag_tdi;
+    logic sim_jtag_tdo;
 
-    logic       jtag_tck;
-    logic       jtag_trst_n;
-    logic       jtag_tms;
-    logic       jtag_tdi;
-    logic       jtag_tdo;
+    logic jtag_tck;
+    logic jtag_trst_n;
+    logic jtag_tms;
+    logic jtag_tdi;
+    logic jtag_tdo;
 
     // UART
-    logic       uart_tx;
-    logic       uart_rx;
-    
+    logic uart_tx;
+    logic uart_rx;
+
 
     //----
     // DUT
@@ -77,7 +76,14 @@ module testharness #(
         .uart_tx_o   (uart_tx),
         .uart_rx_i   (uart_rx),
         .exit_valid_o(exit_valid_o),
-        .exit_value_o(exit_value_o)
+        .exit_value_o(exit_value_o),
+        .jtag_tck_i  (jtag_tck),
+        .jtag_tms_i  (jtag_tms),
+        .jtag_trst_ni(jtag_trst_n),
+        .jtag_tdi_i  (jtag_tdi),
+        .jtag_tdo_o  (jtag_tdo),
+        .jtag_tdo_oe_o(),
+        .test_mode_i (1'b0)
     );
 
     uartdpi #(
@@ -85,10 +91,10 @@ module testharness #(
         .FREQ(CLK_FREQUENCY * 1000),  //Hz
         .NAME("uart0")
     ) i_uart0 (
-        .clk_i(clk_i),
+        .clk_i (clk_i),
         .rst_ni(rst_ni),
-        .tx_o(uart_rx),
-        .rx_i(uart_tx)
+        .tx_o  (uart_rx),
+        .rx_i  (uart_tx)
     );
 
 endmodule

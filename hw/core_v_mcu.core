@@ -11,6 +11,7 @@ filesets:
       - subsystems/bus_subsystem.sv
       - subsystems/bootrom_subsystem.sv
       - subsystems/uart_subsystem.sv
+      - subsystems/debug_subsystem.sv
 
   files_rtl:
     file_type: systemVerilogSource
@@ -23,6 +24,7 @@ filesets:
     depend:
       - pulp-platform.org::axi:0.39.8
       - pulp-platform.org::axi_riscv_atomics
+      - pulp-platform.org:riscv-dbg:0.9.0
       - pulp-platform.org::register_interface:0.4.7
       - openhwgroup.org::cva6:1.4.0
       - lowrisc:ip:uart
