@@ -1,6 +1,6 @@
 CAPI=2:
 
-name: pulp-platform:riscv-dbg:0.1
+name: pulp-platform.org:riscv-dbg:0.9.0
 
 # Copyright 2021 OpenHW Group
 # Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
