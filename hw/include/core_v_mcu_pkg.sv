@@ -49,7 +49,7 @@ package core_v_mcu_pkg;
         addr_t end_addr;
     } rule_t;
 
-  localparam JTAG_IDCODE = 32'h10001c05;
+    localparam JTAG_IDCODE = 32'h10001c05;
 
     // Master indexes
     localparam int unsigned CPU_BUS_IDX = 0;

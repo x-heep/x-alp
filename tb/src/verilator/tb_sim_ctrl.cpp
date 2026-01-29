@@ -65,35 +65,20 @@ void TbSimCtrl::ParseCommandArgs(int argc, char **argv) {
 }
 
 unsigned int TbSimCtrl::SetBootMode(std::string boot_mode_arg) {
-  unsigned int boot_mode = BOOT_MODE_PASSIVE;
+  unsigned int boot_mode = BOOT_MODE_FORCE;
 
   if (boot_mode_arg.empty()) {
-    TB_WARN("[TESTBENCH]: No Boot Option specified, using Idle boot (boot_mode=0)");
-    boot_mode = BOOT_MODE_PASSIVE;
+    TB_WARN("[TESTBENCH]: No Boot Option specified, using force boot");
+    boot_mode = BOOT_MODE_FORCE;
   } else {
-    if (boot_mode_arg == "sd") {
-      TB_WARN("[TESTBENCH]: Autonomous boot from SD card IS NOT SUPPORTED, "
-              "defaulting to force boot");
-      boot_mode = BOOT_MODE_FORCE;
-    } else if (boot_mode_arg == "force") {
+    if (boot_mode_arg == "force") {
       boot_mode = BOOT_MODE_FORCE;
     } else if (boot_mode_arg == "jtag") {
       TB_CONFIG("[TESTBENCH]: Autonomous boot using JTAG and GDB");
       // there should be a PASSIVE jtag mode but not supported yet
-      boot_mode = BOOT_MODE_AUTONOMOUS;
-    } else if (boot_mode_arg == "uart") {
-      TB_WARN("[TESTBENCH]: Boot using UART IS NOT SUPPORTED, defaulting to "
-              "force boot");
-      // should be PASSIVE, but uart is not supported yet
-      boot_mode = BOOT_MODE_FORCE;
-    } else if (boot_mode_arg == "slink") {
-      TB_WARN("[TESTBENCH]: Boot using Serial Link IS NOT SUPPORTED, "
-              "defaulting to force boot");
-      // should be PASSIVE, but slink is not supported yet
-      boot_mode = BOOT_MODE_FORCE;
+      boot_mode = BOOT_MODE_WAIT_FOR_DEBUGGER;
     } else {
-      TB_WARN("[TESTBENCH]: Unsupported boot mode specified, defaulting to "
-              "force boot");
+      TB_WARN("[TESTBENCH]: Unsupported boot mode specified, defaulting to force boot");
       boot_mode = BOOT_MODE_FORCE;
     }
   }
@@ -115,23 +100,11 @@ bool TbSimCtrl::ParseCLIArguments(int argc, char **argv) {
   boot_mode_ = SetBootMode(boot_mode_arg_);
   // TODO: Exit if boot mode is invalid
   switch (boot_mode_) {
-  case BOOT_MODE_PASSIVE:
-    // Preload mode
-    // std::cout<<"[TESTBENCH]: Unsupported passive preload
-    // selected"<<std::endl;
-    TB_ERR("[TESTBENCH]: Unsupported passive preload selected... Exiting");
-    exit_app = true;
-    break;
-  case BOOT_MODE_SD:
-    // Unsupported boot from SD Card
-    TB_ERR("[TESTBENCH]: Unsupported autonomous boot mode (SD Card)...Exiting");
-    exit_app = true;
-    break;
   case BOOT_MODE_FORCE:
     // Force boot from testbench
     TB_LOG(LOG_MEDIUM, "[TESTBENCH]: Force boot from testbench");
     break;
-  case BOOT_MODE_AUTONOMOUS:
+  case BOOT_MODE_WAIT_FOR_DEBUGGER:
     // Autonomous boot using GDB
     TB_LOG(LOG_MEDIUM, "[TESTBENCH]: Make sure to launch OpenOCD and GDB");
     break;
