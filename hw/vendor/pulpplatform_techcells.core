@@ -5,6 +5,7 @@ filesets:
   rtl:
     files:
       - pulpplatform_tech_cells/src/rtl/tc_sram.sv
+      - pulpplatform_tech_cells/src/rtl/tc_clk.sv
     file_type : systemVerilogSource
 
 targets:

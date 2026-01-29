@@ -9,6 +9,36 @@
 
 package cva6_config_pkg;
 
+    // static debug hartinfo
+    // debug causes
+    localparam logic [2:0] CauseBreakpoint = 3'h1;
+    localparam logic [2:0] CauseTrigger = 3'h2;
+    localparam logic [2:0] CauseRequest = 3'h3;
+    localparam logic [2:0] CauseSingleStep = 3'h4;
+    // amount of data count registers implemented
+    localparam logic [3:0] DataCount = 4'h2;
+
+    // address where data0-15 is shadowed or if shadowed in a CSR
+    // address of the first CSR used for shadowing the data
+    localparam logic [11:0] DataAddr = 12'h380;  // we are aligned with Rocket here
+    typedef struct packed {
+        logic [31:24] zero1;
+        logic [23:20] nscratch;
+        logic [19:17] zero0;
+        logic         dataaccess;
+        logic [15:12] datasize;
+        logic [11:0]  dataaddr;
+    } hartinfo_t;
+
+    localparam hartinfo_t DebugHartInfo = '{
+        zero1: '0,
+        nscratch: 2,  // Debug module needs at least two scratch regs
+        zero0: '0,
+        dataaccess: 1'b1,  // data registers are memory mapped in the debugger
+        datasize: DataCount,
+        dataaddr: DataAddr
+    };
+
     localparam int CVA6ConfigXlen = 64;
 
     localparam int CVA6ConfigRVF = 1;

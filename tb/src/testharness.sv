@@ -76,7 +76,14 @@ module testharness #(
         .uart_tx_o   (uart_tx),
         .uart_rx_i   (uart_rx),
         .exit_valid_o(exit_valid_o),
-        .exit_value_o(exit_value_o)
+        .exit_value_o(exit_value_o),
+        .jtag_tck_i  (jtag_tck),
+        .jtag_tms_i  (jtag_tms),
+        .jtag_trst_ni(jtag_trst_n),
+        .jtag_tdi_i  (jtag_tdi),
+        .jtag_tdo_o  (jtag_tdo),
+        .jtag_tdo_oe_o(),
+        .test_mode_i (1'b0)
     );
 
     uartdpi #(

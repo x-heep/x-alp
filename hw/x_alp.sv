@@ -12,9 +12,22 @@ module x_alp (
     input logic clk_i,
     input logic rst_ni,
 
+    // UART IO
     output logic uart_tx_o,
     input  logic uart_rx_i,
 
+    // JTAG Interface
+    input  logic jtag_tck_i,
+    input  logic jtag_tms_i,
+    input  logic jtag_trst_ni,
+    input  logic jtag_tdi_i,
+    output logic jtag_tdo_o,
+    output logic jtag_tdo_oe_o,
+
+    // Test mode
+    input  logic test_mode_i,
+
+    // Exit interface
     output logic        exit_valid_o,
     output logic [31:0] exit_value_o
 
@@ -27,7 +40,14 @@ module x_alp (
         .exit_valid_o (exit_valid_o),
         .exit_value_o (exit_value_o),
         .uart_rx_i    (uart_rx_i),
-        .uart_tx_o    (uart_tx_o)
+        .uart_tx_o    (uart_tx_o),
+        .jtag_tck_i   (jtag_tck_i),
+        .jtag_tms_i   (jtag_tms_i),
+        .jtag_trst_ni (jtag_trst_ni),
+        .jtag_tdi_i   (jtag_tdi_i),
+        .jtag_tdo_o   (jtag_tdo_o),
+        .jtag_tdo_oe_o(jtag_tdo_oe_o),
+        .test_mode_i  (test_mode_i)
     );
 
 endmodule : x_alp
