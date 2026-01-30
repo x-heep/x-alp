@@ -25,30 +25,30 @@ module debug_subsystem (
 
 );
 
-    logic                      dbg_slv_req;
-    core_v_mcu_pkg::addr_t     dbg_slv_addr;
-    core_v_mcu_pkg::axi_data_t dbg_slv_wdata;
-    core_v_mcu_pkg::axi_strb_t dbg_slv_wstrb;
-    logic                      dbg_slv_we;
-    logic                      dbg_slv_rvalid;
-    core_v_mcu_pkg::axi_data_t dbg_slv_rdata;
-    logic                      dbg_slv_rvalid_q;
+    logic                         dbg_slv_req;
+    core_v_mcu_pkg::addr_t        dbg_slv_addr;
+    core_v_mcu_pkg::axi_data_t    dbg_slv_wdata;
+    core_v_mcu_pkg::axi_strb_t    dbg_slv_wstrb;
+    logic                         dbg_slv_we;
+    logic                         dbg_slv_rvalid;
+    core_v_mcu_pkg::axi_data_t    dbg_slv_rdata;
+    logic                         dbg_slv_rvalid_q;
 
-    logic                      dbg_sba_req;
-    core_v_mcu_pkg::addr_t     dbg_sba_addr;
-    core_v_mcu_pkg::axi_data_t dbg_sba_addr_long;
-    logic                      dbg_sba_we;
-    core_v_mcu_pkg::axi_data_t dbg_sba_wdata;
-    core_v_mcu_pkg::axi_strb_t dbg_sba_strb;
-    logic                      dbg_sba_gnt;
-    core_v_mcu_pkg::axi_data_t dbg_sba_rdata;
-    logic                      dbg_sba_rvalid;
-    logic                      dbg_sba_err;
+    logic                         dbg_sba_req;
+    core_v_mcu_pkg::addr_t        dbg_sba_addr;
+    core_v_mcu_pkg::axi_data_t    dbg_sba_addr_long;
+    logic                         dbg_sba_we;
+    core_v_mcu_pkg::axi_data_t    dbg_sba_wdata;
+    core_v_mcu_pkg::axi_strb_t    dbg_sba_strb;
+    logic                         dbg_sba_gnt;
+    core_v_mcu_pkg::axi_data_t    dbg_sba_rdata;
+    logic                         dbg_sba_rvalid;
+    logic                         dbg_sba_err;
 
     core_v_mcu_pkg::axi_mst_req_t axi_dbg_req;
 
-    logic                      dbg_dmi_rst_n;
-    dm::dmi_req_t              dbg_dmi_req;
+    logic                         dbg_dmi_rst_n;
+    dm::dmi_req_t                 dbg_dmi_req;
     logic dbg_dmi_req_ready, dbg_dmi_req_valid;
     dm::dmi_resp_t dbg_dmi_rsp;
     logic dbg_dmi_rsp_ready, dbg_dmi_rsp_valid;
@@ -148,8 +148,8 @@ module debug_subsystem (
         .axi_req_t   (core_v_mcu_pkg::axi_mst_req_t),
         .axi_rsp_t   (core_v_mcu_pkg::axi_mst_rsp_t)
     ) i_dbg_sba_axi_from_mem (
-        .clk_i       (clk_i),
-        .rst_ni      (rst_ni),
+        .clk_i          (clk_i),
+        .rst_ni         (rst_ni),
         .mem_req_i      (dbg_sba_req),
         .mem_addr_i     (dbg_sba_addr),
         .mem_we_i       (dbg_sba_we),
@@ -169,8 +169,8 @@ module debug_subsystem (
     dmi_jtag #(
         .IdcodeValue(core_v_mcu_pkg::JTAG_IDCODE)
     ) i_dbg_dmi_jtag (
-        .clk_i       (clk_i),
-        .rst_ni      (rst_ni),
+        .clk_i           (clk_i),
+        .rst_ni          (rst_ni),
         .testmode_i      (test_mode_i),
         .dmi_rst_no      (dbg_dmi_rst_n),
         .dmi_req_o       (dbg_dmi_req),

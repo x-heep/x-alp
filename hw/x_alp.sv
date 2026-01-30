@@ -25,7 +25,7 @@ module x_alp (
     output logic jtag_tdo_oe_o,
 
     // Test mode
-    input  logic test_mode_i,
+    input logic test_mode_i,
 
     // Exit interface
     output logic        exit_valid_o,
