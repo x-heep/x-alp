@@ -29,6 +29,16 @@ module core_v_mcu (
     // Test mode
     input logic test_mode_i,
 
+    // External Peripheral Interface
+    output core_v_mcu_pkg::axi_slv_req_t ext_slv_req_o,
+    input  core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp_i,
+
+    input  core_v_mcu_pkg::axi_mst_req_t ext_mst_req_i,
+    output core_v_mcu_pkg::axi_mst_rsp_t ext_mst_rsp_o,
+
+    output core_v_mcu_pkg::reg_req_t ext_reg_req_o,
+    input  core_v_mcu_pkg::reg_rsp_t ext_reg_rsp_i,
+
     // Exit interface
     output logic        exit_valid_o,
     output logic [31:0] exit_value_o
@@ -41,18 +51,18 @@ module core_v_mcu (
     import core_v_mcu_pkg::*;
 
     // Internal signals
-    core_v_mcu_pkg::axi_mst_req_t [NumAxiMasters-1:0] axi_master_req_sig;
-    core_v_mcu_pkg::axi_mst_rsp_t [NumAxiMasters-1:0] axi_master_rsp_sig;
-    core_v_mcu_pkg::axi_slv_req_t [ NumAxiSlaves-1:0] axi_slave_req_sig;
-    core_v_mcu_pkg::axi_slv_rsp_t [ NumAxiSlaves-1:0] axi_slave_rsp_sig;
+    core_v_mcu_pkg::axi_mst_req_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_req_sig;
+    core_v_mcu_pkg::axi_mst_rsp_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_rsp_sig;
+    core_v_mcu_pkg::axi_slv_req_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_req_sig;
+    core_v_mcu_pkg::axi_slv_rsp_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_rsp_sig;
 
-    core_v_mcu_pkg::reg_req_t     [ NumRegSlaves-1:0] reg_req_sig;
-    core_v_mcu_pkg::reg_rsp_t     [ NumRegSlaves-1:0] reg_rsp_sig;
+    core_v_mcu_pkg::reg_req_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_req_sig;
+    core_v_mcu_pkg::reg_rsp_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_rsp_sig;
 
-    logic                         [             15:0] fast_intr;
-    logic                         [             15:0] fast_irq;
+    logic                         [                              15:0] fast_intr;
+    logic                         [                              15:0] fast_irq;
 
-    logic                                             debug_req;
+    logic                                                              debug_req;
 
     //
     //       █████████  ███████████  █████  █████
@@ -129,6 +139,15 @@ module core_v_mcu (
         .reg_req_o(reg_req_sig),
         .reg_rsp_i(reg_rsp_sig)
     );
+
+    assign ext_slv_req_o = axi_slave_req_sig[NumAxiSlaves+:NumExtAxiSlaves];
+    assign axi_slave_rsp_sig[NumAxiSlaves+:NumExtAxiSlaves] = ext_slv_rsp_i;
+
+    assign axi_master_req_sig[NumAxiMasters+:NumExtAxiMasters] = ext_mst_req_i;
+    assign ext_mst_rsp_o = axi_master_rsp_sig[NumAxiMasters+:NumExtAxiMasters];
+
+    assign ext_reg_req_o = reg_req_sig[NumRegSlaves+:NumExtRegSlaves];
+    assign reg_rsp_sig[NumRegSlaves+:NumExtRegSlaves] = ext_reg_rsp_i;
 
     // 
     //  ███████████                      ███            █████                                   ████         

@@ -12,16 +12,16 @@ module bus_subsystem (
     input logic rst_ni,
 
     // AXI master
-    input  core_v_mcu_pkg::axi_mst_req_t [core_v_mcu_pkg::NumAxiMasters-1:0] axi_master_req_i,
-    output core_v_mcu_pkg::axi_mst_rsp_t [core_v_mcu_pkg::NumAxiMasters-1:0] axi_master_rsp_o,
+    input  core_v_mcu_pkg::axi_mst_req_t [core_v_mcu_pkg::NumAxiMasters+core_v_mcu_pkg::NumExtAxiMasters-1:0] axi_master_req_i,
+    output core_v_mcu_pkg::axi_mst_rsp_t [core_v_mcu_pkg::NumAxiMasters+core_v_mcu_pkg::NumExtAxiMasters-1:0] axi_master_rsp_o,
 
     // AXI slave
-    output core_v_mcu_pkg::axi_slv_req_t [core_v_mcu_pkg::NumAxiSlaves-1:0] axi_slave_req_o,
-    input  core_v_mcu_pkg::axi_slv_rsp_t [core_v_mcu_pkg::NumAxiSlaves-1:0] axi_slave_rsp_i,
+    output core_v_mcu_pkg::axi_slv_req_t [core_v_mcu_pkg::NumAxiSlaves+core_v_mcu_pkg::NumExtAxiSlaves-1:0] axi_slave_req_o,
+    input  core_v_mcu_pkg::axi_slv_rsp_t [core_v_mcu_pkg::NumAxiSlaves+core_v_mcu_pkg::NumExtAxiSlaves-1:0] axi_slave_rsp_i,
 
     // Peripheral register interface
-    output core_v_mcu_pkg::reg_req_t [core_v_mcu_pkg::NumRegSlaves-1:0] reg_req_o,
-    input  core_v_mcu_pkg::reg_rsp_t [core_v_mcu_pkg::NumRegSlaves-1:0] reg_rsp_i
+    output core_v_mcu_pkg::reg_req_t [core_v_mcu_pkg::NumRegSlaves+core_v_mcu_pkg::NumExtRegSlaves-1:0] reg_req_o,
+    input  core_v_mcu_pkg::reg_rsp_t [core_v_mcu_pkg::NumRegSlaves+core_v_mcu_pkg::NumExtRegSlaves-1:0] reg_rsp_i
 
 );
 
@@ -29,8 +29,10 @@ module bus_subsystem (
     import core_v_mcu_pkg::*;
 
     // Output slaves of the AXI_XBAR is NumAxiSlaves + 1 that goes to the reg bus
-    localparam int unsigned NumAxiSlavesInt = NumAxiSlaves;
-    localparam int unsigned NumRegSlavesIdx = NumRegSlaves > 1 ? $clog2(NumRegSlaves) : 32'd1;
+    localparam int unsigned NumAxiSlavesInt = NumAxiSlaves + NumExtAxiSlaves;
+    localparam int unsigned NumRegSlavesIdx = (NumRegSlaves + NumExtRegSlaves) > 1 ? $clog2(
+        NumRegSlaves + NumExtRegSlaves
+    ) : 32'd1;
     // Internal signals
     // ----------------
     axi_slv_req_t [NumAxiSlavesInt-1:0] axi_slave_req;
@@ -151,8 +153,8 @@ module bus_subsystem (
 
     // Non-matching addresses are directed to an error slave
     addr_decode #(
-        .NoIndices(NumRegSlaves),
-        .NoRules  (NumRegSlaves),
+        .NoIndices(NumRegSlaves + NumExtRegSlaves),
+        .NoRules  (NumRegSlaves + NumExtRegSlaves),
         .addr_t   (addr_t),
         .rule_t   (rule_t)
     ) u_reg_demux_decode (
@@ -166,7 +168,7 @@ module bus_subsystem (
     );
 
     reg_demux #(
-        .NoPorts(NumRegSlaves),
+        .NoPorts(NumRegSlaves + NumExtRegSlaves),
         .req_t  (reg_req_t),
         .rsp_t  (reg_rsp_t)
     ) u_reg_demux (
