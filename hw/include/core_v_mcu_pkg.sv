@@ -17,16 +17,21 @@ package core_v_mcu_pkg;
     localparam int unsigned NumAxiMasters = 2;
     localparam int unsigned NumExtAxiMasters = 1;
 
+    localparam int unsigned totalAxiMasters = NumAxiMasters + NumExtAxiMasters;
+
     localparam int unsigned NumAxiSlaves = 3;
     localparam int unsigned NumExtAxiSlaves = 1;
+
+    localparam int unsigned totalAxiSlaves = NumAxiSlaves + NumExtAxiSlaves;
+
     localparam int unsigned NumRegSlaves = 4;
     localparam int unsigned NumExtRegSlaves = 1;
 
+    localparam int unsigned totalRegSlaves = NumRegSlaves + NumExtRegSlaves;
+
     // AXI configuration parameters
     localparam int unsigned AxiMstIdWidth = 4;
-    localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(
-        NumAxiMasters + NumExtAxiMasters
-    );
+    localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(totalAxiMasters);
     localparam int unsigned AxiAddrWidth = 64;
     localparam int unsigned AxiDataWidth = 64;
     localparam int unsigned AxiUserWidth = 64;
@@ -113,24 +118,22 @@ package core_v_mcu_pkg;
     localparam addr_t EXT_REG_END_ADDR = EXT_REG_START_ADDR + EXT_REG_SIZE;
 
     // Address mapping rules
-    localparam rule_t [NumAxiSlaves + NumExtAxiSlaves-1:0] addr_rules = '{
-        '{idx : EXT_S_BUS_IDX, start_addr : EXT_S_BUS_BASE_ADDR, end_addr : EXT_S_BUS_END_ADDR},
-        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
+    localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
+        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR},
         '{
             idx : DEBUG_S_BUS_IDX,
             start_addr : DEBUG_S_BUS_BASE_ADDR,
             end_addr : DEBUG_S_BUS_END_ADDR
         },
-        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR}
+        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
+        '{idx : EXT_S_BUS_IDX, start_addr : EXT_S_BUS_BASE_ADDR, end_addr : EXT_S_BUS_END_ADDR}
     };
 
-    localparam rule_t [NumRegSlaves + NumExtRegSlaves-1:0] RegMap = '{
-        '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR},
-        '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
+    localparam rule_t [totalRegSlaves-1:0] RegMap = '{
         '{
-            idx : FAST_INTR_CTRL_REG_IDX,
-            start_addr : FAST_INTR_CTRL_REG_START_ADDR,
-            end_addr : FAST_INTR_CTRL_REG_END_ADDR
+            idx : SOC_CTRL_REG_IDX,
+            start_addr : SOC_CTRL_REG_START_ADDR,
+            end_addr : SOC_CTRL_REG_END_ADDR
         },
         '{
             idx : BOOT_ROM_REG_IDX,
@@ -138,15 +141,18 @@ package core_v_mcu_pkg;
             end_addr : BOOT_ROM_REG_END_ADDR
         },
         '{
-            idx : SOC_CTRL_REG_IDX,
-            start_addr : SOC_CTRL_REG_START_ADDR,
-            end_addr : SOC_CTRL_REG_END_ADDR
-        }
+            idx : FAST_INTR_CTRL_REG_IDX,
+            start_addr : FAST_INTR_CTRL_REG_START_ADDR,
+            end_addr : FAST_INTR_CTRL_REG_END_ADDR
+        },
+        '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
+        '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR}
     };
 
+
     localparam axi_pkg::xbar_cfg_t AxiXbarCfg = '{
-        NoSlvPorts        : NumAxiMasters + NumExtAxiMasters,
-        NoMstPorts        : NumAxiSlaves + NumExtAxiSlaves,
+        NoSlvPorts        : totalAxiMasters,
+        NoMstPorts        : totalAxiSlaves,
         MaxMstTrans       : 16,
         MaxSlvTrans       : 16,
         FallThrough       : 1'b1,
@@ -157,7 +163,7 @@ package core_v_mcu_pkg;
         UniqueIds         : 1'b1,
         AxiAddrWidth     : AxiAddrWidth,
         AxiDataWidth     : AxiDataWidth,
-        NoAddrRules      : NumAxiSlaves + NumExtAxiSlaves
+        NoAddrRules      : totalAxiSlaves
     };
 
     // Boot address
