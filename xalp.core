@@ -10,6 +10,13 @@ filesets:
     depend:
       - x-heep:x-alp:core-v-mcu:0.0.1
 
+  rtl-fpga:
+    depend:
+    - openhwgroup.org:systems:core-v-mcu-fpga
+    files:
+    - hw/fpga/xilinx_x_alp_wrapper.sv
+    file_type: systemVerilogSource
+
   testbench:
     depend:
       - x-heep:x-alp:tb:0.0.1
@@ -59,6 +66,26 @@ targets:
         - '-Wno-UNDRIVEN'
         - '--timing'
         # - '-CFLAGS "-Wall -g"'
+  
+  pynq-z2:
+    <<: *default
+    default_tool: vivado
+    description: TUL Pynq-Z2 Board
+    filesets_append:
+    - x_heep_system
+    - rtl-fpga
+    parameters:
+    - FPU_SS_ZFINX
+    - SYNTHESIS=true
+    - REMOVE_OBI_FIFO
+    - FPGA_SYNTHESIS=true
+    tools:
+      vivado:
+        part: xc7z020clg400-1
+        board_part: tul.com.tw:pynq-z2:part0:1.0
+        board_repo_paths: [../../../hw/target/fpga/board_files/vendor/pynq_z2_board_files]
+    toplevel: [xilinx_x_alp_wrapper]
+  
   # Format with Verible
   format:
     <<: *default
