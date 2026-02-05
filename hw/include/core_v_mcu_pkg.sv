@@ -73,24 +73,24 @@ package core_v_mcu_pkg;
 
     // Slave addresses
     localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_0001_0000;  // 64 KB
+    localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_0001_0000;
     localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
     localparam addr_t DEBUG_S_BUS_BASE_ADDR = MEM_BUS_END_ADDR;
-    localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0001_0000;
     localparam addr_t DEBUG_S_BUS_END_ADDR = DEBUG_S_BUS_BASE_ADDR + DEBUG_S_BUS_SIZE;
     localparam addr_t PERIPH_BUS_BASE_ADDR = DEBUG_S_BUS_END_ADDR;
-    localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_0100_0000;  // 1 MB
+    localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_1000_0000;
     localparam addr_t PERIPH_BUS_END_ADDR = PERIPH_BUS_BASE_ADDR + PERIPH_BUS_SIZE;
     localparam addr_t EXT_S_BUS_BASE_ADDR = PERIPH_BUS_END_ADDR;
-    localparam addr_t EXT_S_BUS_SIZE = 64'h0000_0000_0001_0000;  // 64 KB
+    localparam addr_t EXT_S_BUS_SIZE = 64'h0000_0000_0001_0000;
     localparam addr_t EXT_S_BUS_END_ADDR = EXT_S_BUS_BASE_ADDR + EXT_S_BUS_SIZE;
 
     // Code and Data memory zones (cacheable)
     localparam addr_t CODE_ZONE_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t CODE_ZONE_SIZE = 64'h0000_0000_0000_8000;  // 32 KB
+    localparam addr_t CODE_ZONE_SIZE = 64'h0000_0000_0000_8000;
     localparam addr_t CODE_ZONE_END_ADDR = CODE_ZONE_BASE_ADDR + CODE_ZONE_SIZE;
     localparam addr_t DATA_ZONE_BASE_ADDR = 64'h0000_0000_0000_8000;
-    localparam addr_t DATA_ZONE_SIZE = 64'h0000_0000_0000_8000;  // 32 KB
+    localparam addr_t DATA_ZONE_SIZE = 64'h0000_0000_0000_8000;
     localparam addr_t DATA_ZONE_END_ADDR = DATA_ZONE_BASE_ADDR + DATA_ZONE_SIZE;
 
     // Register indexes
@@ -102,19 +102,19 @@ package core_v_mcu_pkg;
 
     // Register addresses
     localparam addr_t SOC_CTRL_REG_START_ADDR = PERIPH_BUS_BASE_ADDR + 64'h0000_0000_0000_0000;
-    localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t SOC_CTRL_REG_END_ADDR = SOC_CTRL_REG_START_ADDR + SOC_CTRL_REG_SIZE;
     localparam addr_t BOOT_ROM_REG_START_ADDR = SOC_CTRL_REG_END_ADDR;
-    localparam addr_t BOOT_ROM_REG_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t BOOT_ROM_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t BOOT_ROM_REG_END_ADDR = BOOT_ROM_REG_START_ADDR + BOOT_ROM_REG_SIZE;
     localparam addr_t FAST_INTR_CTRL_REG_START_ADDR = BOOT_ROM_REG_END_ADDR;
-    localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = FAST_INTR_CTRL_REG_START_ADDR + FAST_INTR_CTRL_REG_SIZE;
     localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
-    localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t UART_REG_END_ADDR = UART_REG_START_ADDR + UART_REG_SIZE;
     localparam addr_t EXT_REG_START_ADDR = UART_REG_END_ADDR;
-    localparam addr_t EXT_REG_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t EXT_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t EXT_REG_END_ADDR = EXT_REG_START_ADDR + EXT_REG_SIZE;
 
     // Address mapping rules
