@@ -97,10 +97,10 @@ module testharness #(
         .jtag_tdo_oe_o(),
         .ext_slv_req_o(ext_slv_req),
         .ext_slv_rsp_i(ext_slv_rsp),
-        .ext_mst_req_i(),
+        .ext_mst_req_i('0),
         .ext_mst_rsp_o(),
         .ext_reg_req_o(),
-        .ext_reg_rsp_i(),
+        .ext_reg_rsp_i('0),
         .test_mode_i  (1'b0)
     );
 
