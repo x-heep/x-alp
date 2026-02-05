@@ -12,39 +12,37 @@ module bus_subsystem (
     input logic rst_ni,
 
     // AXI master
-    input  core_v_mcu_pkg::axi_mst_req_t [core_v_mcu_pkg::NumAxiMasters-1:0] axi_master_req_i,
-    output core_v_mcu_pkg::axi_mst_rsp_t [core_v_mcu_pkg::NumAxiMasters-1:0] axi_master_rsp_o,
+    input  core_v_mcu_pkg::axi_mst_req_t [core_v_mcu_pkg::totalAxiMasters-1:0] axi_master_req_i,
+    output core_v_mcu_pkg::axi_mst_rsp_t [core_v_mcu_pkg::totalAxiMasters-1:0] axi_master_rsp_o,
 
     // AXI slave
-    output core_v_mcu_pkg::axi_slv_req_t [core_v_mcu_pkg::NumAxiSlaves-1:0] axi_slave_req_o,
-    input  core_v_mcu_pkg::axi_slv_rsp_t [core_v_mcu_pkg::NumAxiSlaves-1:0] axi_slave_rsp_i,
+    output core_v_mcu_pkg::axi_slv_req_t [core_v_mcu_pkg::totalAxiSlaves-1:0] axi_slave_req_o,
+    input  core_v_mcu_pkg::axi_slv_rsp_t [core_v_mcu_pkg::totalAxiSlaves-1:0] axi_slave_rsp_i,
 
     // Peripheral register interface
-    output core_v_mcu_pkg::reg_req_t [core_v_mcu_pkg::NumRegSlaves-1:0] reg_req_o,
-    input  core_v_mcu_pkg::reg_rsp_t [core_v_mcu_pkg::NumRegSlaves-1:0] reg_rsp_i
+    output core_v_mcu_pkg::reg_req_t [core_v_mcu_pkg::totalRegSlaves-1:0] reg_req_o,
+    input  core_v_mcu_pkg::reg_rsp_t [core_v_mcu_pkg::totalRegSlaves-1:0] reg_rsp_i
 
 );
 
-    // Package import
     import core_v_mcu_pkg::*;
 
-    // Output slaves of the AXI_XBAR is NumAxiSlaves + 1 that goes to the reg bus
-    localparam int unsigned NumAxiSlavesInt = NumAxiSlaves;
-    localparam int unsigned NumRegSlavesIdx = NumRegSlaves > 1 ? $clog2(NumRegSlaves) : 32'd1;
+    localparam int unsigned regSelectWidth = $clog2(totalRegSlaves);
+
     // Internal signals
     // ----------------
-    axi_slv_req_t [NumAxiSlavesInt-1:0] axi_slave_req;
-    axi_slv_rsp_t [NumAxiSlavesInt-1:0] axi_slave_rsp;
+    axi_slv_req_t [totalAxiSlaves-1:0] axi_slave_req;
+    axi_slv_rsp_t [totalAxiSlaves-1:0] axi_slave_rsp;
     // AMO <--> CUT
-    axi_mst_req_t                       axi_reg_amo_req;
-    axi_mst_rsp_t                       axi_reg_amo_rsp;
+    axi_mst_req_t                      axi_reg_amo_req;
+    axi_mst_rsp_t                      axi_reg_amo_rsp;
     // CUT <--> AXI to REG
-    axi_mst_req_t                       axi_reg_cut_req;
-    axi_mst_rsp_t                       axi_reg_cut_rsp;
-    reg_req_t                           reg_in_req;
-    reg_rsp_t                           reg_in_rsp;
+    axi_mst_req_t                      axi_reg_cut_req;
+    axi_mst_rsp_t                      axi_reg_cut_rsp;
+    reg_req_t                          reg_in_req;
+    reg_rsp_t                          reg_in_rsp;
     // Reg demux 
-    logic         [NumRegSlavesIdx-1:0] reg_select;
+    logic         [regSelectWidth-1:0] reg_select;
 
     // AXI XBAR
     //---------
@@ -151,8 +149,8 @@ module bus_subsystem (
 
     // Non-matching addresses are directed to an error slave
     addr_decode #(
-        .NoIndices(NumRegSlaves),
-        .NoRules  (NumRegSlaves),
+        .NoIndices(totalRegSlaves),
+        .NoRules  (totalRegSlaves),
         .addr_t   (addr_t),
         .rule_t   (rule_t)
     ) u_reg_demux_decode (
@@ -166,7 +164,7 @@ module bus_subsystem (
     );
 
     reg_demux #(
-        .NoPorts(NumRegSlaves),
+        .NoPorts(totalRegSlaves),
         .req_t  (reg_req_t),
         .rsp_t  (reg_rsp_t)
     ) u_reg_demux (
@@ -180,7 +178,7 @@ module bus_subsystem (
     );
 
     assign axi_slave_req_o = axi_slave_req;
-    for (genvar i = 0; i < NumAxiSlavesInt; i++) begin : gen_axislave_rsp_assign
+    for (genvar i = 0; i < totalAxiSlaves; i++) begin : gen_axislave_rsp_assign
         if (i != PERIPH_BUS_IDX) begin : gen_axislave_rsp_assign_nonperiph
             assign axi_slave_rsp[i] = axi_slave_rsp_i[i];
         end

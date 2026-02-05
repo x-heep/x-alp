@@ -15,14 +15,23 @@ package core_v_mcu_pkg;
     // BUS Config
     //-----------
     localparam int unsigned NumAxiMasters = 2;
+    localparam int unsigned NumExtAxiMasters = 1;
+
+    localparam int unsigned totalAxiMasters = NumAxiMasters + NumExtAxiMasters;
 
     localparam int unsigned NumAxiSlaves = 3;
+    localparam int unsigned NumExtAxiSlaves = 1;
+
+    localparam int unsigned totalAxiSlaves = NumAxiSlaves + NumExtAxiSlaves;
+
     localparam int unsigned NumRegSlaves = 4;
-    localparam int unsigned NumSlaves = NumAxiSlaves + NumRegSlaves;
+    localparam int unsigned NumExtRegSlaves = 1;
+
+    localparam int unsigned totalRegSlaves = NumRegSlaves + NumExtRegSlaves;
 
     // AXI configuration parameters
     localparam int unsigned AxiMstIdWidth = 4;
-    localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(NumAxiMasters);
+    localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(totalAxiMasters);
     localparam int unsigned AxiAddrWidth = 64;
     localparam int unsigned AxiDataWidth = 64;
     localparam int unsigned AxiUserWidth = 64;
@@ -49,34 +58,39 @@ package core_v_mcu_pkg;
         addr_t end_addr;
     } rule_t;
 
-  localparam JTAG_IDCODE = 32'h10001c05;
+    localparam JTAG_IDCODE = 32'h10001c05;
 
     // Master indexes
     localparam int unsigned CPU_BUS_IDX = 0;
     localparam int unsigned DEBUG_M_BUS_IDX = 1;
+    localparam int unsigned EXT_M_BUS_IDX = 2;
 
     // Slave indexes
     localparam int unsigned MEM_BUS_IDX = 0;
     localparam int unsigned DEBUG_S_BUS_IDX = 1;
     localparam int unsigned PERIPH_BUS_IDX = 2;
+    localparam int unsigned EXT_S_BUS_IDX = 3;
 
     // Slave addresses
     localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_0001_0000;  // 64 KB
+    localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_0001_0000;
     localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
     localparam addr_t DEBUG_S_BUS_BASE_ADDR = MEM_BUS_END_ADDR;
-    localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0000_1000;  // 4 KB
+    localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0001_0000;
     localparam addr_t DEBUG_S_BUS_END_ADDR = DEBUG_S_BUS_BASE_ADDR + DEBUG_S_BUS_SIZE;
     localparam addr_t PERIPH_BUS_BASE_ADDR = DEBUG_S_BUS_END_ADDR;
-    localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_0FFF_FFFF;
+    localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_1000_0000;
     localparam addr_t PERIPH_BUS_END_ADDR = PERIPH_BUS_BASE_ADDR + PERIPH_BUS_SIZE;
+    localparam addr_t EXT_S_BUS_BASE_ADDR = PERIPH_BUS_END_ADDR;
+    localparam addr_t EXT_S_BUS_SIZE = 64'h0000_0000_0001_0000;
+    localparam addr_t EXT_S_BUS_END_ADDR = EXT_S_BUS_BASE_ADDR + EXT_S_BUS_SIZE;
 
     // Code and Data memory zones (cacheable)
     localparam addr_t CODE_ZONE_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t CODE_ZONE_SIZE = 64'h0000_0000_0000_8000;  // 32 KB
+    localparam addr_t CODE_ZONE_SIZE = 64'h0000_0000_0000_8000;
     localparam addr_t CODE_ZONE_END_ADDR = CODE_ZONE_BASE_ADDR + CODE_ZONE_SIZE;
     localparam addr_t DATA_ZONE_BASE_ADDR = 64'h0000_0000_0000_8000;
-    localparam addr_t DATA_ZONE_SIZE = 64'h0000_0000_0000_8000;  // 32 KB
+    localparam addr_t DATA_ZONE_SIZE = 64'h0000_0000_0000_8000;
     localparam addr_t DATA_ZONE_END_ADDR = DATA_ZONE_BASE_ADDR + DATA_ZONE_SIZE;
 
     // Register indexes
@@ -84,6 +98,7 @@ package core_v_mcu_pkg;
     localparam int unsigned BOOT_ROM_REG_IDX = 1;
     localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
     localparam int unsigned UART_REG_IDX = 3;
+    localparam int unsigned EXT_REG_IDX = 4;
 
     // Register addresses
     localparam addr_t SOC_CTRL_REG_START_ADDR = PERIPH_BUS_BASE_ADDR + 64'h0000_0000_0000_0000;
@@ -98,19 +113,23 @@ package core_v_mcu_pkg;
     localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
     localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t UART_REG_END_ADDR = UART_REG_START_ADDR + UART_REG_SIZE;
+    localparam addr_t EXT_REG_START_ADDR = UART_REG_END_ADDR;
+    localparam addr_t EXT_REG_SIZE = 64'h0000_0000_0000_1000;
+    localparam addr_t EXT_REG_END_ADDR = EXT_REG_START_ADDR + EXT_REG_SIZE;
 
     // Address mapping rules
-    localparam rule_t [NumAxiSlaves-1:0] addr_rules = '{
-        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
+    localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
+        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR},
         '{
             idx : DEBUG_S_BUS_IDX,
             start_addr : DEBUG_S_BUS_BASE_ADDR,
             end_addr : DEBUG_S_BUS_END_ADDR
         },
-        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR}
+        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
+        '{idx : EXT_S_BUS_IDX, start_addr : EXT_S_BUS_BASE_ADDR, end_addr : EXT_S_BUS_END_ADDR}
     };
 
-    localparam rule_t [NumRegSlaves-1:0] RegMap = '{
+    localparam rule_t [totalRegSlaves-1:0] RegMap = '{
         '{
             idx : SOC_CTRL_REG_IDX,
             start_addr : SOC_CTRL_REG_START_ADDR,
@@ -126,12 +145,14 @@ package core_v_mcu_pkg;
             start_addr : FAST_INTR_CTRL_REG_START_ADDR,
             end_addr : FAST_INTR_CTRL_REG_END_ADDR
         },
-        '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR}
+        '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
+        '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR}
     };
 
+
     localparam axi_pkg::xbar_cfg_t AxiXbarCfg = '{
-        NoSlvPorts        : NumAxiMasters,
-        NoMstPorts        : NumAxiSlaves,
+        NoSlvPorts        : totalAxiMasters,
+        NoMstPorts        : totalAxiSlaves,
         MaxMstTrans       : 16,
         MaxSlvTrans       : 16,
         FallThrough       : 1'b1,
@@ -142,7 +163,7 @@ package core_v_mcu_pkg;
         UniqueIds         : 1'b1,
         AxiAddrWidth     : AxiAddrWidth,
         AxiDataWidth     : AxiDataWidth,
-        NoAddrRules      : NumAxiSlaves
+        NoAddrRules      : totalAxiSlaves
     };
 
     // Boot address
