@@ -69,8 +69,8 @@ module core_v_mcu (
     logic                                             cpu_rst_n;
 
     // Synchronizers for debug signals (2-stage sync)
-    logic [1:0] debug_req_sync_reg;
-    logic [1:0] ndmreset_sync_reg;
+    logic                         [              1:0] debug_req_sync_reg;
+    logic                         [              1:0] ndmreset_sync_reg;
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
@@ -97,7 +97,7 @@ module core_v_mcu (
     //
 
     // CPU reset: system reset OR debug module reset (active high)
-    assign cpu_rst_n = rst_ni & ~ndmreset_sync;
+    assign cpu_rst_n      = rst_ni & ~ndmreset_sync;
 
     cpu_subsystem u_cpu_subsystem (
         .clk_i      (clk_i),
