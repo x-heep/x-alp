@@ -160,13 +160,14 @@ package cva6_config_pkg;
         PMPEntryReadOnly: 64'd0,
         PMPNapotEn: bit'(1),
         NOCType: config_pkg::NOC_TYPE_AXI4_ATOP,
-        NrNonIdempotentRules: unsigned'(1),
+        NrNonIdempotentRules: unsigned'(4),
         NonIdempotentAddrBase:
         1024'(
         {
             core_v_mcu_pkg::SOC_CTRL_REG_START_ADDR,
             core_v_mcu_pkg::FAST_INTR_CTRL_REG_START_ADDR,
-            core_v_mcu_pkg::UART_REG_START_ADDR
+            core_v_mcu_pkg::UART_REG_START_ADDR,
+            core_v_mcu_pkg::EXT_REG_START_ADDR
         }
         ),
         NonIdempotentLength:
@@ -174,7 +175,8 @@ package cva6_config_pkg;
         {
             core_v_mcu_pkg::SOC_CTRL_REG_SIZE,
             core_v_mcu_pkg::FAST_INTR_CTRL_REG_SIZE,
-            core_v_mcu_pkg::UART_REG_SIZE
+            core_v_mcu_pkg::UART_REG_SIZE,
+            core_v_mcu_pkg::EXT_REG_SIZE
         }
         ),
         NrExecuteRegionRules: unsigned'(3),

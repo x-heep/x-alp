@@ -24,6 +24,16 @@ module x_alp (
     output logic jtag_tdo_o,
     output logic jtag_tdo_oe_o,
 
+    // External Peripheral Interface
+    output core_v_mcu_pkg::axi_slv_req_t ext_slv_req_o,
+    input  core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp_i,
+
+    input  core_v_mcu_pkg::axi_mst_req_t ext_mst_req_i,
+    output core_v_mcu_pkg::axi_mst_rsp_t ext_mst_rsp_o,
+
+    output core_v_mcu_pkg::reg_req_t ext_reg_req_o,
+    input  core_v_mcu_pkg::reg_rsp_t ext_reg_rsp_i,
+
     // Test mode
     input logic test_mode_i,
 
@@ -47,7 +57,13 @@ module x_alp (
         .jtag_tdi_i   (jtag_tdi_i),
         .jtag_tdo_o   (jtag_tdo_o),
         .jtag_tdo_oe_o(jtag_tdo_oe_o),
-        .test_mode_i  (test_mode_i)
+        .test_mode_i  (test_mode_i),
+        .ext_slv_req_o(ext_slv_req_o),
+        .ext_slv_rsp_i(ext_slv_rsp_i),
+        .ext_mst_req_i(ext_mst_req_i),
+        .ext_mst_rsp_o(ext_mst_rsp_o),
+        .ext_reg_req_o(ext_reg_req_o),
+        .ext_reg_rsp_i(ext_reg_rsp_i)
     );
 
 endmodule : x_alp

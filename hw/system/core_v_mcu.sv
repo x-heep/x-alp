@@ -29,6 +29,16 @@ module core_v_mcu (
     // Test mode
     input logic test_mode_i,
 
+    // External Peripheral Interface
+    output core_v_mcu_pkg::axi_slv_req_t ext_slv_req_o,
+    input  core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp_i,
+
+    input  core_v_mcu_pkg::axi_mst_req_t ext_mst_req_i,
+    output core_v_mcu_pkg::axi_mst_rsp_t ext_mst_rsp_o,
+
+    output core_v_mcu_pkg::reg_req_t ext_reg_req_o,
+    input  core_v_mcu_pkg::reg_rsp_t ext_reg_rsp_i,
+
     // Exit interface
     output logic        exit_valid_o,
     output logic [31:0] exit_value_o
@@ -153,6 +163,15 @@ module core_v_mcu (
         .reg_req_o(reg_req_sig),
         .reg_rsp_i(reg_rsp_sig)
     );
+
+    assign ext_slv_req_o                     = axi_slave_req_sig[EXT_S_BUS_IDX];
+    assign axi_slave_rsp_sig[EXT_S_BUS_IDX]  = ext_slv_rsp_i;
+
+    assign axi_master_req_sig[EXT_M_BUS_IDX] = ext_mst_req_i;
+    assign ext_mst_rsp_o                     = axi_master_rsp_sig[EXT_M_BUS_IDX];
+
+    assign ext_reg_req_o                     = reg_req_sig[EXT_REG_IDX];
+    assign reg_rsp_sig[EXT_REG_IDX]          = ext_reg_rsp_i;
 
     // 
     //  ███████████                      ███            █████                                   ████         
