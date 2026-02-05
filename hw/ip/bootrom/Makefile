@@ -31,10 +31,10 @@ $(BOOTROM_DIR)/bootrom.bin: $(BOOTROM_DIR)/bootrom.elf
 $(BOOTROM_DIR)/bootrom.sv: $(BOOTROM_DIR)/bootrom.bin $(BOOTROM_DIR)/gen_bootrom.py
 	$(PYTHON) $(BOOTROM_DIR)/gen_bootrom.py --sv-module bootrom $< > $@
 
-BOOTROM_ALL += $(BOOTROM_DIR)/bootrom.sv $(BOOTROM_DIR)/bootrom.dump
+BOOTROM_ALL += $(BOOTROM_DIR)/bootrom.sv $(BOOTROM_DIR)/bootrom.dump $(BOOTROM_DIR)/bootrom.bin $(BOOTROM_DIR)/bootrom.elf
 
 all: $(BOOTROM_ALL)
 
 clean:
-	rm -f *.img *.bin *.sv .*dump
+	rm -f $(BOOTROM_ALL)
 
