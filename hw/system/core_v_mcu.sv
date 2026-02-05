@@ -140,14 +140,14 @@ module core_v_mcu (
         .reg_rsp_i(reg_rsp_sig)
     );
 
-    assign ext_slv_req_o = axi_slave_req_sig[NumAxiSlaves+:NumExtAxiSlaves];
-    assign axi_slave_rsp_sig[NumAxiSlaves+:NumExtAxiSlaves] = ext_slv_rsp_i;
+    assign ext_slv_req_o                     = axi_slave_req_sig[EXT_S_BUS_IDX];
+    assign axi_slave_rsp_sig[EXT_S_BUS_IDX]  = ext_slv_rsp_i;
 
-    assign axi_master_req_sig[NumAxiMasters+:NumExtAxiMasters] = ext_mst_req_i;
-    assign ext_mst_rsp_o = axi_master_rsp_sig[NumAxiMasters+:NumExtAxiMasters];
+    assign axi_master_req_sig[EXT_M_BUS_IDX] = ext_mst_req_i;
+    assign ext_mst_rsp_o                     = axi_master_rsp_sig[EXT_M_BUS_IDX];
 
-    assign ext_reg_req_o = reg_req_sig[NumRegSlaves+:NumExtRegSlaves];
-    assign reg_rsp_sig[NumRegSlaves+:NumExtRegSlaves] = ext_reg_rsp_i;
+    assign ext_reg_req_o                     = reg_req_sig[EXT_REG_IDX];
+    assign reg_rsp_sig[EXT_REG_IDX]          = ext_reg_rsp_i;
 
     // 
     //  ███████████                      ███            █████                                   ████         
