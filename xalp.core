@@ -57,6 +57,7 @@ targets:
         - '-LDFLAGS "-pthread -lutil -lelf"'
         - '-Wno-UNUSEDSIGNAL'
         - '-Wno-UNDRIVEN'
+        - '--timing'
         # - '-CFLAGS "-Wall -g"'
   # Format with Verible
   format:

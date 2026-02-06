@@ -21,7 +21,8 @@ module debug_subsystem (
     input  logic test_mode_i,
     // Debug signals
     output logic dbg_active_o,
-    output logic dbg_req_o
+    output logic dbg_req_o,
+    output logic ndmreset_o
 
 );
 
@@ -99,8 +100,8 @@ module debug_subsystem (
         .rst_ni              (rst_ni),
         .next_dm_addr_i      ('h50),
         .testmode_i          (test_mode_i),
-        .ndmreset_o          (),
-        .ndmreset_ack_i      (1'b0),
+        .ndmreset_o          (ndmreset_o),
+        .ndmreset_ack_i      (ndmreset_o),
         .dmactive_o          (dbg_active_o),
         .debug_req_o         (dbg_req_o),
         .unavailable_i       ('0),
