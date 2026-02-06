@@ -75,7 +75,6 @@ unsigned int TbSimCtrl::SetBootMode(std::string boot_mode_arg) {
       boot_mode = BOOT_MODE_FORCE;
     } else if (boot_mode_arg == "jtag") {
       TB_CONFIG("[TESTBENCH]: Autonomous boot using JTAG and GDB");
-      // there should be a PASSIVE jtag mode but not supported yet
       boot_mode = BOOT_MODE_WAIT_FOR_DEBUGGER;
     } else {
       TB_WARN("[TESTBENCH]: Unsupported boot mode specified, defaulting to force boot");
@@ -145,6 +144,7 @@ void TbSimCtrl::Init() {
   dut->jtag_trst_ni = 0;
   dut->jtag_tdi_i = 0;
   dut->boot_mode_i = boot_mode_;
+  dut->sim_jtag_enable_i = 0;
   // dut->test_mode_i          = 0; // unsupported test mode
   dut->eval();
   if (gen_waves_) { m_trace->dump(sim_cycles_); }
@@ -200,6 +200,9 @@ void TbSimCtrl::PreExec() {
     }
     // runCycles(1, top(), m_trace);
     TB_LOG(LOG_MEDIUM, "[TESTBENCH]: Memory Loaded");
+  } else if (boot_mode_ == BOOT_MODE_WAIT_FOR_DEBUGGER) {
+    TB_LOG(LOG_MEDIUM, "[TESTBENCH]: Waiting for debugger to load the firmware...");
+    dut->sim_jtag_enable_i = 1;
   }
 }
 
@@ -298,7 +301,7 @@ unsigned TbSimCtrl::RunSimulation(int argc, char **argv) {
   SetReset();
   UnsetReset();
   time_begin_ = std::chrono::steady_clock::now();
-  ForceBoot();
+  if (boot_mode_ == BOOT_MODE_FORCE) { ForceBoot(); }
   Run();
   time_end_ = std::chrono::steady_clock::now();
   exit_value = PostExec();

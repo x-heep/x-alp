@@ -29,6 +29,7 @@ module testharness #(
 
     // JTAG
     // ----
+    input  logic sim_jtag_enable_i,
     input  logic jtag_tck_i,
     input  logic jtag_tms_i,
     input  logic jtag_trst_ni,
@@ -185,7 +186,7 @@ module testharness #(
     ) u_sim_jtag (
         .clock          (clk_i),
         .reset          (~rst_ni),
-        .enable         (1'b1),
+        .enable         (sim_jtag_enable_i),
         .init_done      (rst_ni),
         .jtag_TCK       (jtag_tck),
         .jtag_TMS       (jtag_tms),
