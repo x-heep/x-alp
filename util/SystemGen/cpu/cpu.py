@@ -3,13 +3,7 @@ class CPU:
     Represents a CPU configuration.
     """
 
-    AVAILABLE_CPUS = {"cv32e20", "cv32e40p", "cv32e40px", "cv32e40x"}
-
     def __init__(self, name: str):
-        if name not in self.AVAILABLE_CPUS:
-            raise ValueError(
-                f"Invalid CPU name '{name}'. Must be one of: {', '.join(self.AVAILABLE_CPUS)}"
-            )
         self.name = name
 
         # Dictionary to hold optional parameter values

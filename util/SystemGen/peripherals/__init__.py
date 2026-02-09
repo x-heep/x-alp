@@ -5,6 +5,9 @@ from .user_peripherals_domain import UserPeripheralDomain
 from . import base_peripherals
 from . import user_peripherals
 
+from .user_peripherals import *
+from .base_peripherals import *
+
 __all__ = [
     "Peripheral",
     "BasePeripheral",
