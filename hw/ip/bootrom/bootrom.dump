@@ -40,10 +40,10 @@ Disassembly of section .text:
   3c:	4301                	li	t1,0
   3e:	0ff0000f          	fence
   42:	0000100f          	fence.i
-  46:	000205b7          	lui	a1,0x20
+  46:	200005b7          	lui	a1,0x20000
 
 000000000000004a <_boot_wait_loop>:
-  4a:	00c5a283          	lw	t0,12(a1) # 2000c <_end+0x1ff6c>
+  4a:	00c5a283          	lw	t0,12(a1) # 2000000c <_end+0x1fffff6c>
   4e:	00029363          	bnez	t0,54 <_boot_continue>
   52:	bfe5                	j	4a <_boot_wait_loop>
 
@@ -60,7 +60,7 @@ Disassembly of section .text:
 0000000000000070 <_exit>:
   70:	0506                	slli	a0,a0,0x1
   72:	00156513          	ori	a0,a0,1
-  76:	000205b7          	lui	a1,0x20
+  76:	200005b7          	lui	a1,0x20000
   7a:	c1c8                	sw	a0,4(a1)
   7c:	9002                	ebreak
   7e:	10500073          	wfi

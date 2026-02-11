@@ -101,9 +101,11 @@ conda:
 # ============================================================================
 
 ## @section MCU Code Generation
-mcu-gen: reg-gen boot-rom
+mcu-gen:
 	$(PYTHON) util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --config $(XALP_CFG) --pads_cfg $(PADS_CFG)
 	$(PYTHON) util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --cached --outtpl "$(MCU_GEN_TEMPLATES)"
+	@$(MAKE) reg-gen
+	@$(MAKE) boot-rom
 	@$(MAKE) format
 
 ## @section Register Generation

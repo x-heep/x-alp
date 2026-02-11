@@ -73,18 +73,18 @@ package core_v_mcu_pkg;
 
 
     // Slave addresses
-    localparam addr_t MEM_BUS_BASE_ADDR = 64'h0x00000000;
-    localparam addr_t MEM_BUS_SIZE = 64'h0x00010000;
-    localparam addr_t MEM_BUS_END_ADDR = 64'h0x00010000;
-    localparam addr_t DEBUG_MODULE_BUS_BASE_ADDR = 64'h0x00010000;
-    localparam addr_t DEBUG_MODULE_BUS_SIZE = 64'h0x00010000;
-    localparam addr_t DEBUG_MODULE_BUS_END_ADDR = 64'h0x00020000;
-    localparam addr_t PERIPHERALS_BUS_BASE_ADDR = 64'h0x00020000;
-    localparam addr_t PERIPHERALS_BUS_SIZE = 64'h0x10000000;
-    localparam addr_t PERIPHERALS_BUS_END_ADDR = 64'h0x10020000;
-    localparam addr_t EXT_SLAVE_BUS_BASE_ADDR = 64'h0x10020000;
-    localparam addr_t EXT_SLAVE_BUS_SIZE = 64'h0x00010000;
-    localparam addr_t EXT_SLAVE_BUS_END_ADDR = 64'h0x10030000;
+    localparam addr_t MEM_BUS_BASE_ADDR = 64'h00000000;
+    localparam addr_t MEM_BUS_SIZE = 64'h00010000;
+    localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
+    localparam addr_t DEBUG_MODULE_BUS_BASE_ADDR = 64'h00010000;
+    localparam addr_t DEBUG_MODULE_BUS_SIZE = 64'h00010000;
+    localparam addr_t DEBUG_MODULE_BUS_END_ADDR = DEBUG_MODULE_BUS_BASE_ADDR + DEBUG_MODULE_BUS_SIZE;
+    localparam addr_t PERIPHERALS_BUS_BASE_ADDR = 64'h00020000;
+    localparam addr_t PERIPHERALS_BUS_SIZE = 64'h10000000;
+    localparam addr_t PERIPHERALS_BUS_END_ADDR = PERIPHERALS_BUS_BASE_ADDR + PERIPHERALS_BUS_SIZE;
+    localparam addr_t EXT_SLAVE_BUS_BASE_ADDR = 64'h10020000;
+    localparam addr_t EXT_SLAVE_BUS_SIZE = 64'h00010000;
+    localparam addr_t EXT_SLAVE_BUS_END_ADDR = EXT_SLAVE_BUS_BASE_ADDR + EXT_SLAVE_BUS_SIZE;
 
     // Code and Data memory zones (cacheable)
     localparam addr_t CODE_ZONE_BASE_ADDR = 64'h0000_0000_0000_0000;
@@ -102,21 +102,21 @@ package core_v_mcu_pkg;
     localparam int unsigned EXT_PERIPHERAL_REG_IDX = 4;
 
     // Register addresses
-    localparam addr_t SOC_CTRL_REG_BASE_ADDR = 64'h00000000;
+    localparam addr_t SOC_CTRL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h00000000;
     localparam addr_t SOC_CTRL_REG_SIZE = 64'h00001000;
-    localparam addr_t SOC_CTRL_REG_END_ADDR = 64'h00001000;
-    localparam addr_t BOOTROM_REG_BASE_ADDR = 64'h00010000;
+    localparam addr_t SOC_CTRL_REG_END_ADDR = SOC_CTRL_REG_BASE_ADDR + SOC_CTRL_REG_SIZE;
+    localparam addr_t BOOTROM_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h00010000;
     localparam addr_t BOOTROM_REG_SIZE = 64'h00010000;
-    localparam addr_t BOOTROM_REG_END_ADDR = 64'h00020000;
-    localparam addr_t FAST_INTR_CTRL_REG_BASE_ADDR = 64'h00020000;
+    localparam addr_t BOOTROM_REG_END_ADDR = BOOTROM_REG_BASE_ADDR + BOOTROM_REG_SIZE;
+    localparam addr_t FAST_INTR_CTRL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h00020000;
     localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h00001000;
-    localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = 64'h00021000;
-    localparam addr_t UART_REG_BASE_ADDR = 64'h10000000;
+    localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = FAST_INTR_CTRL_REG_BASE_ADDR + FAST_INTR_CTRL_REG_SIZE;
+    localparam addr_t UART_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h10000000;
     localparam addr_t UART_REG_SIZE = 64'h00001000;
-    localparam addr_t UART_REG_END_ADDR = 64'h10001000;
-    localparam addr_t EXT_PERIPHERAL_REG_BASE_ADDR = 64'h11000000;
+    localparam addr_t UART_REG_END_ADDR = UART_REG_BASE_ADDR + UART_REG_SIZE;
+    localparam addr_t EXT_PERIPHERAL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h11000000;
     localparam addr_t EXT_PERIPHERAL_REG_SIZE = 64'h00001000;
-    localparam addr_t EXT_PERIPHERAL_REG_END_ADDR = 64'h11001000;
+    localparam addr_t EXT_PERIPHERAL_REG_END_ADDR = EXT_PERIPHERAL_REG_BASE_ADDR + EXT_PERIPHERAL_REG_SIZE;
 
     // Address mapping rules
     localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{

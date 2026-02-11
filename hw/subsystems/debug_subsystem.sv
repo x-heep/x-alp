@@ -93,7 +93,7 @@ module debug_subsystem (
     dm_top #(
         .NrHarts      (1),
         .BusWidth     (core_v_mcu_pkg::AxiDataWidth),
-        .DmBaseAddress(core_v_mcu_pkg::DEBUG_S_BUS_BASE_ADDR)
+        .DmBaseAddress(core_v_mcu_pkg::DEBUG_MODULE_BUS_BASE_ADDR)
     ) i_dbg_dm_top (
         .clk_i               (clk_i),
         .rst_ni              (rst_ni),

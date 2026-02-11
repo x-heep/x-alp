@@ -73,9 +73,9 @@ package core_v_mcu_pkg;
 
     // Slave addresses
 % for a_slave in xalp.bus.slaves:
-    localparam addr_t ${a_slave.name.upper()}_BUS_BASE_ADDR = 64'h${a_slave.get_start_address()};
-    localparam addr_t ${a_slave.name.upper()}_BUS_SIZE = 64'h${a_slave.get_length()};
-    localparam addr_t ${a_slave.name.upper()}_BUS_END_ADDR = 64'h${a_slave.get_end_address()};
+    localparam addr_t ${a_slave.name.upper()}_BUS_BASE_ADDR = 64'h${f"{a_slave.get_start_address()[2:]}"};
+    localparam addr_t ${a_slave.name.upper()}_BUS_SIZE = 64'h${f"{a_slave.get_length()[2:]}"};
+    localparam addr_t ${a_slave.name.upper()}_BUS_END_ADDR = ${a_slave.name.upper()}_BUS_BASE_ADDR + ${a_slave.name.upper()}_BUS_SIZE;
 % endfor
 
     // Code and Data memory zones (cacheable)
@@ -93,9 +93,9 @@ package core_v_mcu_pkg;
 
     // Register addresses
 % for a_peripheral in xalp.get_peripheral_domain("peripherals").get_peripherals():
-    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = 64'h${f"{a_peripheral.get_address():08x}"};
+    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h${f"{a_peripheral.get_address():08x}"};
     localparam addr_t ${a_peripheral._name.upper()}_REG_SIZE = 64'h${f"{a_peripheral.get_length():08x}"};
-    localparam addr_t ${a_peripheral._name.upper()}_REG_END_ADDR = 64'h${f"{a_peripheral.get_address() + a_peripheral.get_length():08x}"};
+    localparam addr_t ${a_peripheral._name.upper()}_REG_END_ADDR = ${a_peripheral._name.upper()}_REG_BASE_ADDR + ${a_peripheral._name.upper()}_REG_SIZE;
 % endfor
 
     // Address mapping rules
