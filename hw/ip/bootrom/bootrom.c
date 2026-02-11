@@ -14,10 +14,9 @@
 extern int boot_next_stage(void *);
 
 int boot_passive(uint64_t core_freq) {
-  volatile uint32_t main_address = *reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
+  volatile uint32_t main_address = *reg32(SOC_CTRL_BASE_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
 
-  while (*reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0);
-
+  while (*reg32(SOC_CTRL_BASE_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0);
   return boot_next_stage((void *)(main_address));
 }
 
@@ -60,9 +59,9 @@ int boot_i2c_24fc1025(uint64_t core_freq) {
 }
 
 int main() {
-  volatile uint32_t main_address = *reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
+  volatile uint32_t main_address = *reg32(SOC_CTRL_BASE_ADDRESS, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET);
 
-  while (*reg32(SOC_CTRL_START_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0);
+  while (*reg32(SOC_CTRL_BASE_ADDRESS, SOC_CTRL_BOOT_EXIT_LOOP_REG_OFFSET) == 0);
 
   boot_next_stage((void *)(main_address));
 

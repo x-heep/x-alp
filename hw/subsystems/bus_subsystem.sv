@@ -139,8 +139,8 @@ module bus_subsystem (
     ) u_axi_to_reg_v2 (
         .clk_i    (clk_i),
         .rst_ni   (rst_ni),
-        .axi_req_i(axi_slave_req[PERIPH_BUS_IDX]),
-        .axi_rsp_o(axi_slave_rsp[PERIPH_BUS_IDX]),
+        .axi_req_i(axi_slave_req[PERIPHERALS_S_BUS_IDX]),
+        .axi_rsp_o(axi_slave_rsp[PERIPHERALS_S_BUS_IDX]),
         .reg_req_o(reg_in_req),
         .reg_rsp_i(reg_in_rsp),
         .reg_id_o (),
@@ -179,7 +179,7 @@ module bus_subsystem (
 
     assign axi_slave_req_o = axi_slave_req;
     for (genvar i = 0; i < totalAxiSlaves; i++) begin : gen_axislave_rsp_assign
-        if (i != PERIPH_BUS_IDX) begin : gen_axislave_rsp_assign_nonperiph
+        if (i != PERIPHERALS_S_BUS_IDX) begin : gen_axislave_rsp_assign_nonperiph
             assign axi_slave_rsp[i] = axi_slave_rsp_i[i];
         end
     end

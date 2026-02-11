@@ -1,0 +1,14 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  name: "SystemGen",
+  target_dir: "SystemGen",
+
+  upstream: {
+    url: "https://github.com/LuigiGiuffrida98/SystemGen.git",
+    rev: "main", # 0.9.0
+  },
+
+  
+}

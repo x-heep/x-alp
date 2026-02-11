@@ -33,6 +33,13 @@ endif
 # ============================================================================
 # Build Configuration
 # ============================================================================
+
+# Build directories
+BUILD_DIR         = build
+FUSESOC_BUILD_DIR = $(shell find $(BUILD_DIR) -maxdepth 1 -type d -name 'openhwgroup.org_systems_core-v-mcu_*' 2>/dev/null | sort -V | head -n 1)
+VERILATOR_DIR     = $(FUSESOC_BUILD_DIR)/sim-verilator
+QUESTASIM_DIR     = $(FUSESOC_BUILD_DIR)/sim-modelsim
+
 # FuseSoC arguments
 FUSESOC_ARGS ?=
 
@@ -53,6 +60,15 @@ COMPILER_PREFIX ?= riscv32-corev-
 COMPILER_FLAGS ?= -mabi=lp64d
 ARCH ?= rv64gc_zifencei
 SOURCE ?=
+
+# MCU-Gen template files to generate
+MCU_GEN_TEMPLATES = $(shell find . \( -path './hw/vendor' -o -path './util' -o -path './test' \) -prune -o -name '*.tpl' -print)
+
+# Mcu-gen configuration files
+PADS_CFG ?= config/pad_cfg.hjson
+XALP_CFG ?= config/config.py
+# Cached mcu-gen xheep configuration
+XALP_CONFIG_CACHE ?= $(BUILD_DIR)/xalp_config_cache.pickle
 
 # Export variables to sub-makefiles
 export
@@ -85,7 +101,12 @@ conda:
 # ============================================================================
 
 ## @section MCU Code Generation
-mcu-gen: reg-gen boot-rom format
+mcu-gen:
+	$(PYTHON) util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --config $(XALP_CFG) --pads_cfg $(PADS_CFG)
+	$(PYTHON) util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --cached --outtpl "$(MCU_GEN_TEMPLATES)"
+	@$(MAKE) reg-gen
+	@$(MAKE) boot-rom
+	@$(MAKE) format
 
 ## @section Register Generation
 reg-gen:
