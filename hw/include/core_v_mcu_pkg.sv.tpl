@@ -93,8 +93,8 @@ package core_v_mcu_pkg;
 
     // Register addresses
 % for a_peripheral in xalp.get_peripheral_domain("peripherals").get_peripherals():
-    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h${f"{a_peripheral.get_address():08x}"};
-    localparam addr_t ${a_peripheral._name.upper()}_REG_SIZE = 64'h${f"{a_peripheral.get_length():08x}"};
+    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h${f"{a_peripheral.get_address():016x}"};
+    localparam addr_t ${a_peripheral._name.upper()}_REG_SIZE = 64'h${f"{a_peripheral.get_length():016x}"};
     localparam addr_t ${a_peripheral._name.upper()}_REG_END_ADDR = ${a_peripheral._name.upper()}_REG_BASE_ADDR + ${a_peripheral._name.upper()}_REG_SIZE;
 % endfor
 
