@@ -9,13 +9,13 @@ class Slave:
         self.end_address = start_address + length
 
     def get_start_address(self):
-        return f"0x{self.start_address:08x}"
+        return f"0x{self.start_address:016x}"
 
     def get_length(self):
-        return f"0x{self.length:08x}"
+        return f"0x{self.length:016x}"
     
     def get_end_address(self):
-        return f"0x{self.end_address:08x}"
+        return f"0x{self.end_address:016x}"
 
 
 class Bus:
