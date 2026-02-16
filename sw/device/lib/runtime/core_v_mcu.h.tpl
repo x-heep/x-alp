@@ -19,8 +19,8 @@ extern "C" {
 % endfor
 
 % for a_peripheral in xalp.get_peripheral_domain("peripherals").get_peripherals():
-#define ${a_peripheral._name.upper()}_BASE_ADDRESS PERIPHERALS_START_ADDRESS +  0x${f"{a_peripheral.get_address():08x}"}
-#define ${a_peripheral._name.upper()}_SIZE 0x${f"{a_peripheral.get_length():08x}"}
+#define ${a_peripheral._name.upper()}_BASE_ADDRESS (PERIPHERALS_START_ADDRESS +  0x${f"{a_peripheral.get_address():016x}"})
+#define ${a_peripheral._name.upper()}_SIZE 0x${f"{a_peripheral.get_length():016x}"}
 #define ${a_peripheral._name.upper()}_END_ADDRESS (${a_peripheral._name.upper()}_BASE_ADDRESS + ${a_peripheral._name.upper()}_SIZE)
 
 % endfor
