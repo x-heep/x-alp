@@ -32,8 +32,8 @@ def config():
     peripheral_domain.add_peripheral(SOC_ctrl(0x0, 0x1000))
     peripheral_domain.add_peripheral(Bootrom(0x10000, 0x10000))
     peripheral_domain.add_peripheral(Fast_intr_ctrl(0x20000, 0x1000))
-    peripheral_domain.add_peripheral(UART(0x10000000, 0x1000))
-    peripheral_domain.add_peripheral(ext_peripipheral(0x11000000, 0x1000))
+    peripheral_domain.add_peripheral(UART(0x30000, 0x1000))
+    peripheral_domain.add_peripheral(ext_peripipheral(0x40000, 0x1000))
 
     system.add_peripheral_domain(peripheral_domain, "peripherals")
 
