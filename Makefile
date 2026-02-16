@@ -76,7 +76,7 @@ export
 # ============================================================================
 # Phony Targets
 # ============================================================================
-.PHONY: help conda clean clean-app clean-all \
+.PHONY: help conda mamba clean clean-app clean-all \
         app app-list \
         verilator-build verilator-run verilator-waves \
         format lint \
@@ -92,9 +92,15 @@ help:
 # Environment Setup
 # ============================================================================
 
-## @section Conda
+## @section Environment Setup
+
+## Create the environment using conda
 conda:
 	@conda env create -f util/conda_environment.yml
+
+## Create the environment using mamba
+mamba:
+	@mamba env create -f util/conda_environment.yml
 
 # ============================================================================
 # MCU Code Generation
