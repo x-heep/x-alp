@@ -2,12 +2,12 @@
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 {
-  name: "SystemGen",
-  target_dir: "SystemGen",
+  name: "XheepGen",
+  target_dir: "XheepGen",
 
   upstream: {
-    url: "https://github.com/LuigiGiuffrida98/SystemGen.git",
-    rev: "main", # 0.9.0
+    url: "https://github.com/x-heep/XheepGen.git",
+    rev: "prepare-xalp",
   },
 
   

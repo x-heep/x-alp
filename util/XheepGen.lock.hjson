@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/LuigiGiuffrida98/SystemGen.git
-    rev: 345fa49b1872defdf7273831bdfdecf76cd96938
+    url: https://github.com/x-heep/XheepGen.git
+    rev: af852f17aef15ab2ad997f2b0e7c34099bc4b307
   }
 }

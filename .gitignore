@@ -26,4 +26,5 @@ sw/device/lib/drivers/soc_ctrl/soc_ctrl_structs.h
 # User-dependent configuration files
 .vscode
 .continue
+.DS_Store
 private/
