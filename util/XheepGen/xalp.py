@@ -14,12 +14,11 @@ class XAlp(System):
     from X-HEEP (to be defined), but shares the same :class:`Bus`-based
     slave map and master indices.
 
-    :param Bus bus: The bus configuration for this system.
     :raise TypeError: when parameters are of incorrect type.
     """
 
-    def __init__(self, bus: Bus):
-        super().__init__(bus)
+    def __init__(self):
+        super().__init__()
 
     # ------------------------------------------------------------
     # Build and Validate

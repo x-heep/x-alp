@@ -1,5 +1,5 @@
 
-/Users/gigi/workspace/x-heep/x-alp/hw/ip/bootrom/bootrom.elf:     file format elf64-littleriscv
+/Users/gigi/workspace/x-heep/test/x-alp/hw/ip/bootrom/bootrom.elf:     file format elf64-littleriscv
 
 
 Disassembly of section .text:

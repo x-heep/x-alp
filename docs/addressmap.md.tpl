@@ -4,18 +4,14 @@ ${"##"} Bus Slaves
 
 | Name | Base Address | Size | End Address |
 |------|-------------|------|-------------|
-% for a_slave in xalp.bus.slaves:
-<%
-    base = int(a_slave.get_start_address(), 16)
-    size = int(a_slave.get_length(), 16)
-    end = base + size
-%>\
-| ${a_slave.name} | `0x${f"{base:016x}"}` | `0x${f"{size:016x}"}` | `0x${f"{end:016x}"}` |
+% for a_slave in xalp.bus().get_slaves():
+| ${a_slave.name} | `0x${f"{a_slave.start_address:016x}"}` | `0x${f"{a_slave.length:016x}"}` | `0x${f"{a_slave.end_address:016x}"}` |
 % endfor
 
 <%
-    periph_domain = xalp.get_peripheral_domain("peripherals")
-    periph_base = int([s for s in xalp.bus.slaves if s.name.upper() == "PERIPHERALS"][0].get_start_address(), 16)
+    periph_domain = xalp.get_peripheral_domain("Peripherals")
+    periph_slaves = xalp.bus().get_slaves()
+    periph_base = [s for s in periph_slaves if s.name.upper() == "PERIPHERALS"][0].start_address
 %>\
 ${"##"} Peripherals
 

@@ -17,16 +17,12 @@ class System:
     Subclasses can extend or override :meth:`build` and :meth:`validate` to
     add system‑specific behaviour.
 
-    :param Bus bus: The bus configuration for this system.
     :raise TypeError: when parameters are of incorrect type.
     """
 
-    def __init__(self, bus: Bus):
-        if not isinstance(bus, Bus):
-            raise TypeError(f"System.bus should be of type Bus not {type(bus)}")
-
+    def __init__(self):
         self._cpu: Optional[CPU] = None
-        self._bus: Bus = bus
+        self._bus: Optional[Bus] = None
         self._peripheral_domains: List[PeripheralDomain] = []
         self._padring: Optional[PadRing] = None
         self._extensions = {}
@@ -108,6 +104,23 @@ class System:
         :rtype: List[PeripheralDomain]
         """
         return deepcopy(self._peripheral_domains)
+
+    def get_peripheral_domain(self, name: str) -> Optional[PeripheralDomain]:
+        """
+        Returns a deepcopy of the peripheral domain with the given name.
+
+        :param str name: The name to search for (matched against the domain's
+            ``_name`` attribute, case-insensitive, with optional suffix
+            " Peripheral Domain" stripped before comparison).
+        :return: The matching peripheral domain, or ``None``.
+        :rtype: Optional[PeripheralDomain]
+        """
+        needle = name.lower().replace(" peripheral domain", "").strip()
+        for domain in self._peripheral_domains:
+            domain_name = domain._name.lower().replace(" peripheral domain", "").strip()
+            if domain_name == needle:
+                return deepcopy(domain)
+        return None
 
     # ------------------------------------------------------------
     # Pad Ring
@@ -192,6 +205,9 @@ class System:
         """
         if not self.cpu():
             raise RuntimeError("[MCU-GEN] ERROR: A CPU must be configured")
+
+        if not self._bus:
+            raise RuntimeError("[MCU-GEN] ERROR: A bus must be configured")
 
         # Validate each peripheral domain
         for domain in self._peripheral_domains:

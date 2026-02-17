@@ -5,8 +5,8 @@
 # Author(s): Juan Sapriza, David Mallasen
 # Description: Top-level container for the pad ring in the X-HEEP generation.
 
-from .pad import Pad, Physical
-from .pad import Corner
+from .Pad import Pad, Physical
+from .Pad import Corner
 from .pin import Pin
 from .floorplan import FloorplanDimensions, Side, SIDE_DEFAULT_ROTATION
 

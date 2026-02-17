@@ -5,9 +5,9 @@
 # Author(s): Juan Sapriza
 # Description: Graphical visualization utilities for X-HEEP padring generation.
 
-from x_heep_gen.pads.pad_ring import *
-from x_heep_gen.pads.floorplan import *
-from x_heep_gen.pads.pad import *
+from .pad_ring import *
+from .floorplan import *
+from .Pad import *
 
 
 def object_to_tree(obj, name=None, indent="", is_last=True):

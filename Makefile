@@ -63,12 +63,12 @@ SOURCE ?=
 
 # MCU-Gen template files to generate
 MCU_GEN_TEMPLATES = $(shell find . \( -path './hw/vendor' -o -path './util' -o -path './test' \) -prune -o -name '*.tpl' -print)
+# Optionally, additional external template files can be provided to mcu-gen
+EXTERNAL_MCU_GEN_TEMPLATES ?=
 
 # Mcu-gen configuration files
-PADS_CFG ?= config/pad_cfg.hjson
+PADS_CFG ?= config/pad_cfg.py
 XALP_CFG ?= config/config.py
-# Cached mcu-gen xheep configuration
-XALP_CONFIG_CACHE ?= $(BUILD_DIR)/xalp_config_cache.pickle
 
 # Export variables to sub-makefiles
 export
@@ -108,8 +108,7 @@ mamba:
 
 ## @section MCU Code Generation
 mcu-gen:
-	$(PYTHON) util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --config $(XALP_CFG) --pads_cfg $(PADS_CFG)
-	$(PYTHON) util/mcu_gen.py --cached_path $(XALP_CONFIG_CACHE) --cached --outtpl "$(MCU_GEN_TEMPLATES)"
+	$(PYTHON) util/mcu_gen.py --config $(XALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
 	@$(MAKE) reg-gen
 	@$(MAKE) boot-rom
 	@$(MAKE) format

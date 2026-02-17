@@ -14,17 +14,17 @@ package core_v_mcu_pkg;
     //-----------
     // BUS Config
     //-----------
-    localparam int unsigned NumAxiMasters = ${xalp.bus.get_num_masters()};
+    localparam int unsigned NumAxiMasters = ${xalp.bus().num_masters()};
     // localparam int unsigned NumExtAxiMasters = 1;
 
     localparam int unsigned totalAxiMasters = NumAxiMasters;
 
-    localparam int unsigned NumAxiSlaves = ${xalp.bus.get_num_slaves()};
+    localparam int unsigned NumAxiSlaves = ${xalp.bus().num_slaves()};
     // localparam int unsigned NumExtAxiSlaves = 1;
 
     localparam int unsigned totalAxiSlaves = NumAxiSlaves;
 
-    localparam int unsigned NumRegSlaves = ${len(xalp.get_peripheral_domain("peripherals").get_peripherals())};
+    localparam int unsigned NumRegSlaves = ${len(xalp.get_peripheral_domain("Peripherals").get_peripherals())};
     // localparam int unsigned NumExtRegSlaves = 1;
 
     localparam int unsigned totalRegSlaves = NumRegSlaves;
@@ -61,20 +61,20 @@ package core_v_mcu_pkg;
     localparam JTAG_IDCODE = 32'h10001c05;
 
     // Master indexes
-% for idx, a_master in enumerate(xalp.bus.masters):
-    localparam int unsigned ${a_master.upper()}_M_BUS_IDX = ${idx};
+% for idx, a_master in enumerate(xalp.bus().get_masters()):
+    localparam int unsigned ${a_master.name.upper()}_M_BUS_IDX = ${idx};
 % endfor
 
     // Slave indexes
-% for idx, a_slave in enumerate(xalp.bus.slaves):
+% for idx, a_slave in enumerate(xalp.bus().get_slaves()):
     localparam int unsigned ${a_slave.name.upper()}_S_BUS_IDX = ${idx};
 % endfor
     
 
     // Slave addresses
-% for a_slave in xalp.bus.slaves:
-    localparam addr_t ${a_slave.name.upper()}_BUS_BASE_ADDR = 64'h${f"{a_slave.get_start_address()[2:]}"};
-    localparam addr_t ${a_slave.name.upper()}_BUS_SIZE = 64'h${f"{a_slave.get_length()[2:]}"};
+% for a_slave in xalp.bus().get_slaves():
+    localparam addr_t ${a_slave.name.upper()}_BUS_BASE_ADDR = 64'h${f"{a_slave.start_address:016X}"};
+    localparam addr_t ${a_slave.name.upper()}_BUS_SIZE = 64'h${f"{a_slave.length:016X}"};
     localparam addr_t ${a_slave.name.upper()}_BUS_END_ADDR = ${a_slave.name.upper()}_BUS_BASE_ADDR + ${a_slave.name.upper()}_BUS_SIZE;
 % endfor
 
@@ -87,39 +87,39 @@ package core_v_mcu_pkg;
     localparam addr_t DATA_ZONE_END_ADDR = DATA_ZONE_BASE_ADDR + DATA_ZONE_SIZE;
 
     // Register indexes
-% for idx, a_peripheral in enumerate(xalp.get_peripheral_domain("peripherals").get_peripherals()):
+% for idx, a_peripheral in enumerate(xalp.get_peripheral_domain("Peripherals").get_peripherals()):
     localparam int unsigned ${a_peripheral._name.upper()}_REG_IDX = ${idx};
 % endfor
 
     // Register addresses
-% for a_peripheral in xalp.get_peripheral_domain("peripherals").get_peripherals():
-    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h${f"{a_peripheral.get_address():016x}"};
-    localparam addr_t ${a_peripheral._name.upper()}_REG_SIZE = 64'h${f"{a_peripheral.get_length():016x}"};
+% for a_peripheral in xalp.get_peripheral_domain("Peripherals").get_peripherals():
+    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h${f"{a_peripheral.get_address():016X}"};
+    localparam addr_t ${a_peripheral._name.upper()}_REG_SIZE = 64'h${f"{a_peripheral.get_length():016X}"};
     localparam addr_t ${a_peripheral._name.upper()}_REG_END_ADDR = ${a_peripheral._name.upper()}_REG_BASE_ADDR + ${a_peripheral._name.upper()}_REG_SIZE;
 % endfor
 
     // Address mapping rules
     localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
-% for  idx, a_slave in enumerate(xalp.bus.slaves):
+% for  idx, a_slave in enumerate(xalp.bus().get_slaves()):
         '{
             idx : ${a_slave.name.upper()}_S_BUS_IDX,
             start_addr : ${a_slave.name.upper()}_BUS_BASE_ADDR,
             end_addr : ${a_slave.name.upper()}_BUS_END_ADDR
         }
-% if (idx != len(xalp.bus.slaves) - 1):
+% if (idx != len(xalp.bus().get_slaves()) - 1):
              , 
 % endif
 % endfor
     };
 
     localparam rule_t [totalRegSlaves-1:0] RegMap = '{
-% for  idx, a_peripheral in enumerate(xalp.get_peripheral_domain("peripherals").get_peripherals()):
+% for  idx, a_peripheral in enumerate(xalp.get_peripheral_domain("Peripherals").get_peripherals()):
         '{
             idx : ${a_peripheral._name.upper()}_REG_IDX,
             start_addr : ${a_peripheral._name.upper()}_REG_BASE_ADDR,
             end_addr : ${a_peripheral._name.upper()}_REG_END_ADDR
         }
-% if (idx != len(xalp.get_peripheral_domain("peripherals").get_peripherals()) - 1):
+% if (idx != len(xalp.get_peripheral_domain("Peripherals").get_peripherals()) - 1):
              ,
 % endif
 % endfor

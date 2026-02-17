@@ -11,16 +11,16 @@ extern "C" {
 
 #define MEMORY_BANKS 1
 
-% for a_slave in xalp.bus.slaves:
-#define ${a_slave.name.upper()}_START_ADDRESS ${a_slave.get_start_address()}
-#define ${a_slave.name.upper()}_SIZE ${a_slave.get_length()}
+% for a_slave in xalp.bus().get_slaves():
+#define ${a_slave.name.upper()}_START_ADDRESS 0x${f"{a_slave.start_address:016X}"}
+#define ${a_slave.name.upper()}_SIZE 0x${f"{a_slave.length:016X}"}
 #define ${a_slave.name.upper()}_END_ADDRESS (${a_slave.name.upper()}_START_ADDRESS + ${a_slave.name.upper()}_SIZE)
 
 % endfor
 
-% for a_peripheral in xalp.get_peripheral_domain("peripherals").get_peripherals():
-#define ${a_peripheral._name.upper()}_BASE_ADDRESS (PERIPHERALS_START_ADDRESS +  0x${f"{a_peripheral.get_address():016x}"})
-#define ${a_peripheral._name.upper()}_SIZE 0x${f"{a_peripheral.get_length():016x}"}
+% for a_peripheral in xalp.get_peripheral_domain("Peripherals").get_peripherals():
+#define ${a_peripheral._name.upper()}_BASE_ADDRESS (PERIPHERALS_START_ADDRESS +  0x${f"{a_peripheral.get_address():016X}"})
+#define ${a_peripheral._name.upper()}_SIZE 0x${f"{a_peripheral.get_length():016X}"}
 #define ${a_peripheral._name.upper()}_END_ADDRESS (${a_peripheral._name.upper()}_BASE_ADDRESS + ${a_peripheral._name.upper()}_SIZE)
 
 % endfor
