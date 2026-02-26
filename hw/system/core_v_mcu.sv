@@ -24,7 +24,7 @@ module core_v_mcu (
     input  logic jtag_trst_ni,
     input  logic jtag_tdi_i,
     output logic jtag_tdo_o,
-    output logic jtag_tdo_oe_o,
+    // output logic jtag_tdo_oe_o,
 
     // Test mode
     input logic test_mode_i,
@@ -235,7 +235,7 @@ module core_v_mcu (
         .jtag_trst_ni (jtag_trst_ni),
         .jtag_tdi_i   (jtag_tdi_i),
         .jtag_tdo_o   (jtag_tdo_o),
-        .jtag_tdo_oe_o(jtag_tdo_oe_o),
+        .jtag_tdo_oe_o(),
         // Test mode
         .test_mode_i  (test_mode_i),
         // Debug signals

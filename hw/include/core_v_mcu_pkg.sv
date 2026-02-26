@@ -182,4 +182,20 @@ package core_v_mcu_pkg;
     // Boot address
     localparam addr_t BOOT_ADDR = BOOTROM_REG_BASE_ADDR;
 
+    //----------
+    // PAD Ring
+    //----------
+    localparam PAD_CLK = 0;
+    localparam PAD_RST = 1;
+    localparam PAD_JTAG_TCK = 2;
+    localparam PAD_JTAG_TMS = 3;
+    localparam PAD_JTAG_TRST = 4;
+    localparam PAD_JTAG_TDI = 5;
+    localparam PAD_JTAG_TDO = 6;
+    localparam PAD_UART_RX = 7;
+    localparam PAD_UART_TX = 8;
+    localparam PAD_EXIT_VALID = 9;
+
+    localparam NUM_PAD = 10;
+
 endpackage : core_v_mcu_pkg

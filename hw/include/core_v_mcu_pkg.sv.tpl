@@ -145,4 +145,15 @@ package core_v_mcu_pkg;
     // Boot address
     localparam addr_t BOOT_ADDR = BOOTROM_REG_BASE_ADDR;
 
+    //----------
+    // PAD Ring
+    //----------
+% for pad in xalp.get_padring().pad_list:
+  % if pad.global_index is not None:
+    localparam PAD_${pad.name.upper()} = ${pad.global_index};
+  % endif
+% endfor
+
+    localparam NUM_PAD = ${len(xalp.get_padring().pad_list)};
+
 endpackage : core_v_mcu_pkg

@@ -48,6 +48,11 @@ module testharness #(
     // Internal signals
     // ----------------
 
+    logic clk;
+    logic rst_n;
+    logic exit_valid;
+    logic [31:0] exit_value;
+
     // JTAG
     logic                         sim_jtag_enable;
     logic                         sim_jtag_tck;
@@ -78,23 +83,25 @@ module testharness #(
     logic                 tb_mem_we;
     logic [         63:0] tb_mem_rdata;
 
+    assign clk = clk_i;
+    assign rst_n = rst_ni;
+    assign exit_valid_o = exit_valid;
 
     //----
     // DUT
     //----
     x_alp u_x_alp (
-        .clk_i        (clk_i),
-        .rst_ni       (rst_ni),
+        .clk_i        (clk),
+        .rst_ni       (rst_n),
         .uart_tx_o    (uart_tx),
         .uart_rx_i    (uart_rx),
-        .exit_valid_o (exit_valid_o),
+        .exit_valid_o (exit_valid),
         .exit_value_o (exit_value_o),
         .jtag_tck_i   (jtag_tck),
         .jtag_tms_i   (jtag_tms),
         .jtag_trst_ni (jtag_trst_n),
         .jtag_tdi_i   (jtag_tdi),
         .jtag_tdo_o   (jtag_tdo),
-        .jtag_tdo_oe_o(),
         .ext_slv_req_o(ext_slv_req),
         .ext_slv_rsp_i(ext_slv_rsp),
         .ext_mst_req_i('0),
