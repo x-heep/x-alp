@@ -1,0 +1,130 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  axi_riscv_atomics: {
+    upstream: {
+      url: https://github.com/pulp-platform/axi_riscv_atomics.git
+      rev: 0ac3a78fe342c5a5b9b10bff49d58897f773059e
+    }
+
+    exclude_from_upstream: [
+      ".github",
+      "scripts",
+      "test",
+      ".editorconfig",
+      ".gitignore",
+      ".gitlab-ci.yml",
+      "Bender.yml",
+      "CHANGELOG.md",
+      "LICENSE",
+      "README.md",
+      "src_files.yml",
+    ]
+  },
+
+  axi: {
+    upstream: {
+      url: "https://github.com/pulp-platform/axi.git",
+      rev: "v0.39.8",
+    },
+
+    exclude_from_upstream: [
+      ".ci",
+      ".github",
+      ".gitlab-ci.d",
+      "doc",
+      "scripts",
+      "test",
+      ".gitignore",
+      ".gitlab-ci.yml",
+      "Bender.yml",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "ips_list.yml",
+      "LICENSE",
+      "Makefile",
+      "README.md",
+      "src_files.yml",
+      "VERSION"
+    ],
+
+    patch_dir: "patches/pulpplatform_axi",
+  },
+
+  commoncells: {
+    upstream: {
+      url: "https://github.com/pulp-platform/common_cells.git",
+      rev: "v1.38.0",
+    },
+
+    exclude_from_upstream: [
+      "ips_list.yml",
+      "LICENSE",
+      "Makefile",
+      "README.md",
+      "src_files.yml",
+      ".github",
+      ".github/workflows",
+      ".github/verible-lint-matcher.json",
+      "ci",
+      "formal",
+      "lint",
+      "test",
+      ".gitignore",
+      ".gitlab-ci.yml",
+      ".travis.yml",
+      "Bender.yml",
+      "CHANGELOG.md"
+    ]
+  },
+
+  register_interface: {
+    upstream: {
+      url: "https://github.com/pulp-platform/register_interface.git",
+      rev: "v0.4.7",
+    },
+
+    exclude_from_upstream: [
+      ".github",
+      "lint",
+      "docs",
+      "vendor/lowrisc_opentitan.vendor.hjson",
+    ]
+  },
+
+  riscv_dbg: {
+    upstream: {
+      url: "https://github.com/pulp-platform/riscv-dbg.git",
+      rev: "v0.9.0",
+    },
+
+    patch_dir: "patches/pulpplatform_riscv_dbg",
+
+    exclude_from_upstream: [
+      "ci",
+      "tb",
+      "sva",
+      "Bender.yml"
+    ]
+  },
+
+  tech_cells: {
+    upstream: {
+      url: "https://github.com/pulp-platform/tech_cells_generic.git",
+      rev: "v0.2.13",
+    },
+
+    exclude_from_upstream: [
+      "scripts",
+      "test",
+      ".gitignore",
+      "Bender.yml",
+      "CHANGELOG.md",
+      "CONTRIBUTING.md",
+      "LICENSE",
+      "README.md",
+      "src_files.yml"
+    ]
+  }
+}
