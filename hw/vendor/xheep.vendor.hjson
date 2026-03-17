@@ -1,0 +1,19 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  spi: {
+    upstream: {
+      url: "https://github.com/x-heep/xheep_spi.git",
+      rev: "0587eeee36834f2405d733ec51039c79d7df2081",
+    },
+  
+    exclude_from_upstream: [
+      ".gitignore",
+      "sw",
+      "util",
+      "vendor/pulp_platform",
+      "vendor/pulp_platform_register_interface.core",
+    ],
+  },
+}

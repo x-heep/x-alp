@@ -1,0 +1,18 @@
+// Copyright 2020 EPFL and OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  register_interface: {
+    upstream: {
+      url: "https://github.com/pulp-platform/register_interface.git",
+      rev: "8e8c209ea559d3b54f45cf30fcce95ce70ff5e49",
+    },
+
+    exclude_from_upstream: [
+      ".github",
+      "lint",
+      "docs",
+      "vendor/lowrisc_opentitan.vendor.hjson",
+    ]
+  }
+}
