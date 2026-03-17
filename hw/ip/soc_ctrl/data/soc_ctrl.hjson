@@ -3,8 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 
-
-
 { name: "soc_ctrl"
   clock_primary: "clk_i"
   bus_interfaces: [
@@ -33,7 +31,7 @@
       swaccess: "ro"
       hwaccess: "hrw"
       fields: [
-        { bits: "1:0", name: "BOOT_SELECT", desc: "Boot Select Reg", 
+        { bits: "1:0", name: "BOOT_SELECT", desc: "Boot Select Reg",
           enum: [
             { name: "BOOT_SELECT_PASSIVE",   value: "0", desc: "Passive Boot (wait for JTAG or UART commands)" }
           ]

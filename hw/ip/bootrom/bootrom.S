@@ -11,7 +11,7 @@
 #include "core_v_mcu.h"
 #include "soc_ctrl_regs.h"
 
-#define SOC_CTRL_START_ADDRESS_20bit (SOC_CTRL_START_ADDRESS >> 12)
+#define SOC_CTRL_START_ADDRESS_20bit (SOC_CTRL_BASE_ADDRESS >> 12)
 
 .section .text._start
 

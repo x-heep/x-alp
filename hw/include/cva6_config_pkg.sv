@@ -164,10 +164,10 @@ package cva6_config_pkg;
         NonIdempotentAddrBase:
         1024'(
         {
-            core_v_mcu_pkg::SOC_CTRL_REG_START_ADDR,
-            core_v_mcu_pkg::FAST_INTR_CTRL_REG_START_ADDR,
-            core_v_mcu_pkg::UART_REG_START_ADDR,
-            core_v_mcu_pkg::EXT_REG_START_ADDR
+            core_v_mcu_pkg::SOC_CTRL_REG_BASE_ADDR,
+            core_v_mcu_pkg::FAST_INTR_CTRL_REG_BASE_ADDR,
+            core_v_mcu_pkg::UART_REG_BASE_ADDR,
+            core_v_mcu_pkg::EXT_PERIPHERAL_REG_BASE_ADDR
         }
         ),
         NonIdempotentLength:
@@ -176,17 +176,17 @@ package cva6_config_pkg;
             core_v_mcu_pkg::SOC_CTRL_REG_SIZE,
             core_v_mcu_pkg::FAST_INTR_CTRL_REG_SIZE,
             core_v_mcu_pkg::UART_REG_SIZE,
-            core_v_mcu_pkg::EXT_REG_SIZE
+            core_v_mcu_pkg::EXT_PERIPHERAL_REG_SIZE
         }
         ),
         NrExecuteRegionRules: unsigned'(2),
         ExecuteRegionAddrBase:
         1024'(
-        {core_v_mcu_pkg::BOOT_ROM_REG_START_ADDR, core_v_mcu_pkg::CODE_ZONE_BASE_ADDR}
+        {core_v_mcu_pkg::BOOTROM_REG_BASE_ADDR, core_v_mcu_pkg::CODE_ZONE_BASE_ADDR}
         ),
         ExecuteRegionLength:
         1024'(
-        {core_v_mcu_pkg::BOOT_ROM_REG_SIZE, core_v_mcu_pkg::CODE_ZONE_SIZE}
+        {core_v_mcu_pkg::BOOTROM_REG_SIZE, core_v_mcu_pkg::CODE_ZONE_SIZE}
         ),
         NrCachedRegionRules: unsigned'(1),
         CachedRegionAddrBase: 1024'({core_v_mcu_pkg::MEM_BUS_BASE_ADDR}),
