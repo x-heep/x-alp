@@ -1,0 +1,58 @@
+CAPI=2:
+
+name: "xheep:ip:power_manager:1.0.0"
+description: "x-alp power manager"
+
+# Copyright 2022 EPFL
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_rtl:
+    depend:
+      - lowrisc:prim:all
+      - pulp-platform.org::common_cells
+    files:
+      - rtl/power_manager_common_reg_pkg.sv
+      - rtl/power_manager_xheep_reg_pkg.sv
+      - rtl/power_manager_common_reg_top.sv
+      - rtl/power_manager_xheep_reg_top.sv
+      - rtl/power_manager.sv
+
+      - rtl/power_manager_counter_sequence.sv
+      - rtl/power_manager_sequence.sv
+      - rtl/reg_to_counter.sv
+    file_type: systemVerilogSource
+
+  files_verilator_tb:
+    files:
+      - tb/power_manager_tb_wrapper.sv: {file_type: systemVerilogSource}
+      - tb/power_manager_tb.cpp: {file_type: cppSource}
+      - tb/tb_macros.hh: {file_type: cppSource, is_include_file: true}
+
+targets:
+  default:
+    filesets:
+      - files_rtl
+    toplevel: power_manager
+
+  sim:
+    filesets:
+      - files_rtl
+      - files_verilator_tb
+    toplevel: power_manager_tb_wrapper
+    default_tool: verilator
+    tools:
+      verilator:
+        mode: cc
+        verilator_options:
+          - '--trace-fst'
+          - '--trace-structs'
+          - '--trace-params'
+          - '-Wno-fatal'
+          - '-Wno-PINCONNECTEMPTY'
+          - '-Wno-ASSIGNDLY'
+          # Optimizations
+          - '-O3'
+          - '--x-assign fast'
+          - '--x-initial fast'
