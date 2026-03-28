@@ -1,0 +1,80 @@
+CAPI=2:
+
+name: "xheep_dma:tb:dma_tb" # name of project
+description: "dma channel testbench"
+
+# Copyright 2021 OpenHW Group
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_tb:
+    depend: # on dma ip
+      - xheep_dma:ip:dma 
+    files:
+      - dma_tb_wrapper.sv
+      - tb_components.cpp: {file_type: cppSource}
+      - tb_components.hh: {file_type: cppSource , is_include_file: true}
+      - tb_macros.cpp: {file_type: cppSource}
+      - tb_macros.hh: {file_type: cppSource, is_include_file: true}
+      - tb_dma_top.cpp: {file_type: cppSource}
+      - obi.hh: {is_include_file: true}
+      - reg.hh: {is_include_file: true}
+      - sw/device/lib/drivers/dma/dma_regs.h: {is_include_file: true}
+
+    file_type: systemVerilogSource # default file type
+
+  files_verilator_waiver:
+    files:
+      - ../dma.vlt
+      - tb_dma.vlt
+    file_type: vlt
+
+# generator for vlt of tb
+#generate:
+#  waivers:
+#    generator: waiver-gen
+#    parameters:
+#      waivers:
+#        - tb/tb_dma.vlt
+
+targets:
+  # defines the default things
+  default: &default
+    filesets: 
+      - files_tb
+    toplevel: dma  
+    #generate:
+    #  - tool_verilator ? (waivers)
+  # simulates the design
+  sim:
+    # inherit key/value from default
+    <<: *default
+    description: Simulates the design
+    default_tool: verilator    
+    # overriding top level
+    toplevel: dma_tb_wrapper 
+    filesets: 
+      - files_tb
+      - tool_verilator ? (files_verilator_waiver)
+    tools:
+      verilator:
+        mode: cc
+        verilator_options:
+        - '--cc'
+        - '--assert'
+        - '--trace'
+        - '--trace-fst'
+        - '--trace-structs'
+        - '--trace-max-array 128'
+        - '--x-assign unique'
+        - '--x-initial unique'
+        #- '--threads 2' # only use with Verilator v5.XXX
+        - '--exe'
+        - 'tb_dma_top.cpp'
+        - '-Wall'
+        - '-Wpedantic'
+        # debug reason
+        # - '--waiver-output test.vlt'
+
+
