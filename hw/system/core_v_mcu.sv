@@ -64,6 +64,16 @@ module core_v_mcu (
 
     logic                                                              debug_req;
 
+    power_manager_pkg::power_manager_out_t cpu_subsystem_pwr_ctrl;
+    power_manager_pkg::power_manager_in_t  cpu_subsystem_pwr_ctrl_ack; 
+    power_manager_pkg::power_manager_out_t peripheral_subsystem_pwr_ctrl;
+    power_manager_pkg::power_manager_in_t  peripheral_subsystem_pwr_ctrl_ack;
+    power_manager_pkg::power_manager_out_t memory_subsystem_pwr_ctrl [core_v_mini_mcu_pkg::NUM_BANKS-1:0];
+    power_manager_pkg::power_manager_in_t  memory_subsystem_pwr_ctrl_ack [core_v_mini_mcu_pkg::NUM_BANKS-1:0];
+    power_manager_pkg::power_manager_out_t external_subsystem_pwr_ctrl [core_v_mini_mcu_pkg::EXTERNAL_DOMAINS == 0 ? 1 : core_v_mini_mcu_pkg::EXTERNAL_DOMAINS-1:0];
+    power_manager_pkg::power_manager_in_t  external_subsystem_pwr_ctrl_ack [core_v_mini_mcu_pkg::EXTERNAL_DOMAINS == 0 ? 1 : core_v_mini_mcu_pkg::EXTERNAL_DOMAINS-1:0];
+    power_manager_pkg::power_manager_out_t dma_subsystem_pwr_ctrl [core_v_mini_mcu_pkg::DMA_CH_NUM-1:0];
+
     //
     //       █████████  ███████████  █████  █████
     //      ███░░░░░███░░███░░░░░███░░███  ░░███ 
@@ -242,6 +252,31 @@ module core_v_mcu (
         .dbg_active_o (),
         .dbg_req_o    (debug_req)
 
+    );
+
+    power_manager_subsystem #(
+        .reg_req_t(core_v_mcu_pkg::reg_req_t),
+        .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
+    ) u_power_manager_subsystem (
+        .clk_i      (clk_i),
+        .rst_ni     (rst_ni),
+        // Bus Interface
+        .reg_req_i  (reg_req_sig[POWER_MANAGER_REG_IDX]),
+        .reg_rsp_o  (reg_rsp_sig[POWER_MANAGER_REG_IDX]),
+        // Status & Interrupts
+        .core_sleep_i (1'b0), // Tie to 0 for now (or connect to CPU sleep signal if available)
+        .intr_i       ('0),   // Tie off for now
+        .ext_irq_i    ('0),   // Tie off for now
+        // Power Control Routing
+        .cpu_subsystem_pwr_ctrl_o        (cpu_subsystem_pwr_ctrl),
+        .peripheral_subsystem_pwr_ctrl_o (peripheral_subsystem_pwr_ctrl),
+        .memory_subsystem_pwr_ctrl_o     (memory_subsystem_pwr_ctrl),
+        .external_subsystem_pwr_ctrl_o   (external_subsystem_pwr_ctrl),
+        .dma_subsystem_pwr_ctrl_o        (dma_subsystem_pwr_ctrl),
+        .cpu_subsystem_pwr_ctrl_i        (cpu_subsystem_pwr_ctrl_ack),
+        .peripheral_subsystem_pwr_ctrl_i (peripheral_subsystem_pwr_ctrl_ack),
+        .memory_subsystem_pwr_ctrl_i     (memory_subsystem_pwr_ctrl_ack),
+        .external_subsystem_pwr_ctrl_i   (external_subsystem_pwr_ctrl_ack)
     );
 
 endmodule
