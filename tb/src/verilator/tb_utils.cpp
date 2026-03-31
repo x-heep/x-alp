@@ -103,7 +103,6 @@ unsigned int TbUtils::extract_memory_type() {
   } else if (memory_type == "dram") {
     std::cout << "[TESTBENCH]: Using DRAM as memory type" << std::endl;
     mem_type = 0; // DRAM
-
   } else if (memory_type == "spm") {
     std::cout << "[TESTBENCH]: Using SPM as memory type" << std::endl;
     mem_type = 1; // SPM
@@ -150,19 +149,13 @@ unsigned long long TbUtils::get_max_sim_time(bool &run_all) {
 std::string TbUtils::get_boot_mode() {
   std::string arg_boot_mode = this->getCmdOption(this->argc, this->argv, "+BOOTMODE=");
   if (arg_boot_mode.empty()) {
-    std::cout << "[TESTBENCH]: No Boot Option specified, using Idle boot (BOOTMODE=0)" << std::endl;
-    arg_boot_mode = "0";
+    std::cout << "[TESTBENCH]: No Boot Option specified, using force boot" << std::endl;
+    arg_boot_mode = "force";
   } else {
-    if (arg_boot_mode == "sd") {
-      std::cout << "[TESTBENCH]: Autonomous boot from SD card" << std::endl;
-    } else if (arg_boot_mode == "force") {
+    if (arg_boot_mode == "force") {
       std::cout << "[TESTBENCH]: Force boot from testbench" << std::endl;
     } else if (arg_boot_mode == "jtag") {
       std::cout << "[TESTBENCH]: Autonomous boot using JTAG and GDB" << std::endl;
-    } else if (arg_boot_mode == "uart") {
-      std::cout << "[TESTBENCH]: Boot using UART" << std::endl;
-    } else if (arg_boot_mode == "slink") {
-      std::cout << "[TESTBENCH]: Boot using Serial Link" << std::endl;
     } else {
       std::cerr << "[TESTBENCH]: Wrong Boot Option specified, supported "
                    "options are ( force, jtag)"

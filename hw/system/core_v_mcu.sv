@@ -51,18 +51,39 @@ module core_v_mcu (
     import core_v_mcu_pkg::*;
 
     // Internal signals
-    core_v_mcu_pkg::axi_mst_req_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_req_sig;
-    core_v_mcu_pkg::axi_mst_rsp_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_rsp_sig;
-    core_v_mcu_pkg::axi_slv_req_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_req_sig;
-    core_v_mcu_pkg::axi_slv_rsp_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_rsp_sig;
+    axi_mst_req_t [totalAxiMasters-1:0] axi_master_req_sig;
+    axi_mst_rsp_t [totalAxiMasters-1:0] axi_master_rsp_sig;
+    axi_slv_req_t [ totalAxiSlaves-1:0] axi_slave_req_sig;
+    axi_slv_rsp_t [ totalAxiSlaves-1:0] axi_slave_rsp_sig;
 
-    core_v_mcu_pkg::reg_req_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_req_sig;
-    core_v_mcu_pkg::reg_rsp_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_rsp_sig;
+    reg_req_t     [ totalRegSlaves-1:0] reg_req_sig;
+    reg_rsp_t     [ totalRegSlaves-1:0] reg_rsp_sig;
 
-    logic                         [                              15:0] fast_intr;
-    logic                         [                              15:0] fast_irq;
+    logic         [               15:0] fast_intr;
+    logic         [               15:0] fast_irq;
 
-    logic                                                              debug_req;
+    logic                               debug_req;
+    logic                               debug_req_sync;
+    logic                               ndmreset;
+    logic                               ndmreset_sync;
+    logic                               cpu_rst_n;
+
+    // Synchronizers for debug signals (2-stage sync)
+    logic         [                1:0] debug_req_sync_reg;
+    logic         [                1:0] ndmreset_sync_reg;
+
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
+            debug_req_sync_reg <= '0;
+            ndmreset_sync_reg  <= '0;
+        end else begin
+            debug_req_sync_reg <= {debug_req_sync_reg[0], debug_req};
+            ndmreset_sync_reg  <= {ndmreset_sync_reg[0], ndmreset};
+        end
+    end
+
+    assign debug_req_sync = debug_req_sync_reg[1];
+    assign ndmreset_sync  = ndmreset_sync_reg[1];
 
     //
     //       █████████  ███████████  █████  █████
@@ -75,9 +96,12 @@ module core_v_mcu (
     //      ░░░░░░░░░  ░░░░░          ░░░░░░░░   
     //
 
+    // CPU reset: system reset OR debug module reset (active high)
+    assign cpu_rst_n      = rst_ni & ~ndmreset_sync;
+
     cpu_subsystem u_cpu_subsystem (
         .clk_i      (clk_i),
-        .rst_ni     (rst_ni),
+        .rst_ni     (cpu_rst_n),
         .boot_addr_i(core_v_mcu_pkg::BOOT_ADDR),
 
         // .cvxif_resp_o (),
@@ -88,7 +112,7 @@ module core_v_mcu (
 
         .irq_i      (fast_irq[1:0]),
         .time_irq_i ('0),
-        .debug_req_i(debug_req)
+        .debug_req_i(debug_req_sync)
     );
 
     // 
@@ -240,8 +264,8 @@ module core_v_mcu (
         .test_mode_i  (test_mode_i),
         // Debug signals
         .dbg_active_o (),
-        .dbg_req_o    (debug_req)
-
+        .dbg_req_o    (debug_req),
+        .ndmreset_o   (ndmreset)
     );
 
 endmodule

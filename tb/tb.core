@@ -14,6 +14,10 @@ filesets:
     files:
     - misc/tb-waivers.vlt
 
+  simjtag_dpi:
+    depend:
+    - pulp-platform.org::riscv_dbg_remote_bitbang
+
   uartdpi:
     depend:
     - lowrisc:dv_dpi:uartdpi
@@ -47,3 +51,4 @@ targets:
     - tool_verilator ? (verilator_tb_waivers)
     - tool_verilator ? (verilator_tb)
     - tool_verilator ? (uartdpi)
+    - tool_verilator ? (simjtag_dpi)
