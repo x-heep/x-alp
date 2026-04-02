@@ -64,6 +64,31 @@ module core_v_mcu (
 
     logic                                                              debug_req;
 
+    // CPU Sleep and Interrupt Signals
+    logic           core_sleep;
+    logic [31:0]    peripheral_interrupts;
+
+    logic uart_intr_tx_watermark;
+    logic uart_intr_rx_watermark;
+    logic uart_intr_tx_empty;
+    logic uart_intr_rx_overflow;
+    logic uart_intr_rx_frame_err;
+    logic uart_intr_rx_break_err;
+    logic uart_intr_rx_timeout;
+    logic uart_intr_rx_parity_err;
+
+    assign peripheral_interrupts = {
+        24'h0,                      // SPACE FOR OTHER PERIPHERAL INTERRUPTS
+        uart_intr_rx_parity_err,
+        uart_intr_rx_timeout,
+        uart_intr_rx_break_err,
+        uart_intr_rx_frame_err,
+        uart_intr_rx_overflow,
+        uart_intr_tx_empty,
+        uart_intr_rx_watermark,
+        uart_intr_tx_watermark
+    };
+
     power_manager_pkg::power_manager_out_t cpu_subsystem_pwr_ctrl;
     power_manager_pkg::power_manager_in_t  cpu_subsystem_pwr_ctrl_ack; 
     power_manager_pkg::power_manager_out_t peripheral_subsystem_pwr_ctrl;
@@ -98,7 +123,8 @@ module core_v_mcu (
 
         .irq_i      (fast_irq[1:0]),
         .time_irq_i ('0),
-        .debug_req_i(debug_req)
+        .debug_req_i(debug_req),
+        .core_sleep_o (core_sleep)
     );
 
     // 
@@ -218,14 +244,14 @@ module core_v_mcu (
         .uart_reg_rsp             (reg_rsp_sig[UART_REG_IDX]),
         .uart_rx_i                (uart_rx_i),
         .uart_tx_o                (uart_tx_o),
-        .uart_intr_tx_watermark_o (),
-        .uart_intr_rx_watermark_o (),
-        .uart_intr_tx_empty_o     (),
-        .uart_intr_rx_overflow_o  (),
-        .uart_intr_rx_frame_err_o (),
-        .uart_intr_rx_break_err_o (),
-        .uart_intr_rx_timeout_o   (),
-        .uart_intr_rx_parity_err_o()
+        .uart_intr_tx_watermark_o (uart_intr_tx_watermark),
+        .uart_intr_rx_watermark_o (uart_intr_rx_watermark),
+        .uart_intr_tx_empty_o     (uart_intr_tx_empty),
+        .uart_intr_rx_overflow_o  (uart_intr_rx_overflow),
+        .uart_intr_rx_frame_err_o (uart_intr_rx_frame_err),
+        .uart_intr_rx_break_err_o (uart_intr_rx_break_err),
+        .uart_intr_rx_timeout_o   (uart_intr_rx_timeout),
+        .uart_intr_rx_parity_err_o(uart_intr_rx_parity_err)
     );
 
     debug_subsystem u_debug_subsystem (
@@ -264,8 +290,8 @@ module core_v_mcu (
         .reg_req_i  (reg_req_sig[POWER_MANAGER_REG_IDX]),
         .reg_rsp_o  (reg_rsp_sig[POWER_MANAGER_REG_IDX]),
         // Status & Interrupts
-        .core_sleep_i (1'b0), // CONNECT TO CPU SLEEP SIGNAL
-        .intr_i       ('0),   // CONNECT
+        .core_sleep_i (core_sleep),
+        .intr_i       (peripheral_interrupts),
         .ext_irq_i    ('0),   // CONNECT
         // Power Control Routing
         .cpu_subsystem_pwr_ctrl_o        (cpu_subsystem_pwr_ctrl),
