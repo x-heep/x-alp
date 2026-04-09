@@ -91,6 +91,7 @@ mcu-gen: reg-gen boot-rom format
 reg-gen:
 	@cd hw/ip/fast_intr_ctrl && ./fast_intr_ctrl_gen.sh && cd - > /dev/null
 	@cd hw/ip/soc_ctrl && ./soc_ctrl_gen.sh && cd - > /dev/null
+	@$(MAKE) -C hw/vendor/spi reg
 
 ## @section Boot ROM Build
 boot-rom:
