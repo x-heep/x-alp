@@ -1,0 +1,20 @@
+{
+  name: "spi",
+  target_dir: "spi",
+
+  upstream: {
+    url: "https://github.com/alebaroc/xheep_spi.git",
+    rev: "b745c58e6cf174ed3b9e04e53500209daa029f0f",
+  },
+
+  exclude_from_upstream: [
+    ".gitignore",
+    "sw",
+    "util",
+    "vendor/pulp_platform_register_interface",
+    "vendor/pulp_platform_register_interface.vendor.hjson",
+    "vendor/pulp_platform_register_interface.lock.hjson",
+    "vendor/pulp_platform_register_interface.core",
+  ],
+
+}
