@@ -122,6 +122,7 @@ jobs:
         shell: bash -le {0}
         run: |
           export RISCV_XALP=$RISCV_XHEEP
+          export COMPILER_PREFIX=riscv32-corev-
           make mcu-gen && \
           util/git-diff.py --error-msg '::error ::Found differences in generated SystemVerilog files.'
 
