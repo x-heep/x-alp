@@ -29,7 +29,7 @@ jobs:
       - name: Determine tag
         id: get-tag
         run: |
-          UPSTREAM_URL=$(git remote get-url upstream 2>/dev/null || echo "https://github.com/x-heep/x-heep.git")
+          UPSTREAM_URL=$(git remote get-url upstream 2>/dev/null || echo "https://github.com/x-heep/x-alp.git")
           git fetch --tags "$UPSTREAM_URL"
           TAG_NAME=$(git describe --tags --abbrev=0 --match "v*" 2> /dev/null || echo "")
           if [ -z "$TAG_NAME" ]; then
