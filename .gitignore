@@ -4,6 +4,8 @@ build/
 *.so
 *.hex
 *.elf
+*.bin
+*.dump
 *.dis
 *.map
 *.do

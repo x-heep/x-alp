@@ -9,15 +9,15 @@ name: pulp-platform.org::axi_riscv_atomics
 filesets:
   files_rtl:
     files:
-    - pulpplatform_axi_riscv_atomics/src/axi_res_tbl.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_amos_alu.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_amos_wrap.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_amos.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_atomics_structs.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_atomics_wrap.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_atomics.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_lrsc_wrap.sv 
-    - pulpplatform_axi_riscv_atomics/src/axi_riscv_lrsc.sv
+    - pulp_platform/axi_riscv_atomics/src/axi_res_tbl.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_amos_alu.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_amos_wrap.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_amos.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_atomics_structs.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_atomics_wrap.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_atomics.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_lrsc_wrap.sv 
+    - pulp_platform/axi_riscv_atomics/src/axi_riscv_lrsc.sv
     file_type: systemVerilogSource
 
 targets:

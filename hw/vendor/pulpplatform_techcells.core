@@ -4,8 +4,8 @@ name : pulp-platform.org::tech_cells:0.2.13
 filesets:
   rtl:
     files:
-      - pulpplatform_tech_cells/src/rtl/tc_sram.sv
-      - pulpplatform_tech_cells/src/rtl/tc_clk.sv
+      - pulp_platform/tech_cells/src/rtl/tc_sram.sv
+      - pulp_platform/tech_cells/src/rtl/tc_clk.sv
     file_type : systemVerilogSource
 
 targets:

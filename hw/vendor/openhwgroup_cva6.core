@@ -4,102 +4,102 @@ name : openhwgroup.org::cva6:1.4.0
 filesets:
   rtl:
     files:
-      - openhwgroup_cva6/core/include/iti_types.svh : {is_include_file: true, include_path: openhwgroup_cva6/core/include} 
-      - openhwgroup_cva6/core/include/cvxif_types.svh : {is_include_file: true, include_path: openhwgroup_cva6/core/include} 
-      - openhwgroup_cva6/core/include/rvfi_types.svh : {is_include_file: true, include_path: openhwgroup_cva6/core/include}
-      - openhwgroup_cva6/core/include/aes_pkg.sv 
-      - openhwgroup_cva6/core/include/ariane_pkg.sv 
-      - openhwgroup_cva6/core/include/build_config_pkg.sv 
-      - openhwgroup_cva6/core/include/config_pkg.sv 
-      - openhwgroup_cva6/core/include/instr_tracer_pkg.sv 
-      - openhwgroup_cva6/core/include/iti_pkg.sv 
-      - openhwgroup_cva6/core/include/riscv_pkg.sv 
-      - openhwgroup_cva6/core/include/std_cache_pkg.sv 
-      - openhwgroup_cva6/core/include/triggers_pkg.sv 
-      - openhwgroup_cva6/core/include/wt_cache_pkg.sv
-      - openhwgroup_cva6/common/local/util/ex_trace_item.svh 
-      - openhwgroup_cva6/common/local/util/instr_trace_item.svh 
-      - openhwgroup_cva6/common/local/util/instr_tracer.sv 
-      - openhwgroup_cva6/common/local/util/sram_cache.sv 
-      - openhwgroup_cva6/common/local/util/sram.sv 
-      - openhwgroup_cva6/core/frontend/bht.sv 
-      - openhwgroup_cva6/core/frontend/bht2lvl.sv 
-      - openhwgroup_cva6/core/frontend/btb.sv 
-      - openhwgroup_cva6/core/frontend/frontend.sv 
-      - openhwgroup_cva6/core/frontend/instr_queue.sv 
-      - openhwgroup_cva6/core/frontend/instr_scan.sv 
-      - openhwgroup_cva6/core/frontend/ras.sv
-      - openhwgroup_cva6/core/pmp/src/pmp_data_if.sv 
-      - openhwgroup_cva6/core/pmp/src/pmp_entry.sv 
-      - openhwgroup_cva6/core/pmp/src/pmp.sv
-      - openhwgroup_cva6/core/cva6_mmu/cva6_mmu.sv 
-      - openhwgroup_cva6/core/cva6_mmu/cva6_ptw.sv 
-      - openhwgroup_cva6/core/cva6_mmu/cva6_shared_tlb.sv 
-      - openhwgroup_cva6/core/cva6_mmu/cva6_tlb.sv
-      - openhwgroup_cva6/core/cache_subsystem/amo_alu.sv 
-      - openhwgroup_cva6/core/cache_subsystem/axi_adapter.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cache_ctrl.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cva6_hpdcache_if_adapter.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cva6_hpdcache_subsystem_axi_arbiter.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cva6_hpdcache_subsystem.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cva6_hpdcache_wrapper.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cva6_icache_axi_wrapper.sv 
-      - openhwgroup_cva6/core/cache_subsystem/cva6_icache.sv 
-      - openhwgroup_cva6/core/cache_subsystem/miss_handler.sv 
-      - openhwgroup_cva6/core/cache_subsystem/std_cache_subsystem.sv 
-      - openhwgroup_cva6/core/cache_subsystem/std_nbdcache.sv 
-      - openhwgroup_cva6/core/cache_subsystem/tag_cmp.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_axi_adapter.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_cache_subsystem.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_dcache_ctrl.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_dcache_mem.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_dcache_missunit.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_dcache_wbuffer.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_dcache.sv 
-      - openhwgroup_cva6/core/cache_subsystem/wt_l15_adapter.sv
-      - openhwgroup_cva6/core/acc_dispatcher.sv 
-      - openhwgroup_cva6/core/aes.sv 
-      - openhwgroup_cva6/core/alu_wrapper.sv 
-      - openhwgroup_cva6/core/alu.sv 
-      - openhwgroup_cva6/core/amo_buffer.sv 
-      - openhwgroup_cva6/core/ariane_regfile_ff.sv 
-      - openhwgroup_cva6/core/ariane_regfile_fpga.sv 
-      - openhwgroup_cva6/core/axi_shim.sv 
-      - openhwgroup_cva6/core/branch_unit.sv 
-      - openhwgroup_cva6/core/commit_stage.sv 
-      - openhwgroup_cva6/core/compressed_decoder.sv 
-      - openhwgroup_cva6/core/controller.sv 
-      - openhwgroup_cva6/core/csr_buffer.sv 
-      - openhwgroup_cva6/core/csr_regfile.sv 
-      - openhwgroup_cva6/core/cva6_accel_first_pass_decoder_stub.sv 
-      - openhwgroup_cva6/core/cva6_fifo_v3.sv 
-      - openhwgroup_cva6/core/cva6_rvfi_probes.sv 
-      - openhwgroup_cva6/core/cva6_rvfi.sv 
-      - openhwgroup_cva6/core/cva6.sv 
-      - openhwgroup_cva6/core/cvxif_compressed_if_driver.sv 
-      - openhwgroup_cva6/core/cvxif_fu.sv 
-      - openhwgroup_cva6/core/cvxif_issue_register_commit_if_driver.sv 
-      - openhwgroup_cva6/core/decoder.sv 
-      - openhwgroup_cva6/core/ex_stage.sv
-      - openhwgroup_cva6/core/fpu_wrap.sv 
-      - openhwgroup_cva6/core/id_stage.sv 
-      - openhwgroup_cva6/core/instr_realign.sv 
-      - openhwgroup_cva6/core/issue_read_operands.sv 
-      - openhwgroup_cva6/core/issue_stage.sv 
-      - openhwgroup_cva6/core/load_store_unit.sv 
-      - openhwgroup_cva6/core/load_unit.sv 
-      - openhwgroup_cva6/core/lsu_bypass.sv 
-      - openhwgroup_cva6/core/macro_decoder.sv 
-      - openhwgroup_cva6/core/mult.sv 
-      - openhwgroup_cva6/core/multiplier.sv 
-      - openhwgroup_cva6/core/perf_counters.sv 
-      - openhwgroup_cva6/core/raw_checker.sv 
-      - openhwgroup_cva6/core/scoreboard.sv 
-      - openhwgroup_cva6/core/serdiv.sv 
-      - openhwgroup_cva6/core/store_buffer.sv 
-      - openhwgroup_cva6/core/store_unit.sv 
-      - openhwgroup_cva6/core/trigger_module.sv 
-      - openhwgroup_cva6/core/zcmt_decoder.sv
+      - openhwgroup/cva6/core/include/iti_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
+      - openhwgroup/cva6/core/include/cvxif_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
+      - openhwgroup/cva6/core/include/rvfi_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include}
+      - openhwgroup/cva6/core/include/aes_pkg.sv 
+      - openhwgroup/cva6/core/include/ariane_pkg.sv 
+      - openhwgroup/cva6/core/include/build_config_pkg.sv 
+      - openhwgroup/cva6/core/include/config_pkg.sv 
+      - openhwgroup/cva6/core/include/instr_tracer_pkg.sv 
+      - openhwgroup/cva6/core/include/iti_pkg.sv 
+      - openhwgroup/cva6/core/include/riscv_pkg.sv 
+      - openhwgroup/cva6/core/include/std_cache_pkg.sv 
+      - openhwgroup/cva6/core/include/triggers_pkg.sv 
+      - openhwgroup/cva6/core/include/wt_cache_pkg.sv
+      - openhwgroup/cva6/common/local/util/ex_trace_item.svh 
+      - openhwgroup/cva6/common/local/util/instr_trace_item.svh 
+      - openhwgroup/cva6/common/local/util/instr_tracer.sv 
+      - openhwgroup/cva6/common/local/util/sram_cache.sv 
+      - openhwgroup/cva6/common/local/util/sram.sv 
+      - openhwgroup/cva6/core/frontend/bht.sv 
+      - openhwgroup/cva6/core/frontend/bht2lvl.sv 
+      - openhwgroup/cva6/core/frontend/btb.sv 
+      - openhwgroup/cva6/core/frontend/frontend.sv 
+      - openhwgroup/cva6/core/frontend/instr_queue.sv 
+      - openhwgroup/cva6/core/frontend/instr_scan.sv 
+      - openhwgroup/cva6/core/frontend/ras.sv
+      - openhwgroup/cva6/core/pmp/src/pmp_data_if.sv 
+      - openhwgroup/cva6/core/pmp/src/pmp_entry.sv 
+      - openhwgroup/cva6/core/pmp/src/pmp.sv
+      - openhwgroup/cva6/core/cva6_mmu/cva6_mmu.sv 
+      - openhwgroup/cva6/core/cva6_mmu/cva6_ptw.sv 
+      - openhwgroup/cva6/core/cva6_mmu/cva6_shared_tlb.sv 
+      - openhwgroup/cva6/core/cva6_mmu/cva6_tlb.sv
+      - openhwgroup/cva6/core/cache_subsystem/amo_alu.sv 
+      - openhwgroup/cva6/core/cache_subsystem/axi_adapter.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cache_ctrl.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cva6_hpdcache_if_adapter.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cva6_hpdcache_subsystem_axi_arbiter.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cva6_hpdcache_subsystem.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cva6_hpdcache_wrapper.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cva6_icache_axi_wrapper.sv 
+      - openhwgroup/cva6/core/cache_subsystem/cva6_icache.sv 
+      - openhwgroup/cva6/core/cache_subsystem/miss_handler.sv 
+      - openhwgroup/cva6/core/cache_subsystem/std_cache_subsystem.sv 
+      - openhwgroup/cva6/core/cache_subsystem/std_nbdcache.sv 
+      - openhwgroup/cva6/core/cache_subsystem/tag_cmp.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_axi_adapter.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_cache_subsystem.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_dcache_ctrl.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_dcache_mem.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_dcache_missunit.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_dcache_wbuffer.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_dcache.sv 
+      - openhwgroup/cva6/core/cache_subsystem/wt_l15_adapter.sv
+      - openhwgroup/cva6/core/acc_dispatcher.sv 
+      - openhwgroup/cva6/core/aes.sv 
+      - openhwgroup/cva6/core/alu_wrapper.sv 
+      - openhwgroup/cva6/core/alu.sv 
+      - openhwgroup/cva6/core/amo_buffer.sv 
+      - openhwgroup/cva6/core/ariane_regfile_ff.sv 
+      - openhwgroup/cva6/core/ariane_regfile_fpga.sv 
+      - openhwgroup/cva6/core/axi_shim.sv 
+      - openhwgroup/cva6/core/branch_unit.sv 
+      - openhwgroup/cva6/core/commit_stage.sv 
+      - openhwgroup/cva6/core/compressed_decoder.sv 
+      - openhwgroup/cva6/core/controller.sv 
+      - openhwgroup/cva6/core/csr_buffer.sv 
+      - openhwgroup/cva6/core/csr_regfile.sv 
+      - openhwgroup/cva6/core/cva6_accel_first_pass_decoder_stub.sv 
+      - openhwgroup/cva6/core/cva6_fifo_v3.sv 
+      - openhwgroup/cva6/core/cva6_rvfi_probes.sv 
+      - openhwgroup/cva6/core/cva6_rvfi.sv 
+      - openhwgroup/cva6/core/cva6.sv 
+      - openhwgroup/cva6/core/cvxif_compressed_if_driver.sv 
+      - openhwgroup/cva6/core/cvxif_fu.sv 
+      - openhwgroup/cva6/core/cvxif_issue_register_commit_if_driver.sv 
+      - openhwgroup/cva6/core/decoder.sv 
+      - openhwgroup/cva6/core/ex_stage.sv
+      - openhwgroup/cva6/core/fpu_wrap.sv 
+      - openhwgroup/cva6/core/id_stage.sv 
+      - openhwgroup/cva6/core/instr_realign.sv 
+      - openhwgroup/cva6/core/issue_read_operands.sv 
+      - openhwgroup/cva6/core/issue_stage.sv 
+      - openhwgroup/cva6/core/load_store_unit.sv 
+      - openhwgroup/cva6/core/load_unit.sv 
+      - openhwgroup/cva6/core/lsu_bypass.sv 
+      - openhwgroup/cva6/core/macro_decoder.sv 
+      - openhwgroup/cva6/core/mult.sv 
+      - openhwgroup/cva6/core/multiplier.sv 
+      - openhwgroup/cva6/core/perf_counters.sv 
+      - openhwgroup/cva6/core/raw_checker.sv 
+      - openhwgroup/cva6/core/scoreboard.sv 
+      - openhwgroup/cva6/core/serdiv.sv 
+      - openhwgroup/cva6/core/store_buffer.sv 
+      - openhwgroup/cva6/core/store_unit.sv 
+      - openhwgroup/cva6/core/trigger_module.sv 
+      - openhwgroup/cva6/core/zcmt_decoder.sv
     file_type : systemVerilogSource
     depend:
       - openhwgroup.org::cvfpu
@@ -107,14 +107,14 @@ filesets:
 
   sim_rtl:
     files:
-    - openhwgroup_cva6/common/local/util/tc_sram_wrapper.sv
+    - openhwgroup/cva6/common/local/util/tc_sram_wrapper.sv
     file_type : systemVerilogSource
     depend:
       -  pulp-platform.org::tech_cells:0.2.13
   
   rtl_fpga:
     files:
-    - openhwgroup_cva6/common/local/util/tc_sram_fpga_wrapper.sv
+    - openhwgroup/cva6/common/local/util/tc_sram_fpga_wrapper.sv
     file_type : systemVerilogSource
 
 
