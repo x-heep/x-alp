@@ -32,9 +32,9 @@ def main():
 
     # diff tree against working tree
     for diff in diff_to_head:
+        print(diff.b_path)
         print("::error file={}::Files differ ({})".format(
             diff.b_path, diff.change_type))
-    print(diff_to_head)
     if len(diff_to_head) > 0:
         print(args.error_msg)
         exit(1)
