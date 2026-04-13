@@ -1,0 +1,376 @@
+name: Create X-HEEP Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tag for the GitHub release (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      llvm_version:
+        description: 'LLVM version tag to build (e.g., llvmorg-19.1.4)'
+        required: true
+        default: 'llvmorg-19.1.4'
+      gcc_version:
+        description: 'GCC version tag to build (e.g., 2023.01.03)'
+        required: true
+        default: '2023.01.03'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: x-heep/x-heep/x-heep-toolchain
+  VERILATOR_VERSION: v5.040
+  VERIBLE_VERSION: v0.0-4023-gc1271a00
+
+jobs:
+  check-changes:
+    name: Check for Changes
+    runs-on: ubuntu-latest
+    outputs:
+      rebuild_toolchain: ${{ steps.check.outputs.rebuild_toolchain }}
+      rebuild_docker: ${{ steps.check.outputs.rebuild_docker }}
+      prev_tag: ${{ steps.check.outputs.prev_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check conditions
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GCC_VERSION_NEW: ${{ inputs.gcc_version }}
+          LLVM_VERSION_NEW: ${{ inputs.llvm_version }}
+          VERILATOR_VERSION_NEW: ${{ env.VERILATOR_VERSION }}
+          VERIBLE_VERSION_NEW: ${{ env.VERIBLE_VERSION }}
+        run: |
+          # Get latest release
+          PREV_TAG=$(gh release list --limit 1 --exclude-drafts --exclude-pre-releases --json tagName --jq '.[0].tagName' || echo "")
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
+          # Unconditionally rebuild everything if no previous release is found
+          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" == "null" ]; then
+            echo "No previous release found. Rebuilding everything."
+            echo "rebuild_toolchain=true" >> $GITHUB_OUTPUT
+            echo "rebuild_docker=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Try to fetch toolchain versions from metadata file
+          gh release download $PREV_TAG -p "tool-versions.env" -D /tmp && source "/tmp/tool-versions.env" || GCC_VERSION="" LLVM_VERSION="" VERILATOR_VERSION="" VERIBLE_VERSION=""
+          REBUILD_TOOLCHAIN="false"
+          if [ "$GCC_VERSION" != "$GCC_VERSION_NEW" ] || [ "$LLVM_VERSION" != "$LLVM_VERSION_NEW" ]; then
+            REBUILD_TOOLCHAIN="true"
+          fi
+          echo "Rebuild toolchain: $REBUILD_TOOLCHAIN"
+          echo "rebuild_toolchain=$REBUILD_TOOLCHAIN" >> $GITHUB_OUTPUT
+
+          # Check Docker file changes between PREV_TAG and HEAD
+          CHANGED=$(git diff --name-only $PREV_TAG HEAD -- util/docker/ util/conda_environment.yml util/python-requirements.txt docs/python-requirements.txt)
+          REBUILD_DOCKER="false"
+          if [ "$REBUILD_TOOLCHAIN" == "true" ] || [ -n "$CHANGED" ] || [ "$VERILATOR_VERSION" != "$VERILATOR_VERSION_NEW" ] || [ "$VERIBLE_VERSION" != "$VERIBLE_VERSION_NEW" ]; then
+            REBUILD_DOCKER="true"
+          fi
+          echo "Rebuild Docker: $REBUILD_DOCKER"
+          echo "rebuild_docker=$REBUILD_DOCKER" >> $GITHUB_OUTPUT
+
+  prepare-release:
+    name: Prepare Release Branch, Tag, and Draft Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      branch_name: ${{ steps.bump_versions.outputs.BRANCH_NAME }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create release branch and update versions
+        id: bump_versions
+        run: |
+          set -ex
+          VERSION=${{ github.event.inputs.release_tag }}
+          VERSION_NUM=${VERSION#v}
+          RELEASE_NUM=$(echo ${VERSION_NUM} | cut -d. -f1,2)
+          BRANCH_NAME="release/${VERSION}"
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b ${BRANCH_NAME} ${{ github.ref }}
+          sed -i "s/name: openhwgroup.org:systems:core-v-mini-mcu:.*/name: openhwgroup.org:systems:core-v-mini-mcu:${VERSION_NUM}/" core-v-mini-mcu.core
+          sed -i "s/ARG toolchain_version=.*/ARG toolchain_version=${VERSION}/" util/docker/dockerfile
+          git add core-v-mini-mcu.core util/docker/dockerfile
+          git commit -m "Release: Bump version to ${VERSION}"
+          git push --set-upstream origin ${BRANCH_NAME}
+
+      - name: Create GitHub Draft Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          IMAGE_ID: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          release_name: X-HEEP ${{ github.event.inputs.release_tag }}
+          commitish: ${{ steps.bump_versions.outputs.BRANCH_NAME }}
+          body: |
+            This release includes the X-HEEP code and the following toolchain components:
+            - GCC RISC-V toolchain
+            - LLVM/Clang RISC-V toolchain
+
+            You can pull and use the latest [X-HEEP Docker image](https://${{ env.IMAGE_ID }}) with the following commands:
+            ```bash
+            make -C util/docker docker-pull
+            make -C util/docker docker-run
+            ```
+
+            Check `tool-versions.env` in the release assets for specific version details.
+          draft: true
+          prerelease: false
+
+  build-and-upload-toolchain:
+    name: Build and Upload Toolchain
+    runs-on: ubuntu-22.04
+    needs: [prepare-release, check-changes]
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tarball_name: ${{ steps.package.outputs.TARBALL_NAME || steps.package_reuse.outputs.TARBALL_NAME }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        if: needs.check-changes.outputs.rebuild_toolchain == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build lld
+
+      - name: Clean Up Runner
+        if: needs.check-changes.outputs.rebuild_toolchain == 'true'
+        run: |
+          docker rmi `docker images -q` || true
+          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php apt/sources.list.d
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+      - name: Build GCC
+        id: build-gcc
+        if: needs.check-changes.outputs.rebuild_toolchain == 'true'
+        run: |
+          set -ex
+          INSTALL_DIR=/tmp/riscv
+          mkdir -p ${INSTALL_DIR}
+          git clone https://github.com/riscv/riscv-gnu-toolchain /tmp/riscv-gnu-toolchain
+          cd /tmp/riscv-gnu-toolchain
+          git checkout ${{ github.event.inputs.gcc_version }}
+          ./configure --target=riscv32-unknown-elf --prefix=${INSTALL_DIR} --with-newlib --with-abi=ilp32 --with-arch=rv32imc --with-cmodel=medlow
+          make -j$(nproc)
+          rm -rf /tmp/riscv-gnu-toolchain
+
+      - name: Build LLVM/Clang
+        id: build-clang
+        if: needs.check-changes.outputs.rebuild_toolchain == 'true'
+        run: |
+          set -ex
+          INSTALL_DIR=/tmp/riscv
+          mkdir -p ${INSTALL_DIR}
+          git clone https://github.com/llvm/llvm-project.git /tmp/llvm-project
+          cd /tmp/llvm-project
+          git checkout ${{ github.event.inputs.llvm_version }}
+          cmake -S llvm -B build -G "Ninja" \
+                -DLLVM_ENABLE_PROJECTS="clang;lld" \
+                -DCMAKE_BUILD_TYPE=Release \
+                -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+                -DLLVM_TARGETS_TO_BUILD="RISCV" \
+                -DLLVM_USE_LINKER=lld
+          ninja -C build install
+          rm -rf /tmp/llvm-project
+
+      - name: Package Toolchain
+        id: package
+        if: needs.check-changes.outputs.rebuild_toolchain == 'true'
+        run: |
+          set -ex
+          INSTALL_DIR=/tmp/riscv
+          TARBALL_NAME=x-heep-toolchain-${{ github.event.inputs.release_tag }}-ubuntu2204.tar.gz
+          echo "TARBALL_NAME=${TARBALL_NAME}" >> $GITHUB_OUTPUT
+          cd ${INSTALL_DIR}
+          tar -czf /tmp/${TARBALL_NAME} .
+
+      - name: Reuse Toolchain
+        if: needs.check-changes.outputs.rebuild_toolchain == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREV_TAG: ${{ needs.check-changes.outputs.prev_tag }}
+          NEW_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -ex
+          OLD_ASSET="x-heep-toolchain-${PREV_TAG}-ubuntu2204.tar.gz"
+          NEW_ASSET="x-heep-toolchain-${NEW_TAG}-ubuntu2204.tar.gz"
+          echo "Downloading $OLD_ASSET from $PREV_TAG..."
+          gh release download $PREV_TAG -p "$OLD_ASSET" -D /tmp
+          mv /tmp/$OLD_ASSET /tmp/$NEW_ASSET
+
+      - name: Set Tarball Name for Reuse
+        id: package_reuse
+        if: needs.check-changes.outputs.rebuild_toolchain == 'false'
+        run: echo "TARBALL_NAME=x-heep-toolchain-${{ inputs.release_tag }}-ubuntu2204.tar.gz" >> $GITHUB_OUTPUT
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.prepare-release.outputs.upload_url }}
+          asset_path: /tmp/${{ steps.package.outputs.TARBALL_NAME || steps.package_reuse.outputs.TARBALL_NAME }}
+          asset_name: ${{ steps.package.outputs.TARBALL_NAME || steps.package_reuse.outputs.TARBALL_NAME }}
+          asset_content_type: application/gzip
+
+      - name: Upload Version Metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "GCC_VERSION=${{ inputs.gcc_version }}" > tool-versions.env
+          echo "LLVM_VERSION=${{ inputs.llvm_version }}" >> tool-versions.env
+          echo "VERILATOR_VERSION=${{ env.VERILATOR_VERSION }}" >> tool-versions.env
+          echo "VERIBLE_VERSION=${{ env.VERIBLE_VERSION }}" >> tool-versions.env
+          gh release upload ${{ inputs.release_tag }} tool-versions.env
+
+  build-docker:
+    name: Build and Publish Docker Container
+    runs-on: ubuntu-latest
+    needs: [prepare-release, build-and-upload-toolchain, check-changes]
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare-release.outputs.branch_name }}
+
+      - name: Download toolchain asset from draft release
+        if: needs.check-changes.outputs.rebuild_docker == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # fallback for gh CLI
+        run: |
+          gh release download ${{ github.event.inputs.release_tag }} \
+            --pattern "${{ needs.build-and-upload-toolchain.outputs.tarball_name }}" \
+            --output toolchain.tar.gz
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        if: needs.check-changes.outputs.rebuild_docker == 'true'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.release_tag }}
+
+      - name: Build and push Docker Image
+        if: needs.check-changes.outputs.rebuild_docker == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./util/docker/dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            toolchain_path=toolchain.tar.gz
+            verilator_version=${{ env.VERILATOR_VERSION }}
+            verible_version=${{ env.VERIBLE_VERSION }}
+
+      - name: Retag Docker Image
+        if: needs.check-changes.outputs.rebuild_docker == 'false'
+        env:
+          PREV_TAG: ${{ needs.check-changes.outputs.prev_tag }}
+          NEW_TAG: ${{ inputs.release_tag }}
+        run: |
+          echo "Retagging image from $PREV_TAG to $NEW_TAG"
+          docker buildx imagetools create \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${PREV_TAG} \
+            --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${NEW_TAG}
+
+  create-version-pr:
+    name: Create Version Bump PR
+    runs-on: ubuntu-latest
+    needs: [prepare-release, build-docker]
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # fallback for gh CLI
+        run: |
+          gh pr create \
+            --base main \
+            --head ${{ needs.prepare-release.outputs.branch_name }} \
+            --title "Release: ${{ github.event.inputs.release_tag }}" \
+            --body "This PR bumps the version for the ${{ github.event.inputs.release_tag }} release. All artifacts have been successfully built and a draft release is ready. Merging this PR will automatically publish the release."
+
+  cleanup-on-failure:
+    name: Clean up on failure
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: [prepare-release, build-and-upload-toolchain, build-docker, create-version-pr]
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Delete Release and Tag
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete ${{ github.event.inputs.release_tag }} --cleanup-tag --yes || echo "Release not found or already deleted."
+
+      - name: Delete Remote Branch
+        run: |
+          BRANCH_NAME="release/${{ github.event.inputs.release_tag }}"
+          git push origin --delete ${BRANCH_NAME} || echo "Branch not found or already deleted."
+
+      - name: Get Package Name
+        id: get_package_name
+        run: |
+          echo "name=$(echo '${{ env.IMAGE_NAME }}' | sed 's/^[^\/]*\///')" >> $GITHUB_OUTPUT
+
+      - name: Get Docker Image Version ID
+        id: get_version_id
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -ex
+          OWNER=$(echo '${{ env.IMAGE_NAME }}' | cut -d/ -f1)
+          PACKAGE_NAME_URLENCODED=$(echo '${{ steps.get_package_name.outputs.name }}' | sed 's|/|%2F|g')
+          VERSION_ID=$(gh api "orgs/${OWNER}/packages/container/${PACKAGE_NAME_URLENCODED}/versions" --jq '.[] | select(.metadata.container.tags and (.metadata.container.tags | index("${{ github.event.inputs.release_tag }}"))) | .id' || echo "")
+          echo "VERSION_ID=${VERSION_ID}" >> $GITHUB_OUTPUT
+
+      - name: Delete Docker Image from GHCR
+        if: steps.get_version_id.outputs.VERSION_ID != ''
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ steps.get_package_name.outputs.name }}
+          package-version-ids: ${{ steps.get_version_id.outputs.VERSION_ID }}
+          package-type: 'container'
