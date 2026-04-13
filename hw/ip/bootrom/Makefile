@@ -18,7 +18,7 @@ BOOTROM_DIR = $(mkfile_path)/hw/ip/bootrom
 SW_FLAGS   ?= -DOT_PLATFORM_RV32 -march=rv64gc_zifencei -mabi=lp64d -mstrict-align -O2 -Wall -Wextra -static -ffunction-sections -fdata-sections -fuse-linker-plugin -flto -Wl,-flto
 SW_LDFLAGS ?= $(SW_FLAGS) -nostartfiles -Wl,--gc-sections -Wl,-L$(LINK_FOLDER) -Wl,--no-relax
 
-BROM_SRCS = $(wildcard $(BOOTROM_DIR)/*.S $(BOOTROM_DIR)/*.c)
+BROM_SRCS = $(wildcard $(BOOTROM_DIR)/*.S)
 BROM_FLAGS = $(SW_LDFLAGS) -Os -fno-zero-initialized-in-bss -flto -fwhole-program
 
 $(BOOTROM_DIR)/bootrom.elf: $(BOOTROM_DIR)/bootrom.ld $(BROM_SRCS)
