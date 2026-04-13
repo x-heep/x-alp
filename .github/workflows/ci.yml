@@ -1,0 +1,185 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  packages: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  determine-image-tag:
+    name: Determine Image Tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.get-tag.outputs.tag }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need the full history to get the tag
+          fetch-tags: true
+
+      - name: Determine tag
+        id: get-tag
+        run: |
+          UPSTREAM_URL=$(git remote get-url upstream 2>/dev/null || echo "https://github.com/x-heep/x-alp.git")
+          git fetch --tags "$UPSTREAM_URL"
+          TAG_NAME=$(git describe --tags --abbrev=0 --match "v*" 2> /dev/null || echo "")
+          if [ -z "$TAG_NAME" ]; then
+            echo "No tag in branch history, getting latest tag from main"
+            TAG_NAME=$(git describe --tags --abbrev=0 --match "v*" origin/main 2> /dev/null || echo "")
+          fi
+          if [ -z "$TAG_NAME" ]; then
+            echo "No tags found, defaulting to 'latest'"
+            TAG_NAME="latest"
+          fi
+          echo "Detected tag: $TAG_NAME"
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+
+  compile-apps:
+    name: Compile All Apps
+    runs-on: ubuntu-latest
+    needs: [determine-image-tag, lint, check-vendor]
+    container:
+      image: ghcr.io/x-heep/x-heep/x-heep-toolchain:${{ needs.determine-image-tag.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Project
+        uses: ./.github/actions/setup-project
+      - name: Compile all apps with GCC and Clang
+        shell: bash -le {0}
+        run: |
+          export ARCH=rv64gc_zifencei && \
+          export RISCV_XALP=$RISCV_XHEEP && \
+          export COMPILER_PREFIX=riscv32-corev- && \
+          make mcu-gen && \
+          python3 test/test_apps/test_apps.py --compilers gcc --compiler-paths /tools/riscv --compiler-prefixes riscv32-corev- --table --compile-only
+
+  simulate-apps:
+    name: Simulate All Apps
+    runs-on: ubuntu-latest
+    needs: [determine-image-tag, lint, check-vendor]
+    container:
+      image: ghcr.io/x-heep/x-heep/x-heep-toolchain:${{ needs.determine-image-tag.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Project
+        uses: ./.github/actions/setup-project
+      - name: Compile and simulate all apps
+        shell: bash -le {0}
+        run: |
+          export ARCH=rv64gc_zifencei && \
+          export RISCV_XALP=$RISCV_XHEEP && \
+          export COMPILER_PREFIX=riscv32-corev- && \
+          make mcu-gen && \
+          python3 test/test_apps/test_apps.py --compilers gcc --compiler-paths /tools/riscv --compiler-prefixes riscv32-corev- --table
+
+  # test-rv-profile:
+  #   name: Test RV Profile
+  #   runs-on: ubuntu-latest
+  #   needs: [determine-image-tag, lint, gen-peripherals, check-vendor, black-formatter]
+  #   container:
+  #     image: ghcr.io/x-heep/x-heep/x-heep-toolchain:${{ needs.determine-image-tag.outputs.tag }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Setup Project
+  #       uses: ./.github/actions/setup-project
+  #     - name: Mark Repository as Safe
+  #       run: |
+  #         git config --global --add safe.directory $GITHUB_WORKSPACE
+  #     - name: Run RV Profile test
+  #       shell: bash -le {0}
+  #       run: |
+  #         make mcu-gen PYTHON_X_HEEP_CFG=configs/ci.py
+  #         make verilator-build
+  #         make app
+  #         make verilator-run
+  #         make profile
+  #         if [ ! -f "./util/profile/flamegraph.svg" ]; then
+  #           echo "::error::Flamegraph SVG was not generated!"
+  #           exit 1
+  #         fi
+
+  lint:
+    name: Lint Generated Files
+    runs-on: ubuntu-latest
+    needs: determine-image-tag
+    container:
+      image: ghcr.io/x-heep/x-heep/x-heep-toolchain:${{ needs.determine-image-tag.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Project
+        uses: ./.github/actions/setup-project
+      - name: Check generated file consistency
+        shell: bash -le {0}
+        run: |
+          export ARCH=rv64gc_zifencei && \
+          export RISCV_XALP=$RISCV_XHEEP && \
+          export COMPILER_PREFIX=riscv32-corev- && \
+          make mcu-gen && \
+          util/git-diff.py --error-msg '::error ::Found differences in generated SystemVerilog files.'
+
+  # gen-peripherals:
+  #   name: Test Peripherals Generation
+  #   runs-on: ubuntu-latest
+  #   needs: determine-image-tag
+  #   container:
+  #     image: ghcr.io/x-heep/x-heep/x-heep-toolchain:${{ needs.determine-image-tag.outputs.tag }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #     - name: Setup Project
+  #       uses: ./.github/actions/setup-project
+  #     - name: Configure the job container and simulate all apps
+  #       shell: bash -le {0}
+  #       run: |
+  #         make clean-all
+  #         # Run the test script
+  #         python3 test/test_x_heep_gen/test_peripherals.py
+
+  check-vendor:
+    name: Vendor up-to-date
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: Install requirements
+        run: pip install -r util/python-requirements.txt
+      - name: Re-vendor and diff
+        run: |
+          find hw/vendor sw/vendor -maxdepth 2 -type f -name '*.vendor.hjson' | xargs -n1 util/vendor.py --verbose && \
+          util/git-diff.py --error-msg '::error ::Found differences, please re-vendor.' && \
+          util/check-vendor.py
+
+  # black-formatter:
+  #   name: Check Python code formatting
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: psf/black@stable
+  #       with:
+  #         options: "--check --verbose"
+  #         src: >
+  #           util/x_heep_gen
+  #           util/periph_structs_gen
+  #           util/mcu_gen.py
+  #           util/waiver-gen.py
+  #           util/c_gen.py
+  #           test/test_x_heep_gen
+  #           test/test_apps
+  #           configs
+  #         version: "~= 24.8.0"
