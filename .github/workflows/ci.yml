@@ -79,7 +79,7 @@ jobs:
         run: |
           export ARCH=rv64gc_zifencei && \
           export RISCV_XALP=$RISCV_XHEEP && \
-          export COMPILER_PREFIX=riscv32-corev- && \         
+          export COMPILER_PREFIX=riscv32-corev- && \
           make mcu-gen && \
           python3 test/test_apps/test_apps.py --compilers gcc --compiler-paths /tools/riscv --compiler-prefixes riscv32-corev- --table
 
