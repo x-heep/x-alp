@@ -57,6 +57,7 @@ jobs:
       - name: Compile all apps with GCC and Clang
         shell: bash -le {0}
         run: |
+          export ARCH=rv64gc_zifencei && \
           export RISCV_XALP=$RISCV_XHEEP && \
           export COMPILER_PREFIX=riscv32-corev- && \
           make mcu-gen && \
@@ -76,6 +77,7 @@ jobs:
       - name: Compile and simulate all apps
         shell: bash -le {0}
         run: |
+          export ARCH=rv64gc_zifencei && \
           export RISCV_XALP=$RISCV_XHEEP && \
           export COMPILER_PREFIX=riscv32-corev- && \         
           make mcu-gen && \
@@ -125,6 +127,7 @@ jobs:
       - name: Check generated file consistency
         shell: bash -le {0}
         run: |
+          export ARCH=rv64gc_zifencei && \
           export RISCV_XALP=$RISCV_XHEEP && \
           export COMPILER_PREFIX=riscv32-corev- && \
           make mcu-gen && \
