@@ -64,6 +64,41 @@ module core_v_mcu (
 
     logic                                                              debug_req;
 
+    // CPU Sleep and Interrupt Signals
+    logic           core_sleep;
+    logic [31:0]    peripheral_interrupts;
+
+    logic uart_intr_tx_watermark;
+    logic uart_intr_rx_watermark;
+    logic uart_intr_tx_empty;
+    logic uart_intr_rx_overflow;
+    logic uart_intr_rx_frame_err;
+    logic uart_intr_rx_break_err;
+    logic uart_intr_rx_timeout;
+    logic uart_intr_rx_parity_err;
+
+    assign peripheral_interrupts = {
+        24'h0,                      // SPACE FOR OTHER PERIPHERAL INTERRUPTS
+        uart_intr_rx_parity_err,
+        uart_intr_rx_timeout,
+        uart_intr_rx_break_err,
+        uart_intr_rx_frame_err,
+        uart_intr_rx_overflow,
+        uart_intr_tx_empty,
+        uart_intr_rx_watermark,
+        uart_intr_tx_watermark
+    };
+
+    power_manager_pkg::power_manager_out_t cpu_subsystem_pwr_ctrl;
+    power_manager_pkg::power_manager_in_t  cpu_subsystem_pwr_ctrl_ack; 
+    power_manager_pkg::power_manager_out_t peripheral_subsystem_pwr_ctrl;
+    power_manager_pkg::power_manager_in_t  peripheral_subsystem_pwr_ctrl_ack;
+    power_manager_pkg::power_manager_out_t memory_subsystem_pwr_ctrl [core_v_mini_mcu_pkg::NUM_BANKS-1:0];
+    power_manager_pkg::power_manager_in_t  memory_subsystem_pwr_ctrl_ack [core_v_mini_mcu_pkg::NUM_BANKS-1:0];
+    power_manager_pkg::power_manager_out_t external_subsystem_pwr_ctrl [core_v_mini_mcu_pkg::EXTERNAL_DOMAINS == 0 ? 1 : core_v_mini_mcu_pkg::EXTERNAL_DOMAINS-1:0];
+    power_manager_pkg::power_manager_in_t  external_subsystem_pwr_ctrl_ack [core_v_mini_mcu_pkg::EXTERNAL_DOMAINS == 0 ? 1 : core_v_mini_mcu_pkg::EXTERNAL_DOMAINS-1:0];
+    power_manager_pkg::power_manager_out_t dma_subsystem_pwr_ctrl [core_v_mini_mcu_pkg::DMA_CH_NUM-1:0];
+
     //
     //       █████████  ███████████  █████  █████
     //      ███░░░░░███░░███░░░░░███░░███  ░░███ 
@@ -88,7 +123,8 @@ module core_v_mcu (
 
         .irq_i      (fast_irq[1:0]),
         .time_irq_i ('0),
-        .debug_req_i(debug_req)
+        .debug_req_i(debug_req),
+        .core_sleep_o (core_sleep)
     );
 
     // 
@@ -208,14 +244,14 @@ module core_v_mcu (
         .uart_reg_rsp             (reg_rsp_sig[UART_REG_IDX]),
         .uart_rx_i                (uart_rx_i),
         .uart_tx_o                (uart_tx_o),
-        .uart_intr_tx_watermark_o (),
-        .uart_intr_rx_watermark_o (),
-        .uart_intr_tx_empty_o     (),
-        .uart_intr_rx_overflow_o  (),
-        .uart_intr_rx_frame_err_o (),
-        .uart_intr_rx_break_err_o (),
-        .uart_intr_rx_timeout_o   (),
-        .uart_intr_rx_parity_err_o()
+        .uart_intr_tx_watermark_o (uart_intr_tx_watermark),
+        .uart_intr_rx_watermark_o (uart_intr_rx_watermark),
+        .uart_intr_tx_empty_o     (uart_intr_tx_empty),
+        .uart_intr_rx_overflow_o  (uart_intr_rx_overflow),
+        .uart_intr_rx_frame_err_o (uart_intr_rx_frame_err),
+        .uart_intr_rx_break_err_o (uart_intr_rx_break_err),
+        .uart_intr_rx_timeout_o   (uart_intr_rx_timeout),
+        .uart_intr_rx_parity_err_o(uart_intr_rx_parity_err)
     );
 
     debug_subsystem u_debug_subsystem (
@@ -242,6 +278,31 @@ module core_v_mcu (
         .dbg_active_o (),
         .dbg_req_o    (debug_req)
 
+    );
+
+    power_manager_subsystem #(
+        .reg_req_t(core_v_mcu_pkg::reg_req_t),
+        .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
+    ) u_power_manager_subsystem (
+        .clk_i      (clk_i),
+        .rst_ni     (rst_ni),
+        // Bus Interface
+        .reg_req_i  (reg_req_sig[POWER_MANAGER_REG_IDX]),
+        .reg_rsp_o  (reg_rsp_sig[POWER_MANAGER_REG_IDX]),
+        // Status & Interrupts
+        .core_sleep_i (core_sleep),
+        .intr_i       (peripheral_interrupts),
+        .ext_irq_i    ('0),   // CONNECT
+        // Power Control Routing
+        .cpu_subsystem_pwr_ctrl_o        (cpu_subsystem_pwr_ctrl),
+        .peripheral_subsystem_pwr_ctrl_o (peripheral_subsystem_pwr_ctrl),
+        .memory_subsystem_pwr_ctrl_o     (memory_subsystem_pwr_ctrl),
+        .external_subsystem_pwr_ctrl_o   (external_subsystem_pwr_ctrl),
+        .dma_subsystem_pwr_ctrl_o        (dma_subsystem_pwr_ctrl),
+        .cpu_subsystem_pwr_ctrl_i        (cpu_subsystem_pwr_ctrl_ack),
+        .peripheral_subsystem_pwr_ctrl_i (peripheral_subsystem_pwr_ctrl_ack),
+        .memory_subsystem_pwr_ctrl_i     (memory_subsystem_pwr_ctrl_ack),
+        .external_subsystem_pwr_ctrl_i   (external_subsystem_pwr_ctrl_ack)
     );
 
 endmodule

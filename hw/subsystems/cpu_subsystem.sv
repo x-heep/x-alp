@@ -27,8 +27,10 @@ module cpu_subsystem (
     // Timer (async) interrupt
     input logic       time_irq_i,
     // Debug (async) request
-    input logic       debug_req_i
-
+    input logic       debug_req_i,
+    
+    // Core sleep signal (WFI)
+    output logic      core_sleep_o
 );
 
     /* verilator lint_off PINCONNECTEMPTY */
@@ -62,7 +64,10 @@ module cpu_subsystem (
         // noc request, can be AXI or OpenPiton
         .noc_req_o    (bus_req_o),
         // noc response, can be AXI or OpenPiton
-        .noc_resp_i   (bus_rsp_i)
+        .noc_resp_i   (bus_rsp_i),
+        
+        // Sleep signal
+        .core_sleep_o (core_sleep_o)
     );
 
 endmodule

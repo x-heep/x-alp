@@ -24,7 +24,7 @@ package core_v_mcu_pkg;
 
     localparam int unsigned totalAxiSlaves = NumAxiSlaves + NumExtAxiSlaves;
 
-    localparam int unsigned NumRegSlaves = 4;
+    localparam int unsigned NumRegSlaves = 5;
     localparam int unsigned NumExtRegSlaves = 1;
 
     localparam int unsigned totalRegSlaves = NumRegSlaves + NumExtRegSlaves;
@@ -98,7 +98,8 @@ package core_v_mcu_pkg;
     localparam int unsigned BOOT_ROM_REG_IDX = 1;
     localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
     localparam int unsigned UART_REG_IDX = 3;
-    localparam int unsigned EXT_REG_IDX = 4;
+    localparam int unsigned POWER_MANAGER_REG_IDX = 4;
+    localparam int unsigned EXT_REG_IDX = 5;
 
     // Register addresses
     localparam addr_t SOC_CTRL_REG_START_ADDR = PERIPH_BUS_BASE_ADDR + 64'h0000_0000_0000_0000;
@@ -113,7 +114,10 @@ package core_v_mcu_pkg;
     localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
     localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t UART_REG_END_ADDR = UART_REG_START_ADDR + UART_REG_SIZE;
-    localparam addr_t EXT_REG_START_ADDR = UART_REG_END_ADDR;
+    localparam addr_t POWER_MANAGER_REG_START_ADDR = UART_REG_END_ADDR;
+    localparam addr_t POWER_MANAGER_REG_SIZE = 64'h0000_0000_0000_1000;
+    localparam addr_t POWER_MANAGER_REG_END_ADDR = POWER_MANAGER_REG_START_ADDR + POWER_MANAGER_REG_SIZE;
+    localparam addr_t EXT_REG_START_ADDR = POWER_MANAGER_REG_END_ADDR;
     localparam addr_t EXT_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t EXT_REG_END_ADDR = EXT_REG_START_ADDR + EXT_REG_SIZE;
 
@@ -146,6 +150,7 @@ package core_v_mcu_pkg;
             end_addr : FAST_INTR_CTRL_REG_END_ADDR
         },
         '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
+        '{idx : POWER_MANAGER_REG_IDX, start_addr : POWER_MANAGER_REG_START_ADDR, end_addr : POWER_MANAGER_REG_END_ADDR},
         '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR}
     };
 
