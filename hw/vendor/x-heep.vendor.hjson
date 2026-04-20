@@ -1,0 +1,61 @@
+// Copyright 2026 EPFL.
+// Copyright and related rights are licensed under the Solderpad Hardware
+// License, Version 2.0 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// http://solderpad.org/licenses/SHL-2.0. Unless required by applicable law
+// or agreed to in writing, software, hardware and materials distributed under
+// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+//
+// File: x-heep.vendor.hjson
+// Author(s):
+//   Michele Caon <michele.caon@epfl.ch>
+// Date: 30/03/2026
+// Description: Vendor configuration file for X-HEEP dependencies
+
+{
+  name: "x-heep",
+  target_dir: "x-heep",
+
+  upstream: {
+    url: "https://github.com/x-heep/x-heep.git",
+    rev: "aa4738a3c35426c853c5da99c1afe8406391c120", # TODO: update once X-HEEP/953 is merged
+  },
+
+  mapping: [
+    {from: "LICENSE", to: "LICENSE"},
+
+    // Tools and utilities
+    {from: "util", to: "util"},
+
+    // Third-party IPs
+    {from: "hw/vendor/pulp_platform/axi", to: "pulp_platform/axi"},
+    {from: "hw/vendor/pulp_platform/common_cells", to: "pulp_platform/common_cells"},
+    {from: "hw/vendor/pulp_platform/register_interface", to: "pulp_platform/register_interface"},
+    {from: "hw/vendor/pulp_platform_register_interface.core", to: "pulp_platform_register_interface.core"},
+    {from: "hw/vendor/pulp_platform/riscv_dbg", to: "pulp_platform/riscv_dbg"},
+    {from: "hw/vendor/pulp_platform_riscv_dbg.core", to: "pulp_platform_riscv_dbg.core"},
+    {from: "hw/vendor/pulp_platform_riscv_dbg_pkg.core", to: "pulp_platform_riscv_dbg_pkg.core"},
+    {from: "hw/vendor/pulp_platform/tech_cells_generic", to: "pulp_platform/tech_cells_generic"},
+    {from: "hw/vendor/pulp_platform_tech_cells_generic.core", to: "pulp_platform_tech_cells_generic.core"},
+
+    {from: "hw/vendor/lowrisc/opentitan", to: "lowrisc/opentitan"},
+  ],
+
+  exclude_from_upstream: [
+    # Unused PULP Platform files
+    "hw/vendor/pulp_platform/common_cells/.github",
+    "hw/vendor/pulp_platform/common_cells/lint",
+    # Unused OpenHW Group files
+    "hw/vendor/openhwgroup/cv32e40x/reference",
+    "hw/vendor/openhwgroup/cv32e40x/tb",
+    # Unused OpenTitan files
+    "hw/vendor/lowrisc/opentitan/hw/ip/prim/doc",
+    "hw/vendor/lowrisc/opentitan/hw/ip/prim/dv",
+    "hw/vendor/lowrisc/opentitan/hw/ip/prim/fpv",
+    "hw/vendor/lowrisc/opentitan/hw/ip/prim/pre_dv",
+    "hw/vendor/lowrisc/opentitan/hw/lint/doc",
+    "hw/vendor/lowrisc/opentitan/hw/lint/tools/dvsim",
+  ]
+}
