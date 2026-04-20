@@ -1,0 +1,34 @@
+CAPI=2:
+
+name: pulp-platform.org::register_interface
+
+# Copyright 2021 OpenHW Group
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_rtl:
+    files:
+    - pulp_platform/register_interface/include/register_interface/assign.svh : {is_include_file: true, include_path: pulp_platform/register_interface/include}
+    - pulp_platform/register_interface/include/register_interface/typedef.svh : {is_include_file: true, include_path: pulp_platform/register_interface/include}
+    - pulp_platform/register_interface/src/apb_to_reg.sv
+    - pulp_platform/register_interface/src/axi_lite_to_reg.sv
+    - pulp_platform/register_interface/src/axi_to_reg_v2.sv
+    - pulp_platform/register_interface/src/periph_to_reg.sv
+    - pulp_platform/register_interface/src/reg_cdc.sv
+    - pulp_platform/register_interface/src/reg_cut.sv
+    - pulp_platform/register_interface/src/reg_demux.sv
+    - pulp_platform/register_interface/src/reg_err_slv.sv
+    - pulp_platform/register_interface/src/reg_filter_empty_writes.sv
+    - pulp_platform/register_interface/src/reg_mux.sv
+    - pulp_platform/register_interface/src/reg_to_apb.sv
+    - pulp_platform/register_interface/src/reg_to_axi.sv
+    - pulp_platform/register_interface/src/reg_to_mem.sv
+    - pulp_platform/register_interface/src/reg_to_tlul.sv
+    - pulp_platform/register_interface/src/reg_uniform.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+    - files_rtl
