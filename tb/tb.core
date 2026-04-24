@@ -5,6 +5,7 @@ filesets:
 
   testbench:
     files:
+    - ../hw/include/core_v_mcu_pkg.sv
     - src/testharness.sv
     - src/verilator/tb_util.svh: {is_include_file: true, include_path: src/verilator} 
     file_type: systemVerilogSource

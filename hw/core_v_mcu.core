@@ -40,9 +40,9 @@ filesets:
     files:
       - target/simulation/pad_cell_bypass_input.sv 
       - target/simulation/pad_cell_bypass_output.sv 
-      - target/simulation/pad_cell_inout.sv 
-      - target/simulation/pad_cell_input.sv 
-      - target/simulation/pad_cell_output.sv 
+      # - target/simulation/pad_cell_inout.sv # core_v_mcu_pkg.sv is missing side_pad_e type
+      # - target/simulation/pad_cell_input.sv # core_v_mcu_pkg.sv is missing side_pad_e type
+      # - target/simulation/pad_cell_output.sv # core_v_mcu_pkg.sv is missing side_pad_e type
       - target/simulation/sram_wrapper.sv
 
   waivers:

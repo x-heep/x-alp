@@ -8,6 +8,7 @@ lint_off -rule BLKANDNBLK -file "*/fpnew_divsqrt_multi.sv"
 lint_off -rule BLKANDNBLK -file "*/fpnew_fma.sv"
 lint_off -rule BLKANDNBLK -file "*/fpnew_noncomp.sv"
 lint_off -rule BLKANDNBLK -file "*/fpnew_opgroup_multifmt_slice.sv"
+lint_off -rule BLKANDNBLK -file "*/fpnew_divsqrt_th_64_multi.sv"
 
 // Vl 4
 lint_off -rule LITENDIAN -file "*/fpnew_pkg.sv"                    -match "Little bit endian vector: left < right of bit range:*"
