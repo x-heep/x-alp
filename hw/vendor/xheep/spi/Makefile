@@ -36,6 +36,9 @@ SPISUBSYS_SW_FILES := $(SPISUBSYS_SW_OUT)/$(SPISUBSYS_NAME)_regs.h
 SPISUBSYS_STRUCTS_FILE := $(SPISUBSYS_SW_OUT)/$(SPISUBSYS_NAME)_structs.h
 SPISUBSYS_DOC_FILE := $(SPISUBSYS_SW_OUT)/$(SPISUBSYS_NAME)_regs.md
 
+# output directory
+OUT_DIR ?= $(RTL_DIR)
+
 .PHONY: reg
 reg: $(W25Q_RTL_FILES) $(W25Q_SW_FILES) $(W25Q_STRUCTS_FILE) $(W25Q_DOC_FILE) \
      $(SPISUBSYS_RTL_FILES) $(SPISUBSYS_SW_FILES) $(SPISUBSYS_STRUCTS_FILE) $(SPISUBSYS_DOC_FILE)
@@ -114,7 +117,7 @@ spi-gen: reg periph-gen
 ## Generate spi_subsystem.sv
 .PHONY: periph-gen
 periph-gen:
-	python3 $(RTL_DIR)/spi_subsystem_gen.py $(RTL_DIR)/spi_subsystem.sv.tpl $(RTL_DIR)/spi_subsystem.sv $(SPI_SUBSYS_PERIPH_GEN)
+	python3 $(RTL_DIR)/spi_subsystem_gen.py $(RTL_DIR)/spi_subsystem.sv.tpl $(OUT_DIR)/spi_subsystem.sv $(SPI_SUBSYS_PERIPH_GEN)
 
 ## Clean files
 .PHONY: clean

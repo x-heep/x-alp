@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/alebaroc/xheep_spi.git
-    rev: fa5cc748dd0f7a36d94f9dab8eafbcc50a60ff45
+    rev: d7720dae73e6fdc9d88283d6376f858fa29c1a34
   }
 }

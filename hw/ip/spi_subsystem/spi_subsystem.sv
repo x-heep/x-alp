@@ -2,13 +2,6 @@
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
-// *** CRITICAL ***
-// TODO: dma_reg_pkg no longer exists , thus :
-// * input in the port was commented in this module
-// * input in the port was commented in w25q128jw_controller
-// * whole body of w25q128jw_controller was commented
-// * assignment to external_dma_hw2reg_o commented in this module (if w25_ctr not generated)
-
 
 
 module spi_subsystem

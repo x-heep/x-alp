@@ -40,7 +40,7 @@ FUSESOC_ARGS ?=
 REGTOOL ?= hw/vendor/pulp_platform/register_interface/vendor/lowrisc_opentitan/util/regtool.py
 PERIPH_STRUCTS_GEN ?= util/periph_structs_gen/periph_structs_gen.py
 TEMPLATE_FILE ?= util/periph_structs_gen/periph_structs.tpl
-DATA_DIR ?= data
+DATA_DIR ?= hw/ip/data
 
 # Verilator simulation parameters
 LOG_LEVEL ?= LOG_DEBUG
@@ -102,8 +102,8 @@ reg-gen:
 		REGTOOL=../../../../$(REGTOOL) \
 		PERIPH_STRUCTS_GEN=../../../../$(PERIPH_STRUCTS_GEN) \
 		TEMPLATE_FILE=../../../../$(TEMPLATE_FILE) \
-		SPISUBSYS_CFG=../../../../$(DATA_DIR)/spi_subsystem.hjson \
-		W25Q_CFG_CFG=../../../../$(DATA_DIR)/w25q128jw_controller.hjson
+		SPISUBSYS_CFG=../../../../$(DATA_DIR)/spi_subsystem/spi_subsystem.hjson \
+		W25Q_CFG_CFG=../../../../$(DATA_DIR)/spi_subsystem/w25q128jw_controller.hjson
 
 ## @section Boot ROM Build
 boot-rom:

@@ -50,11 +50,11 @@ module axi_to_flash_controller
   localparam int PageCountDW = sizeInBits(SE_PSIZE+1),
   localparam int SectorBufferLatency = 1,
   localparam int SecBuffLatencyDW = sizeInBits(SectorBufferLatency+1),
-  localparam int ClockFrequencyMAX_MHz = 1e3,
   localparam int w25q128jw_tRES1_us = 30, // from datasheet p. 64
   localparam int PowerOnWaitCycles = ClockFrequencyMAX_MHz * w25q128jw_tRES1_us,
   localparam int PoweronWaitCycles_SIM = 300,
   localparam int PowerOnWaitCyclesDW = sizeInBits(PowerOnWaitCycles+1),
+  parameter int ClockFrequencyMAX_MHz = 1e3,
   parameter logic ByteOrder = 1, // 1 == Little Endian , 0 == Big Endian  ; @ 0 , beat_queues swap bytes.
   parameter int AddrWidth = 64,
   parameter int FlashAddrW = 24,
@@ -381,7 +381,7 @@ module axi_to_flash_controller
   logic [PowerOnWaitCyclesDW-1:0]    poweron_wait_count_q   , poweron_wait_count_d;
   logic                              flash_is_on_q          , flash_is_on_d;
   logic [FlashAddrW-1:0]             flash_addr_q           , flash_addr_d;
-  logic [RegDataWidth-1:0]           spi_host_command_q     , spi_host_command_d;
+  logic [RegDataWidth-1:0]           spi_host_control_q     , spi_host_control_d;
   logic                              beat_half_index_q      , beat_half_index_d;
   logic [SE_WSIZE_DW-1:0]            word_count_q           , word_count_d;
   logic [DataWidth-1:0]              rd_queue_buffer_q      , rd_queue_buffer_d;
@@ -426,7 +426,7 @@ module axi_to_flash_controller
       poweron_wait_count_q   <= '0;
       flash_is_on_q          <= '0;
       flash_addr_q           <= '0;
-      spi_host_command_q     <= '0;
+      spi_host_control_q     <= '0;
       beat_half_index_q      <= '0;
       word_count_q           <= '0;
       rd_queue_buffer_q      <= '0;
@@ -462,7 +462,7 @@ module axi_to_flash_controller
       poweron_wait_count_q   <= poweron_wait_count_d;
       flash_is_on_q          <= flash_is_on_d;
       flash_addr_q           <= flash_addr_d;
-      spi_host_command_q     <= spi_host_command_d;
+      spi_host_control_q     <= spi_host_control_d;
       beat_half_index_q      <= beat_half_index_d;
       word_count_q           <= word_count_d;
       rd_queue_buffer_q      <= rd_queue_buffer_d;
@@ -527,7 +527,7 @@ int actual_poweron_wait_cycles;
     poweron_wait_count_d   = poweron_wait_count_q;
     flash_is_on_d          = flash_is_on_q;
     flash_addr_d           = flash_addr_q;
-    spi_host_command_d     = spi_host_command_q;
+    spi_host_control_d     = spi_host_control_q;
     beat_half_index_d      = beat_half_index_q;
     word_count_d           = word_count_q;
     rd_queue_buffer_d      = rd_queue_buffer_q;
@@ -812,13 +812,13 @@ int actual_poweron_wait_cycles;
           READ_SET_RXWM_R: begin
             // Set RX watermark to 1 word so we get notified when status byte arrives
             // but we need to preserve other bits when modifying RXWM
-            // this is why here we first read the entire spi_host command to then write back the rest of the bits alongside the new wm
-            // Read the command:
+            // this is why here we first read the entire spi_host control register to then write back the rest of the bits alongside the new wm
+            // Read the control register:
             spi_host_reg_req_offset = SPI_HOST_CONTROL_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
-              spi_host_command_d = spi_host_reg_rsp_i.rdata;
+              spi_host_control_d = spi_host_reg_rsp_i.rdata;
             end
             // Next state evaluation
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -833,7 +833,7 @@ int actual_poweron_wait_cycles;
             spi_host_reg_req_o.valid = 1'b1;
             // Keep upper CONTROL bits, set RXWM = 1
             spi_host_reg_req_o.wdata = {
-              spi_host_command_q[31:8], 8'h01
+              spi_host_control_q[31:8], 8'h01
             };  
             // Next state evaluation
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1088,13 +1088,13 @@ int actual_poweron_wait_cycles;
           FWAIT_SET_RXWM_R: begin
             // Set RX watermark to 1 word so we get notified when status byte arrives
             // but we need to preserve other bits when modifying RXWM
-            // this is why here we first read the entire spi_host command to then write back the rest of the bits alongside the new wm
-            // Read the command:
+            // this is why here we first read the entire spi_host control register to then write back the rest of the bits alongside the new wm
+            // Read the control register:
             spi_host_reg_req_offset = SPI_HOST_CONTROL_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
-              spi_host_command_d = spi_host_reg_rsp_i.rdata;
+              spi_host_control_d = spi_host_reg_rsp_i.rdata;
             end
             // Next state evaluation
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1109,7 +1109,7 @@ int actual_poweron_wait_cycles;
             spi_host_reg_req_o.valid = 1'b1;
             // Keep upper CONTROL bits, set RXWM = 1
             spi_host_reg_req_o.wdata = {
-              spi_host_command_q[31:8], 8'h01
+              spi_host_control_q[31:8], 8'h01
             };  
             // Next state evaluation
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1595,13 +1595,21 @@ int actual_poweron_wait_cycles;
         end
         endcase
       end
-      // // WRITE SFM
-      // Programs the modified sector buffer back to flash, page by page
-      // Flash page size is 256 bytes and a sector contains 16 pages resulting in 4096 bytes per sector
-      //
-      // For each page, the sequence is:
-      //   1. Write Enable (WE): Required before each write/erase flash operation
-      //   2. Page Program (PP): Send command + address, then data is transfered from local sector buffer to SPI Host TX FIFO
+
+
+      /*
+
+                                                  ==========================================================
+                                                  |                       WRITE SFM                        |
+                                                  ==========================================================
+
+
+        Programs the modified sector buffer back to flash, page by page
+        Flash page size is 256 bytes and a sector contains 16 pages resulting in 4096 bytes per sector
+        For each page, the sequence is:
+            1. Write Enable (WE): Required before each write/erase flash operation
+            2. Page Program (PP): Send command + address, then data is transfered from local sector buffer to SPI Host TX FIFO
+      */
       TOP_WRITE: begin
         case (write_state_q)
 
@@ -1796,8 +1804,17 @@ int actual_poweron_wait_cycles;
 
         endcase
       end
-      // // AXIRESP FSM
-      // Create a response to the manager from its last request, either on R or B channel
+
+
+      /*
+
+      
+                                                  ==========================================================
+                                                  |                      AXIRESP SFM                       |
+                                                  ==========================================================
+
+      Create a response to the manager from its last request, either on R or B channel
+      */
       TOP_AXIRESP: begin
         case(axiresp_state_q)
 

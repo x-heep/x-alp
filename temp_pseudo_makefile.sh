@@ -19,7 +19,8 @@ do
     periph-gen)
       echo "Generating spi_subsystem.sv..."
       make -C  hw/vendor/xheep/spi periph-gen \
-      SPI_SUBSYS_PERIPH_GEN=axi
+      SPI_SUBSYS_PERIPH_GEN=axi \
+      OUT_DIR=../../../ip/spi_subsystem
       ;;
 
     *)
