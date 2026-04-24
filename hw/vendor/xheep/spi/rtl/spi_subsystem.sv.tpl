@@ -2,13 +2,6 @@
 // Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
-// *** CRITICAL ***
-// TODO: dma_reg_pkg no longer exists , thus :
-// * input in the port was commented in this module
-// * input in the port was commented in w25q128jw_controller
-// * whole body of w25q128jw_controller was commented
-// * assignment to external_dma_hw2reg_o commented in this module (if w25_ctr not generated)
-
 <%
   base_peripheral_domain = xheep.get_base_peripheral_domain()
 %>
@@ -24,6 +17,7 @@ module spi_subsystem
 % if base_peripheral_domain.contains_peripheral('axi_spi'):
     parameter type axi_req_t = logic,
     parameter type axi_resp_t = logic,
+    parameter int ClockFrequencyMAX_MHz = 1e3,
 % else:
 % endif
 % if base_peripheral_domain.contains_peripheral('obi_spi'):
@@ -220,6 +214,7 @@ end
   axi_to_flash_controller #(
       .ByteOrder,
       .AddrWidth,   // behavior differs depending from dataWidth, generated HW is always the same.
+      .ClockFrequencyMAX_MHz,
       .FlashAddrW(24),
       .DataWidth,
       .axi_req_t(axi_req_t),
