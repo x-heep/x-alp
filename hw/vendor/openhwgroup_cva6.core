@@ -4,16 +4,17 @@ name : openhwgroup.org::cva6:1.4.0
 filesets:
   rtl:
     files:
+      - openhwgroup/cva6/core/include/config_pkg.sv
+      - ../include/cva6_config_pkg.sv
       - openhwgroup/cva6/core/include/iti_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
       - openhwgroup/cva6/core/include/cvxif_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
       - openhwgroup/cva6/core/include/rvfi_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include}
       - openhwgroup/cva6/core/include/aes_pkg.sv 
+      - openhwgroup/cva6/core/include/riscv_pkg.sv 
       - openhwgroup/cva6/core/include/ariane_pkg.sv 
       - openhwgroup/cva6/core/include/build_config_pkg.sv 
-      - openhwgroup/cva6/core/include/config_pkg.sv 
       - openhwgroup/cva6/core/include/instr_tracer_pkg.sv 
       - openhwgroup/cva6/core/include/iti_pkg.sv 
-      - openhwgroup/cva6/core/include/riscv_pkg.sv 
       - openhwgroup/cva6/core/include/std_cache_pkg.sv 
       - openhwgroup/cva6/core/include/triggers_pkg.sv 
       - openhwgroup/cva6/core/include/wt_cache_pkg.sv

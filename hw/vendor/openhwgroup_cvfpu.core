@@ -4,6 +4,7 @@ name : openhwgroup.org::cvfpu
 filesets:
   rtl:
     files:
+    - openhwgroup/cvfpu/src/fpnew_pkg.sv 
     - openhwgroup/cvfpu/vendor/openc910/C910_RTL_FACTORY/gen_rtl/clk/rtl/gated_clk_cell.v
     - openhwgroup/cvfpu/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/ct_vfdsu_ctrl.v 
     - openhwgroup/cvfpu/vendor/openc910/C910_RTL_FACTORY/gen_rtl/vfdsu/rtl/ct_vfdsu_double.v 
@@ -27,9 +28,8 @@ filesets:
     - openhwgroup/cvfpu/src/fpnew_opgroup_block.sv 
     - openhwgroup/cvfpu/src/fpnew_opgroup_fmt_slice.sv 
     - openhwgroup/cvfpu/src/fpnew_opgroup_multifmt_slice.sv 
-    - openhwgroup/cvfpu/src/fpnew_pkg.sv 
-    - openhwgroup/cvfpu/src/fpnew_rounding.sv 
     - openhwgroup/cvfpu/src/fpnew_top.sv
+    - openhwgroup/cvfpu/src/fpnew_rounding.sv 
     file_type : systemVerilogSource
     depend:
       - pulp-platform.org::common_cells:1.38.0
