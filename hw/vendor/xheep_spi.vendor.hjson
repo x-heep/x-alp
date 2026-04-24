@@ -1,0 +1,32 @@
+{
+  name: "spi",
+  target_dir: "xheep/spi",
+
+  upstream: {
+    url: "https://github.com/alebaroc/xheep_spi.git",
+    rev: "d7720dae73e6fdc9d88283d6376f858fa29c1a34",
+  },
+
+  exclude_from_upstream: [
+    ".gitignore",
+    "sw",
+    "tb",
+    "util",
+    "lint",
+    "data",
+    "README.md",
+    "fusesoc.conf",
+    "rtl/spi_subsystem.sv"
+    "vendor/lowrisc_opentitan",
+    "vendor/lowrisc_opentitan.vendor.hjson",
+    "vendor/lowrisc_opentitan.lock.hjson",
+    "vendor/pulp_platform_axi",
+    "vendor/pulp_platform_axi.vendor.hjson",
+    "vendor/pulp_platform_axi.lock.hjson",
+    "vendor/pulp_platform_register_interface",
+    "vendor/pulp_platform_register_interface.vendor.hjson",
+    "vendor/pulp_platform_register_interface.lock.hjson",
+    "vendor/pulp_platform_register_interface.core",
+  ],
+
+}
