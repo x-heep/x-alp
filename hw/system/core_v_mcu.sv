@@ -163,6 +163,38 @@ module core_v_mcu (
     //                                       ░░░░░                                                           
     // 
 
+    
+    spi_subsystem #(
+        .DataWidth                    (64),
+        .AddrWidth                    (64),
+        .ByteOrder                    (1),
+        .ClockFrequencyMAX_MHz        (500),
+        .axi_req_t                    (core_v_mcu_pkg::axi_slv_req_t),
+        .axi_resp_t                   (core_v_mcu_pkg::axi_slv_rsp_t),
+        .reg_req_t                    (core_v_mcu_pkg::reg_req_t),
+        .reg_rsp_t                    (core_v_mcu_pkg::reg_rsp_t)
+    ) DUT_spi_subsystem (
+        .clk_i                        (clk_i), 
+        .rst_ni                       (rst_ni), 
+        .axi_req_i                    (axi_slave_req_sig[FLASH_STORAGE_IDX]),
+        .axi_rsp_o                    (axi_slave_rsp_sig[FLASH_STORAGE_IDX]),
+        .top_reg_req_i                (reg_req_sig[SPI_SUBSYSTEM_IDX]),
+        .top_reg_rsp_o                (reg_rsp_sig[SPI_SUBSYSTEM_IDX]),
+        .spihost_reg_req_i            (reg_req_sig[SPI_FLASH_IDX]),
+        .spihost_reg_rsp_o            (reg_rsp_sig[SPI_FLASH_IDX]),
+        .spi_flash_sck_o              (),
+        .spi_flash_sck_en_o           (),
+        .spi_flash_csb_o              (),
+        .spi_flash_csb_en_o           (),
+        .spi_flash_sd_o               (),
+        .spi_flash_sd_en_o            (),
+        .spi_flash_sd_i               (),
+        .spi_flash_intr_error_o       (),
+        .spi_flash_intr_event_o       (),
+        .spi_flash_rx_valid_o         (),
+        .spi_flash_tx_ready_o         ()
+    );
+
     soc_ctrl #(
         .reg_req_t(core_v_mcu_pkg::reg_req_t),
         .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)

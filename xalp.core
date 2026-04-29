@@ -4,11 +4,12 @@ name: x-heep:x-alp:x-alp:0.0.1
 
 filesets:
   x-alp:
-    files:
-    - hw/x_alp.sv
-    file_type : systemVerilogSource
     depend:
       - x-heep:x-alp:core-v-mcu:0.0.1
+    files:
+      - hw/x_alp.sv
+    file_type : systemVerilogSource
+
 
   testbench:
     depend:

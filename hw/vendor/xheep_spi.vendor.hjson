@@ -4,7 +4,7 @@
 
   upstream: {
     url: "https://github.com/alebaroc/xheep_spi.git",
-    rev: "d7720dae73e6fdc9d88283d6376f858fa29c1a34",
+    rev: "c6bb25eb40be5ff4febb3edae9448e74da63ef21",
   },
 
   exclude_from_upstream: [

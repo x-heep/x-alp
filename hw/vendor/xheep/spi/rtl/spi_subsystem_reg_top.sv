@@ -74,6 +74,9 @@ module spi_subsystem_reg_top #(
   logic control_a2f_ctr_poweron_en_qs;
   logic control_a2f_ctr_poweron_en_wd;
   logic control_a2f_ctr_poweron_en_we;
+  logic control_a2f_ctr_quadspi_en_qs;
+  logic control_a2f_ctr_quadspi_en_wd;
+  logic control_a2f_ctr_quadspi_en_we;
 
   // Register instances
   // R[control]: V(False)
@@ -130,6 +133,32 @@ module spi_subsystem_reg_top #(
   );
 
 
+  //   F[a2f_ctr_quadspi_en]: 2:2
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_control_a2f_ctr_quadspi_en (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (control_a2f_ctr_quadspi_en_we),
+    .wd     (control_a2f_ctr_quadspi_en_wd),
+
+    // from internal hardware
+    .de     (hw2reg.control.a2f_ctr_quadspi_en.de),
+    .d      (hw2reg.control.a2f_ctr_quadspi_en.d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.control.a2f_ctr_quadspi_en.q ),
+
+    // to register interface (read)
+    .qs     (control_a2f_ctr_quadspi_en_qs)
+  );
+
+
 
 
   logic [0:0] addr_hit;
@@ -152,6 +181,9 @@ module spi_subsystem_reg_top #(
   assign control_a2f_ctr_poweron_en_we = addr_hit[0] & reg_we & !reg_error;
   assign control_a2f_ctr_poweron_en_wd = reg_wdata[1];
 
+  assign control_a2f_ctr_quadspi_en_we = addr_hit[0] & reg_we & !reg_error;
+  assign control_a2f_ctr_quadspi_en_wd = reg_wdata[2];
+
   // Read data return
   always_comb begin
     reg_rdata_next = '0;
@@ -159,6 +191,7 @@ module spi_subsystem_reg_top #(
       addr_hit[0]: begin
         reg_rdata_next[0] = control_use_axi_qs;
         reg_rdata_next[1] = control_a2f_ctr_poweron_en_qs;
+        reg_rdata_next[2] = control_a2f_ctr_quadspi_en_qs;
       end
 
       default: begin

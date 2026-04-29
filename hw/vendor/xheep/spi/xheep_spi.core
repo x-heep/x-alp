@@ -16,7 +16,6 @@ filesets:
     files:
       - rtl/obi_pkg.sv
       - rtl/reg_pkg.sv
-      - rtl/core_v_mini_mcu_pkg.sv
       - rtl/spi_subsystem_reg_pkg.sv
       # w25_ctr ignored because dma_reg_pkg.sv not existing yet
       # - rtl/w25q128jw_controller/rtl/w25q128jw_controller_reg_pkg.sv
@@ -25,10 +24,6 @@ filesets:
       - rtl/spi_subsystem_reg_top.sv
       - rtl/axi_to_flash_beat_queues.sv
       - rtl/axi_to_flash_controller.sv
-      - rtl/spi_subsystem.sv
-      - tb/tc_sram.sv
-      - tb/sram_wrapper.sv
-      - tb/yosys_spiflash.sv
     file_type: systemVerilogSource
 
   files_verilator_waiver:
@@ -37,8 +32,20 @@ filesets:
       - lint/spi_subsystem.vlt
     file_type: vlt
 
+  files_scratchpad_tb:
+    files:
+      - tb/tc_sram.sv
+      - tb/sram_wrapper.sv
+    file_type: systemVerilogSource
+
+  files_toplvl_rtl:
+    files:
+      - rtl/spi_subsystem.sv 
+    file_type: systemVerilogSource
+
   files_verilator_tb:
     files:
+      - tb/yosys_spiflash.sv: {file_type: systemVerilogSource}
       - tb/spi_subsystem_tb_wrapper.sv: {file_type: systemVerilogSource}
       - tb/spi_subsystem_tb.cpp: {file_type: cppSource}
 
@@ -51,6 +58,8 @@ targets:
   sim:
     filesets:
       - files_rtl
+      - files_toplvl_rtl
+      - files_scratchpad_tb
       - files_verilator_tb
       - files_verilator_waiver
     toplevel: spi_subsystem_tb_wrapper

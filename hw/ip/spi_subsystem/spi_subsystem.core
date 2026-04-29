@@ -1,0 +1,17 @@
+CAPI=2:
+
+name: "x-heep:ip:spi_subsys"
+description: "core-v-mini-mcu spi subsystem"
+
+filesets:
+  files_rtl:
+    depend:
+      - x-heep:ip:spi
+    files:
+      - rtl/spi_subsystem.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+      - files_rtl

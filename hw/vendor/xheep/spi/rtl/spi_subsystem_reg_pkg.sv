@@ -20,6 +20,9 @@ package spi_subsystem_reg_pkg;
     struct packed {
       logic        q;
     } a2f_ctr_poweron_en;
+    struct packed {
+      logic        q;
+    } a2f_ctr_quadspi_en;
   } spi_subsystem_reg2hw_control_reg_t;
 
   typedef struct packed {
@@ -31,16 +34,20 @@ package spi_subsystem_reg_pkg;
       logic        d;
       logic        de;
     } a2f_ctr_poweron_en;
+    struct packed {
+      logic        d;
+      logic        de;
+    } a2f_ctr_quadspi_en;
   } spi_subsystem_hw2reg_control_reg_t;
 
   // Register -> HW type
   typedef struct packed {
-    spi_subsystem_reg2hw_control_reg_t control; // [1:0]
+    spi_subsystem_reg2hw_control_reg_t control; // [2:0]
   } spi_subsystem_reg2hw_t;
 
   // HW -> register type
   typedef struct packed {
-    spi_subsystem_hw2reg_control_reg_t control; // [3:0]
+    spi_subsystem_hw2reg_control_reg_t control; // [5:0]
   } spi_subsystem_hw2reg_t;
 
   // Register offsets
