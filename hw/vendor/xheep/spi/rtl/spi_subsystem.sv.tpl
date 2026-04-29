@@ -7,8 +7,6 @@
 %>
 
 module spi_subsystem
-  import core_v_mini_mcu_pkg::*;
-  import spi_host_reg_pkg::*;
 #(
     parameter int DataWidth = 64,
     parameter int AddrWidth = 64,
@@ -230,6 +228,9 @@ end
 
       // Enable power-on subrutine
       .poweron_en_i(reg2hw.control.a2f_ctr_poweron_en.q),
+
+      // Enable quad spi
+      .quadspi_en_i(reg2hw.control.a2f_ctr_quadspi_en.q),
 
       // register interface to SPI controller
       .spi_host_reg_req_o(reg_req_from_a2f_ctr),

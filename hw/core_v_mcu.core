@@ -28,12 +28,14 @@ filesets:
       - pulp-platform.org::register_interface:0.4.7
       - openhwgroup.org::cva6:1.4.0
       - lowrisc:ip:uart
+      - x-heep:ip:spi
   
   ip_modules:
     depend:
       - x-alp:ip:boot_rom
       - x-heep:ip:soc_ctrl
       - x-heep:ip:fast_intr_ctrl
+      - x-heep:ip:spi_subsys
 
   simulation_rtl:
     file_type: systemVerilogSource
@@ -57,6 +59,7 @@ filesets:
       - misc/vendor/hpdcache-waivers.vlt
       - misc/vendor/tech_cells-waivers.vlt
       - misc/vendor/axi_riscv_atomics-waivers.vlt
+      - misc/vendor/spi-waivers.vlt
       - misc/simulation.vlt
       
 targets:
