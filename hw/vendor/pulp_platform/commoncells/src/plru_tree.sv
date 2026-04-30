@@ -17,12 +17,12 @@
 `include "common_cells/assertions.svh"
 
 module plru_tree #(
-  parameter int unsigned ENTRIES = 16
+    parameter int unsigned ENTRIES = 16
 ) (
-  input  logic               clk_i,
-  input  logic               rst_ni,
-  input  logic [ENTRIES-1:0] used_i, // element i was used (one hot)
-  output logic [ENTRIES-1:0] plru_o  // element i is the least recently used (one hot)
+    input  logic               clk_i,
+    input  logic               rst_ni,
+    input  logic [ENTRIES-1:0] used_i,  // element i was used (one hot)
+    output logic [ENTRIES-1:0] plru_o   // element i is the least recently used (one hot)
 );
 
     localparam int unsigned LogEntries = $clog2(ENTRIES);
@@ -59,17 +59,19 @@ module plru_tree #(
         // used_i[0]: plru_tree_d[0, 1, 3] = {0, 0, 0};
         // default: begin /* No hit */ end
         // endcase
-        for (int unsigned i = 0; i < ENTRIES; i++) begin
+        for (
+            int unsigned i = 0; i < ENTRIES; i++
+        ) begin
             // we got a hit so update the pointer as it was least recently used
             if (used_i[i]) begin
                 // Set the nodes to the values we would expect
                 for (int unsigned lvl = 0; lvl < LogEntries; lvl++) begin
-                  idx_base = $unsigned((2**lvl)-1);
-                  // lvl0 <=> MSB, lvl1 <=> MSB-1, ...
-                  shift = LogEntries - lvl;
-                  // to circumvent the 32 bit integer arithmetic assignment
-                  new_index = 1'(~(i >> (shift-1)));
-                  plru_tree_d[idx_base + (i >> shift)] = new_index;
+                    idx_base                         = $unsigned((2 ** lvl) - 1);
+                    // lvl0 <=> MSB, lvl1 <=> MSB-1, ...
+                    shift                            = LogEntries - lvl;
+                    // to circumvent the 32 bit integer arithmetic assignment
+                    new_index                        = 1'(~(i >> (shift - 1)));
+                    plru_tree_d[idx_base+(i>>shift)] = new_index;
                 end
             end
         end
@@ -98,15 +100,15 @@ module plru_tree #(
         // the next entry to replace.
         for (int unsigned i = 0; i < ENTRIES; i += 1) begin
             for (int unsigned lvl = 0; lvl < LogEntries; lvl++) begin
-                idx_base = $unsigned((2**lvl)-1);
+                idx_base  = $unsigned((2 ** lvl) - 1);
                 // lvl0 <=> MSB, lvl1 <=> MSB-1, ...
-                shift = LogEntries - lvl;
+                shift     = LogEntries - lvl;
                 // plru_o[i] &= plru_tree_q[idx_base + (i>>shift)] == ((i >> (shift-1)) & 1'b1);
-                new_index = 1'(i >> (shift-1));
+                new_index = 1'(i >> (shift - 1));
                 if (new_index) begin
-                  plru_o[i] &= plru_tree_q[idx_base + (i>>shift)];
+                    plru_o[i] &= plru_tree_q[idx_base+(i>>shift)];
                 end else begin
-                  plru_o[i] &= ~plru_tree_q[idx_base + (i>>shift)];
+                    plru_o[i] &= ~plru_tree_q[idx_base+(i>>shift)];
                 end
             end
         end
@@ -121,7 +123,8 @@ module plru_tree #(
     end
 
 `ifndef COMMON_CELLS_ASSERTS_OFF
-    `ASSERT_INIT(entries_not_power_of_2, ENTRIES == 2**LogEntries, "Entries must be a power of two")
+    `ASSERT_INIT(entries_not_power_of_2, ENTRIES == 2 ** LogEntries,
+                 "Entries must be a power of two")
 
     `ASSERT(output_onehot, $onehot0(plru_o), clk_i, !rst_ni,
             "More than one bit set in PLRU output.")

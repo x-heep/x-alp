@@ -15,6 +15,6 @@ module read #(
     output T d_o
 );
 
-  assign d_o = d_i;
+    assign d_o = d_i;
 
 endmodule

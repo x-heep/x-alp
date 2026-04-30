@@ -15,34 +15,34 @@ module stream_fifo_optimal_wrap #(
     /// Print information when the simulation launches
     parameter bit PrintInfo = 1'b0,
     // DO NOT OVERWRITE THIS PARAMETER
-    parameter int unsigned AddrDepth  = (Depth > 32'd1) ? $clog2(Depth) : 32'd1
+    parameter int unsigned AddrDepth = (Depth > 32'd1) ? $clog2(Depth) : 32'd1
 ) (
-    input  logic                 clk_i,      // Clock
-    input  logic                 rst_ni,     // Asynchronous reset active low
-    input  logic                 flush_i,    // flush the fifo
-    input  logic                 testmode_i, // test_mode to bypass clock gating
-    output logic [AddrDepth-1:0] usage_o,    // fill pointer
+    input  logic                  clk_i,       // Clock
+    input  logic                  rst_ni,      // Asynchronous reset active low
+    input  logic                  flush_i,     // flush the fifo
+    input  logic                  testmode_i,  // test_mode to bypass clock gating
+    output logic  [AddrDepth-1:0] usage_o,     // fill pointer
     // input interface
-    input  type_t                data_i,     // data to push into the fifo
-    input  logic                 valid_i,    // input data valid
-    output logic                 ready_o,    // fifo is not full
+    input  type_t                 data_i,      // data to push into the fifo
+    input  logic                  valid_i,     // input data valid
+    output logic                  ready_o,     // fifo is not full
     // output interface
-    output type_t                data_o,     // output data
-    output logic                 valid_o,    // fifo is not empty
-    input  logic                 ready_i     // pop head from fifo
+    output type_t                 data_o,      // output data
+    output logic                  valid_o,     // fifo is not empty
+    input  logic                  ready_i      // pop head from fifo
 );
 
     //--------------------------------------
     // Prevent Depth 0 and 1
     //--------------------------------------
     // Throw an error if depth is 0 or 1
-    `ifndef SYNTHESIS
+`ifndef SYNTHESIS
     if (Depth < 32'd2) begin : gen_fatal
         initial begin
             $fatal(1, "FIFO of depth %d does not make any sense!", Depth);
         end
     end
-    `endif
+`endif
 
     //--------------------------------------
     // Spill register (depth 2)
@@ -51,18 +51,18 @@ module stream_fifo_optimal_wrap #(
     if (Depth == 32'd2) begin : gen_spill
 
         // print info
-        `ifndef SYNTHESIS
+`ifndef SYNTHESIS
         if (PrintInfo) begin : gen_info
             initial begin
                 $display("[%m] Instantiate spill register (of depth %d)", Depth);
             end
         end
-        `endif
+`endif
 
         // spill register
         spill_register_flushable #(
-            .T       ( type_t ),
-            .Bypass  ( 1'b0   )
+            .T     (type_t),
+            .Bypass(1'b0)
         ) i_spill_register_flushable (
             .clk_i,
             .rst_ni,
@@ -87,18 +87,18 @@ module stream_fifo_optimal_wrap #(
     if (Depth > 32'd2) begin : gen_fifo
 
         // print info
-        `ifndef SYNTHESIS
+`ifndef SYNTHESIS
         if (PrintInfo) begin : gen_info
             initial begin
                 $info("[%m] Instantiate stream FIFO of depth %d", Depth);
             end
         end
-        `endif
+`endif
 
         // stream fifo
         stream_fifo #(
-            .DEPTH        ( Depth  ),
-            .T            ( type_t )
+            .DEPTH(Depth),
+            .T    (type_t)
         ) i_stream_fifo (
             .clk_i,
             .rst_ni,

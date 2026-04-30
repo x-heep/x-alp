@@ -15,15 +15,15 @@
 */
 
 /**
-* @file   spi_subsystem_structs.h
-* @date   18/04/2026
-* @brief  Contains structs for every register
-*
-* This file contains the structs of the registes of the peripheral.
-* Each structure has the various bit fields that can be accessed
-* independently.
-* 
-*/
+ * @file   spi_subsystem_structs.h
+ * @date   18/04/2026
+ * @brief  Contains structs for every register
+ *
+ * This file contains the structs of the registes of the peripheral.
+ * Each structure has the various bit fields that can be accessed
+ * independently.
+ *
+ */
 
 #ifndef _SPI_SUBSYSTEM_STRUCTS_H
 #define _SPI_SUBSYSTEM_STRUCTS_H
@@ -34,8 +34,8 @@
 /**                                                                        **/
 /****************************************************************************/
 
-#include <inttypes.h>
 #include "core_v_mcu.h"
+#include <inttypes.h>
 
 /****************************************************************************/
 /**                                                                        **/
@@ -43,7 +43,7 @@
 /**                                                                        **/
 /****************************************************************************/
 
-#define spi_subsystem_peri ((volatile spi_subsystem *) SPI_SUBSYSTEM_START_ADDRESS)
+#define spi_subsystem_peri ((volatile spi_subsystem *)SPI_SUBSYSTEM_START_ADDRESS)
 
 /****************************************************************************/
 /**                                                                        **/
@@ -51,11 +51,9 @@
 /**                                                                        **/
 /****************************************************************************/
 
-
-
 typedef struct {
 
-  uint32_t CONTROL;                               /*!< Control register*/
+  uint32_t CONTROL; /*!< Control register*/
 
 } spi_subsystem;
 
@@ -67,9 +65,7 @@ typedef struct {
 
 #ifndef _SPI_SUBSYSTEM_STRUCTS_C_SRC
 
-
-
-#endif  /* _SPI_SUBSYSTEM_STRUCTS_C_SRC */
+#endif /* _SPI_SUBSYSTEM_STRUCTS_C_SRC */
 
 /****************************************************************************/
 /**                                                                        **/
@@ -77,14 +73,11 @@ typedef struct {
 /**                                                                        **/
 /****************************************************************************/
 
-
 /****************************************************************************/
 /**                                                                        **/
 /**                          INLINE FUNCTIONS                              **/
 /**                                                                        **/
 /****************************************************************************/
-
-
 
 #endif /* _SPI_SUBSYSTEM_STRUCTS_H */
 /****************************************************************************/

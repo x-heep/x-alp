@@ -52,7 +52,7 @@ filesets:
 targets:
   default:
     filesets:
-      - files_rtl
+      - "!target_format ? (!target_lint ? (files_rtl))"
     toplevel: spi_subsystem
 
   sim:

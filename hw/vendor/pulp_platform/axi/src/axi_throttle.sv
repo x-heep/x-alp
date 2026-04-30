@@ -28,9 +28,9 @@ module axi_throttle #(
     parameter type r_credit_t = logic [RCntWidth-1:0]
 ) (
     /// Clock
-    input  logic clk_i,
+    input logic clk_i,
     /// Asynchronous reset, active low
-    input  logic rst_ni,
+    input logic rst_ni,
 
     /// AXI4+ATOP request in
     input  axi_req_t req_i,
@@ -42,9 +42,9 @@ module axi_throttle #(
     input  axi_rsp_t rsp_i,
 
     /// Amount of write credit (number of outstanding write transfers)
-    input  w_credit_t w_credit_i,
+    input w_credit_t w_credit_i,
     /// Amount of read credit (number of outstanding read transfers)
-    input  r_credit_t r_credit_i
+    input r_credit_t r_credit_i
 );
 
     // ax throttled valids
@@ -57,32 +57,32 @@ module axi_throttle #(
 
     // limit Aw requests -> wait for b
     stream_throttle #(
-        .MaxNumPending ( MaxNumAwPending  )
+        .MaxNumPending(MaxNumAwPending)
     ) i_stream_throttle_aw (
         .clk_i,
         .rst_ni,
-        .req_valid_i ( req_i.aw_valid     ),
-        .req_valid_o ( throttled_aw_valid ),
-        .req_ready_i ( rsp_i.aw_ready     ),
-        .req_ready_o ( throttled_aw_ready ),
-        .rsp_valid_i ( rsp_i.b_valid      ),
-        .rsp_ready_i ( req_i.b_ready      ),
-        .credit_i    ( w_credit_i         )
+        .req_valid_i(req_i.aw_valid),
+        .req_valid_o(throttled_aw_valid),
+        .req_ready_i(rsp_i.aw_ready),
+        .req_ready_o(throttled_aw_ready),
+        .rsp_valid_i(rsp_i.b_valid),
+        .rsp_ready_i(req_i.b_ready),
+        .credit_i   (w_credit_i)
     );
 
     // limit Ar requests -> wait for r.last
     stream_throttle #(
-        .MaxNumPending ( MaxNumArPending  )
+        .MaxNumPending(MaxNumArPending)
     ) i_stream_throttle_ar (
         .clk_i,
         .rst_ni,
-        .req_valid_i ( req_i.ar_valid               ),
-        .req_valid_o ( throttled_ar_valid           ),
-        .req_ready_i ( rsp_i.ar_ready               ),
-        .req_ready_o ( throttled_ar_ready           ),
-        .rsp_valid_i ( rsp_i.r_valid & rsp_i.r.last ),
-        .rsp_ready_i ( req_i.r_ready                ),
-        .credit_i    ( r_credit_i                   )
+        .req_valid_i(req_i.ar_valid),
+        .req_valid_o(throttled_ar_valid),
+        .req_ready_i(rsp_i.ar_ready),
+        .req_ready_o(throttled_ar_ready),
+        .rsp_valid_i(rsp_i.r_valid & rsp_i.r.last),
+        .rsp_ready_i(req_i.r_ready),
+        .credit_i   (r_credit_i)
     );
 
     // connect the throttled request bus (its a through connection - except for the ax valids)

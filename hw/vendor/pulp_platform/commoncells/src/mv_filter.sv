@@ -13,7 +13,7 @@
 module mv_filter #(
     parameter int unsigned WIDTH     = 4,
     parameter int unsigned THRESHOLD = 10
-)(
+) (
     input  logic clk_i,
     input  logic rst_ni,
     input  logic sample_i,
@@ -28,7 +28,7 @@ module mv_filter #(
 
     always_comb begin
         counter_d = counter_q;
-        d = q;
+        d         = q;
 
         if (counter_q >= THRESHOLD[WIDTH-1:0]) begin
             d = 1'b1;
@@ -39,7 +39,7 @@ module mv_filter #(
         // sync reset
         if (clear_i) begin
             counter_d = '0;
-            d = 1'b0;
+            d         = 1'b0;
         end
     end
 

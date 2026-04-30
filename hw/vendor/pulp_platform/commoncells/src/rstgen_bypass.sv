@@ -24,30 +24,30 @@ module rstgen_bypass #(
 );
 
     // internal reset
-    logic rst_n;
+    logic               rst_n;
 
     logic [NumRegs-1:0] synch_regs_q;
 
     // bypass mode: use (clock) multiplexers
     tc_clk_mux2 i_tc_clk_mux2_rst_n (
-        .clk0_i     ( rst_ni ),
-        .clk1_i     ( rst_test_mode_ni ),
-        .clk_sel_i  ( test_mode_i ),
-        .clk_o      ( rst_n )
+        .clk0_i   (rst_ni),
+        .clk1_i   (rst_test_mode_ni),
+        .clk_sel_i(test_mode_i),
+        .clk_o    (rst_n)
     );
 
     tc_clk_mux2 i_tc_clk_mux2_rst_no (
-        .clk0_i     ( synch_regs_q[NumRegs-1] ),
-        .clk1_i     ( rst_test_mode_ni ),
-        .clk_sel_i  ( test_mode_i ),
-        .clk_o      ( rst_no )
+        .clk0_i   (synch_regs_q[NumRegs-1]),
+        .clk1_i   (rst_test_mode_ni),
+        .clk_sel_i(test_mode_i),
+        .clk_o    (rst_no)
     );
 
     tc_clk_mux2 i_tc_clk_mux2_init_no (
-        .clk0_i     ( synch_regs_q[NumRegs-1] ),
-        .clk1_i     ( 1'b1 ),
-        .clk_sel_i  ( test_mode_i ),
-        .clk_o      ( init_no )
+        .clk0_i   (synch_regs_q[NumRegs-1]),
+        .clk1_i   (1'b1),
+        .clk_sel_i(test_mode_i),
+        .clk_o    (init_no)
     );
 
     always @(posedge clk_i or negedge rst_n) begin
@@ -57,11 +57,11 @@ module rstgen_bypass #(
             synch_regs_q <= {synch_regs_q[NumRegs-2:0], 1'b1};
         end
     end
-    `ifndef SYNTHESIS
-    `ifndef COMMON_CELLS_ASSERTS_OFF
+`ifndef SYNTHESIS
+`ifndef COMMON_CELLS_ASSERTS_OFF
     initial begin : p_assertions
         if (NumRegs < 1) $fatal(1, "At least one register is required.");
     end
-    `endif
-    `endif
+`endif
+`endif
 endmodule

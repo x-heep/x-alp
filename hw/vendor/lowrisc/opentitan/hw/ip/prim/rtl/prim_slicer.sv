@@ -8,25 +8,25 @@
 `include "prim_assert.sv"
 
 module prim_slicer #(
-  parameter int InW = 64,
-  parameter int OutW = 8,
+    parameter int InW  = 64,
+    parameter int OutW = 8,
 
-  parameter int IndexW = 4
+    parameter int IndexW = 4
 ) (
-  input        [IndexW-1:0] sel_i,
-  input        [InW-1:0]    data_i,
-  output logic [OutW-1:0]   data_o
+    input        [IndexW-1:0] sel_i,
+    input        [   InW-1:0] data_i,
+    output logic [  OutW-1:0] data_o
 );
 
-  localparam int UnrollW = OutW*(2**IndexW);
+    localparam int UnrollW = OutW * (2 ** IndexW);
 
-  logic [UnrollW-1:0] unrolled_data;
+    logic [UnrollW-1:0] unrolled_data;
 
-  assign unrolled_data = UnrollW'(data_i);
+    assign unrolled_data = UnrollW'(data_i);
 
-  assign data_o = unrolled_data[sel_i*OutW+:OutW];
+    assign data_o        = unrolled_data[sel_i*OutW+:OutW];
 
-  `ASSERT_INIT(ValidWidth_A, InW <= OutW*(2**IndexW))
+    `ASSERT_INIT(ValidWidth_A, InW <= OutW * (2 ** IndexW))
 
 endmodule
 

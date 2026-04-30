@@ -19,20 +19,22 @@
 `include "common_cells/assertions.svh"
 
 module stream_fork #(
-    parameter int unsigned N_OUP = 0    // Synopsys DC requires a default value for parameters.
+    parameter int unsigned N_OUP = 0  // Synopsys DC requires a default value for parameters.
 ) (
-    input  logic                clk_i,
-    input  logic                rst_ni,
-    input  logic                valid_i,
-    output logic                ready_o,
-    output logic [N_OUP-1:0]    valid_o,
-    input  logic [N_OUP-1:0]    ready_i
+    input  logic             clk_i,
+    input  logic             rst_ni,
+    input  logic             valid_i,
+    output logic             ready_o,
+    output logic [N_OUP-1:0] valid_o,
+    input  logic [N_OUP-1:0] ready_i
 );
 
-    typedef enum logic {READY, WAIT} state_t;
+    typedef enum logic {
+        READY,
+        WAIT
+    } state_t;
 
-    logic [N_OUP-1:0]   oup_ready,
-                        all_ones;
+    logic [N_OUP-1:0] oup_ready, all_ones;
 
     state_t inp_state_d, inp_state_q;
 
@@ -48,7 +50,7 @@ module stream_fork #(
                         // If handshake on all outputs, handshake on input.
                         ready_o = 1'b1;
                     end else begin
-                        ready_o = 1'b0;
+                        ready_o     = 1'b0;
                         // Otherwise, wait for inputs that did not handshake yet.
                         inp_state_d = WAIT;
                     end
@@ -58,7 +60,7 @@ module stream_fork #(
             end
             WAIT: begin
                 if (valid_i && oup_ready == all_ones) begin
-                    ready_o = 1'b1;
+                    ready_o     = 1'b1;
                     inp_state_d = READY;
                 end else begin
                     ready_o = 1'b0;
@@ -66,7 +68,7 @@ module stream_fork #(
             end
             default: begin
                 inp_state_d = READY;
-                ready_o = 1'b0;
+                ready_o     = 1'b0;
             end
         endcase
     end
@@ -80,29 +82,29 @@ module stream_fork #(
     end
 
     // Output control FSM
-    for (genvar i = 0; i < N_OUP; i++) begin: gen_oup_state
+    for (genvar i = 0; i < N_OUP; i++) begin : gen_oup_state
         state_t oup_state_d, oup_state_q;
 
         always_comb begin
-            oup_ready[i]    = 1'b1;
-            valid_o[i]      = 1'b0;
-            oup_state_d     = oup_state_q;
+            oup_ready[i] = 1'b1;
+            valid_o[i]   = 1'b0;
+            oup_state_d  = oup_state_q;
 
             unique case (oup_state_q)
                 READY: begin
                     if (valid_i) begin
                         valid_o[i] = 1'b1;
-                        if (ready_i[i]) begin   // Output handshake
-                            if (!ready_o) begin     // No input handshake yet
+                        if (ready_i[i]) begin  // Output handshake
+                            if (!ready_o) begin  // No input handshake yet
                                 oup_state_d = WAIT;
                             end
-                        end else begin          // No output handshake
+                        end else begin  // No output handshake
                             oup_ready[i] = 1'b0;
                         end
                     end
                 end
                 WAIT: begin
-                    if (valid_i && ready_o) begin   // Input handshake
+                    if (valid_i && ready_o) begin  // Input handshake
                         oup_state_d = READY;
                     end
                 end
@@ -121,8 +123,8 @@ module stream_fork #(
         end
     end
 
-    assign all_ones = '1;   // Synthesis fix for Vivado, which does not correctly compute the width
-                            // of the '1 literal when assigned to a port of parametrized width.
+    assign all_ones = '1;  // Synthesis fix for Vivado, which does not correctly compute the width
+                           // of the '1 literal when assigned to a port of parametrized width.
 
 `ifndef COMMON_CELLS_ASSERTS_OFF
     `ASSERT_INIT(n_oup_0, N_OUP >= 1, "Number of outputs must be at least 1!")

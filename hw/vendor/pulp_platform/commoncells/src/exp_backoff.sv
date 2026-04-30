@@ -23,71 +23,65 @@
 `include "common_cells/assertions.svh"
 
 module exp_backoff #(
-  /// Seed for 16bit LFSR
-  parameter int unsigned Seed   = 'hffff,
-  /// 2**MaxExp-1 determines the maximum range from which random wait counts are drawn
-  parameter int unsigned MaxExp = 16
+    /// Seed for 16bit LFSR
+    parameter int unsigned Seed   = 'hffff,
+    /// 2**MaxExp-1 determines the maximum range from which random wait counts are drawn
+    parameter int unsigned MaxExp = 16
 ) (
-  input  logic clk_i,
-  input  logic rst_ni,
-  /// Sets the backoff counter (pulse) -> use when trial did not succeed
-  input  logic set_i,
-  /// Clears the backoff counter (pulse) -> use when trial succeeded
-  input  logic clr_i,
-  /// Indicates whether the backoff counter is equal to zero and a new trial can be launched
-  output logic is_zero_o
+    input  logic clk_i,
+    input  logic rst_ni,
+    /// Sets the backoff counter (pulse) -> use when trial did not succeed
+    input  logic set_i,
+    /// Clears the backoff counter (pulse) -> use when trial succeeded
+    input  logic clr_i,
+    /// Indicates whether the backoff counter is equal to zero and a new trial can be launched
+    output logic is_zero_o
 );
 
-  // leave this constant
-  localparam int unsigned WIDTH = 16;
+    // leave this constant
+    localparam int unsigned WIDTH = 16;
 
-  logic [WIDTH-1:0] lfsr_d, lfsr_q, cnt_d, cnt_q, mask_d, mask_q;
-  logic lfsr;
+    logic [WIDTH-1:0] lfsr_d, lfsr_q, cnt_d, cnt_q, mask_d, mask_q;
+    logic lfsr;
 
-  // generate random wait counts
-  // note: we use a flipped lfsr here to
-  // avoid strange correlation effects between
-  // the (left-shifted) mask and the lfsr
-  assign lfsr = lfsr_q[15-15] ^
-                lfsr_q[15-13] ^
-                lfsr_q[15-12] ^
-                lfsr_q[15-10];
+    // generate random wait counts
+    // note: we use a flipped lfsr here to
+    // avoid strange correlation effects between
+    // the (left-shifted) mask and the lfsr
+    assign lfsr = lfsr_q[15-15] ^ lfsr_q[15-13] ^ lfsr_q[15-12] ^ lfsr_q[15-10];
 
-  assign lfsr_d = (set_i) ? {lfsr, lfsr_q[$high(lfsr_q):1]} :
-                            lfsr_q;
+    assign lfsr_d = (set_i) ? {lfsr, lfsr_q[$high(lfsr_q):1]} : lfsr_q;
 
-  // mask the wait counts with exponentially increasing mask (shift reg)
-  assign mask_d = (clr_i) ? '0                                :
+    // mask the wait counts with exponentially increasing mask (shift reg)
+    assign mask_d = (clr_i) ? '0                                :
                   (set_i) ? {{(WIDTH-MaxExp){1'b0}},mask_q[MaxExp-2:0], 1'b1} :
                             mask_q;
 
-  assign cnt_d =  (clr_i)      ? '0                :
-                  (set_i)      ? (mask_q & lfsr_q) :
-                  (!is_zero_o) ? cnt_q - 1'b1      : '0;
+    assign cnt_d = (clr_i) ? '0 : (set_i) ? (mask_q & lfsr_q) : (!is_zero_o) ? cnt_q - 1'b1 : '0;
 
-  assign is_zero_o = (cnt_q=='0);
+    assign is_zero_o = (cnt_q == '0);
 
-  always_ff @(posedge clk_i or negedge rst_ni) begin : p_regs
-    if (!rst_ni) begin
-      lfsr_q <= WIDTH'(Seed);
-      mask_q <= '0;
-      cnt_q  <= '0;
-    end else begin
-      lfsr_q <= lfsr_d;
-      mask_q <= mask_d;
-      cnt_q  <= cnt_d;
+    always_ff @(posedge clk_i or negedge rst_ni) begin : p_regs
+        if (!rst_ni) begin
+            lfsr_q <= WIDTH'(Seed);
+            mask_q <= '0;
+            cnt_q  <= '0;
+        end else begin
+            lfsr_q <= lfsr_d;
+            mask_q <= mask_d;
+            cnt_q  <= cnt_d;
+        end
     end
-  end
 
-///////////////////////////////////////////////////////
-// assertions
-///////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////
+    // assertions
+    ///////////////////////////////////////////////////////
 
 `ifndef COMMON_CELLS_ASSERTS_OFF
-  // assert wrong parameterizations
-  `ASSERT_INIT(max_exp_0, MaxExp>0, "MaxExp must be greater than 0")
-  `ASSERT_INIT(max_exp_gt_16, MaxExp<=16, "MaxExp cannot be greater than 16")
-  `ASSERT_INIT(seed_0, Seed>0, "Zero seed is not allowed for LFSR")
+    // assert wrong parameterizations
+    `ASSERT_INIT(max_exp_0, MaxExp > 0, "MaxExp must be greater than 0")
+    `ASSERT_INIT(max_exp_gt_16, MaxExp <= 16, "MaxExp cannot be greater than 16")
+    `ASSERT_INIT(seed_0, Seed > 0, "Zero seed is not allowed for LFSR")
 `endif
 
-endmodule // exp_backoff
+endmodule  // exp_backoff

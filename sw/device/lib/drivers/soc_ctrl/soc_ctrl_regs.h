@@ -27,8 +27,9 @@ extern "C" {
 #define SOC_CTRL_BOOT_SELECT_REG_OFFSET 0x8
 #define SOC_CTRL_BOOT_SELECT_BOOT_SELECT_MASK 0x3
 #define SOC_CTRL_BOOT_SELECT_BOOT_SELECT_OFFSET 0
-#define SOC_CTRL_BOOT_SELECT_BOOT_SELECT_FIELD \
-  ((bitfield_field32_t) { .mask = SOC_CTRL_BOOT_SELECT_BOOT_SELECT_MASK, .index = SOC_CTRL_BOOT_SELECT_BOOT_SELECT_OFFSET })
+#define SOC_CTRL_BOOT_SELECT_BOOT_SELECT_FIELD                                                                         \
+  ((bitfield_field32_t){.mask = SOC_CTRL_BOOT_SELECT_BOOT_SELECT_MASK,                                                 \
+                        .index = SOC_CTRL_BOOT_SELECT_BOOT_SELECT_OFFSET})
 #define SOC_CTRL_BOOT_SELECT_BOOT_SELECT_VALUE_BOOT_SELECT_PASSIVE 0x0
 
 // Boot Exit Loop Value - Set externally (e.g. JTAG, TESTBENCH, or another
@@ -44,7 +45,7 @@ extern "C" {
 #define SOC_CTRL_SYSTEM_FREQUENCY_HZ_REG_OFFSET 0x14
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
-#endif  // _SOC_CTRL_REG_DEFS_
-// End generated register defines for soc_ctrl
+#endif // _SOC_CTRL_REG_DEFS_
+       // End generated register defines for soc_ctrl
