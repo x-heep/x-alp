@@ -14,7 +14,7 @@ module stream_filter (
     input  logic valid_i,
     output logic ready_o,
 
-    input  logic drop_i,
+    input logic drop_i,
 
     output logic valid_o,
     input  logic ready_i

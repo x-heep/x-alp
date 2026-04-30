@@ -19,26 +19,26 @@ module stream_throttle #(
     parameter type credit_t = logic [CntWidth-1:0]
 ) (
     /// Clock
-    input  logic clk_i,
+    input logic clk_i,
     /// Asynchronous reset, active low
-    input  logic rst_ni,
+    input logic rst_ni,
 
     /// Request valid in
-    input  logic    req_valid_i,
+    input  logic req_valid_i,
     /// Request valid out
-    output logic    req_valid_o,
+    output logic req_valid_o,
     /// Request ready in
-    input  logic    req_ready_i,
+    input  logic req_ready_i,
     /// Request ready out
-    output logic    req_ready_o,
+    output logic req_ready_o,
 
     /// Response valid in
-    input  logic    rsp_valid_i,
+    input logic rsp_valid_i,
     /// Response ready in
-    input  logic    rsp_ready_i,
+    input logic rsp_ready_i,
 
     /// Amount of credit (number of outstanding transfers)
-    input  credit_t credit_i
+    input credit_t credit_i
 );
 
     // we use a credit counter to keep track of how many transfers are pending at any point in
@@ -71,10 +71,10 @@ module stream_throttle #(
     assign credit_available = credit_q <= (credit_i - 'd1);
 
     // a request id passed on as valid if the input is valid and we have credit.
-    assign req_valid_o = req_valid_i & credit_available;
+    assign req_valid_o      = req_valid_i & credit_available;
 
     // a request id passed on as ready if the input is ready and we have credit.
-    assign req_ready_o = req_ready_i & credit_available;
+    assign req_ready_o      = req_ready_i & credit_available;
 
     // state
     `FF(credit_q, credit_d, '0, clk_i, rst_ni)

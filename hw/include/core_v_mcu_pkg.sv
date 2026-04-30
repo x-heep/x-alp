@@ -137,7 +137,11 @@ package core_v_mcu_pkg;
             start_addr : DEBUG_S_BUS_BASE_ADDR,
             end_addr : DEBUG_S_BUS_END_ADDR
         },
-        '{idx : FLASH_STORAGE_IDX, start_addr : FLASH_STORAGE_BASE_ADDR, end_addr : FLASH_STORAGE_END_ADDR},
+        '{
+            idx : FLASH_STORAGE_IDX,
+            start_addr : FLASH_STORAGE_BASE_ADDR,
+            end_addr : FLASH_STORAGE_END_ADDR
+        },
         '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
         '{idx : EXT_S_BUS_IDX, start_addr : EXT_S_BUS_BASE_ADDR, end_addr : EXT_S_BUS_END_ADDR}
     };
@@ -159,8 +163,12 @@ package core_v_mcu_pkg;
             end_addr : FAST_INTR_CTRL_REG_END_ADDR
         },
         '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
-        '{idx : SPI_SUBSYSTEM_IDX, start_addr : SPI_SUBSYSTEM_START_ADDR, end_addr : SPI_SUBSYSTEM_END_ADDR},
-        '{idx : SPI_FLASH_IDX, start_addr : SPI_FLASH_START_ADDR, end_addr : SPI_FLASH_END_ADDR},   
+        '{
+            idx : SPI_SUBSYSTEM_IDX,
+            start_addr : SPI_SUBSYSTEM_START_ADDR,
+            end_addr : SPI_SUBSYSTEM_END_ADDR
+        },
+        '{idx : SPI_FLASH_IDX, start_addr : SPI_FLASH_START_ADDR, end_addr : SPI_FLASH_END_ADDR},
         '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR}
     };
 

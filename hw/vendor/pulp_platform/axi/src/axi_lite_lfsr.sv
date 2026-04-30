@@ -22,7 +22,7 @@ module axi_lite_lfsr #(
     parameter type axi_lite_req_t    = logic,
     /// AXI4 Lite response struct definition
     parameter type axi_lite_rsp_t    = logic
-)(
+) (
     /// Rising-edge clock
     input  logic          clk_i,
     /// Active-low reset
@@ -64,17 +64,17 @@ module axi_lite_lfsr #(
 
     // W
     axi_opt_lfsr #(
-        .Width ( DataWidth )
+        .Width(DataWidth)
     ) i_axi_opt_lfsr_w (
         .clk_i,
         .rst_ni,
-        .en_i        ( w_lfsr_en    ),
-        .ser_data_i  ( w_ser_data_i ),
-        .ser_data_o  ( w_ser_data_o ),
-        .ser_en_i    ( w_ser_en_i   ),
-        .inp_en_i    ( w_lfsr_en    ),
-        .data_i      ( w_data_in    ),
-        .data_o      ( w_data_out   )
+        .en_i      (w_lfsr_en),
+        .ser_data_i(w_ser_data_i),
+        .ser_data_o(w_ser_data_o),
+        .ser_en_i  (w_ser_en_i),
+        .inp_en_i  (w_lfsr_en),
+        .data_i    (w_data_in),
+        .data_o    (w_data_out)
     );
     assign w_lfsr_en     = req_i.w_valid & rsp_o.w_ready;
     assign rsp_o.w_ready = !w_ser_en_i & w_b_fifo_ready;
@@ -94,41 +94,41 @@ module axi_lite_lfsr #(
 
     // B
     stream_fifo #(
-        .FALL_THROUGH ( 1'b0 ),
-        .DATA_WIDTH   ( 'd1  ),
-        .DEPTH        ( 'd2  )
+        .FALL_THROUGH(1'b0),
+        .DATA_WIDTH  ('d1),
+        .DEPTH       ('d2)
     ) i_stream_fifo_w_b (
         .clk_i,
         .rst_ni,
         .testmode_i,
-        .flush_i    ( 1'b0                ),
-        .usage_o    ( /* NOT CONNECTED */ ),
-        .data_i     ( 1'b0                ),
-        .valid_i    ( req_i.w_valid       ),
-        .ready_o    ( w_b_fifo_ready      ),
-        .data_o     ( /* NOT CONNECTED */ ),
-        .valid_o    ( w_b_fifo_valid      ),
-        .ready_i    ( req_i.b_ready       )
+        .flush_i(1'b0),
+        .usage_o(  /* NOT CONNECTED */),
+        .data_i (1'b0),
+        .valid_i(req_i.w_valid),
+        .ready_o(w_b_fifo_ready),
+        .data_o (  /* NOT CONNECTED */),
+        .valid_o(w_b_fifo_valid),
+        .ready_i(req_i.b_ready)
     );
-    assign rsp_o.b.resp  = axi_pkg::RESP_OKAY;
-    assign rsp_o.b_valid = w_b_fifo_valid;
+    assign rsp_o.b.resp   = axi_pkg::RESP_OKAY;
+    assign rsp_o.b_valid  = w_b_fifo_valid;
 
     // AR (ignored)
     assign rsp_o.ar_ready = !w_ser_en_i;
 
     // R
     axi_opt_lfsr #(
-        .Width ( DataWidth )
+        .Width(DataWidth)
     ) i_axi_opt_lfsr_r (
         .clk_i,
         .rst_ni,
-        .en_i        ( r_lfsr_en           ),
-        .ser_data_i  ( r_ser_data_i        ),
-        .ser_data_o  ( r_ser_data_o        ),
-        .ser_en_i    ( r_ser_en_i          ),
-        .inp_en_i    ( 1'b0                ),
-        .data_i      ( /* NOT CONNECTED */ ),
-        .data_o      ( rsp_o.r.data        )
+        .en_i      (r_lfsr_en),
+        .ser_data_i(r_ser_data_i),
+        .ser_data_o(r_ser_data_o),
+        .ser_en_i  (r_ser_en_i),
+        .inp_en_i  (1'b0),
+        .data_i    (  /* NOT CONNECTED */),
+        .data_o    (rsp_o.r.data)
     );
     assign rsp_o.r.resp  = axi_pkg::RESP_OKAY;
     assign r_lfsr_en     = req_i.r_ready & rsp_o.r_valid;
@@ -143,14 +143,14 @@ module axi_opt_lfsr #(
     parameter int unsigned Width = 32'd0
 ) (
     /// Rising-edge clock
-    input  logic clk_i,
+    input  logic             clk_i,
     /// Active-low reset
-    input  logic rst_ni,
-    input  logic en_i,
-    input  logic ser_data_i,
-    output logic ser_data_o,
-    input  logic ser_en_i,
-    input  logic inp_en_i,
+    input  logic             rst_ni,
+    input  logic             en_i,
+    input  logic             ser_data_i,
+    output logic             ser_data_o,
+    input  logic             ser_en_i,
+    input  logic             inp_en_i,
     input  logic [Width-1:0] data_i,
     output logic [Width-1:0] data_o
 );
@@ -161,7 +161,7 @@ module axi_opt_lfsr #(
     localparam int unsigned MaxNumTabs = 4;
 
     /// Type specifying the tap positions
-    typedef logic [LfsrIdxWidth:0] xnor_entry_t [MaxNumTabs-1:0];
+    typedef logic [LfsrIdxWidth:0] xnor_entry_t[MaxNumTabs-1:0];
     xnor_entry_t XnorFeedback;
 
     // the shift register
@@ -174,15 +174,15 @@ module axi_opt_lfsr #(
 
         // get the parameters
         case (Width)
-            'd8     : XnorFeedback = { 'd8,    'd6,    'd5,    'd4    };
-            'd16    : XnorFeedback = { 'd16,   'd14,   'd13,   'd11   };
-            'd32    : XnorFeedback = { 'd32,   'd30,   'd26,   'd25   };
-            'd64    : XnorFeedback = { 'd64,   'd63,   'd61,   'd60   };
-            'd128   : XnorFeedback = { 'd128,  'd127,  'd126,  'd119  };
-            'd256   : XnorFeedback = { 'd256,  'd256,  'd521,  'd246  };
-            'd512   : XnorFeedback = { 'd512,  'd510,  'd507,  'd504  };
-            'd1024  : XnorFeedback = { 'd1024, 'd1015, 'd1002, 'd1001 };
-            default : XnorFeedback = { 'x,     'x,     'x,     'x     };
+            'd8:     XnorFeedback = {'d8, 'd6, 'd5, 'd4};
+            'd16:    XnorFeedback = {'d16, 'd14, 'd13, 'd11};
+            'd32:    XnorFeedback = {'d32, 'd30, 'd26, 'd25};
+            'd64:    XnorFeedback = {'d64, 'd63, 'd61, 'd60};
+            'd128:   XnorFeedback = {'d128, 'd127, 'd126, 'd119};
+            'd256:   XnorFeedback = {'d256, 'd256, 'd521, 'd246};
+            'd512:   XnorFeedback = {'d512, 'd510, 'd507, 'd504};
+            'd1024:  XnorFeedback = {'d1024, 'd1015, 'd1002, 'd1001};
+            default: XnorFeedback = {'x, 'x, 'x, 'x};
         endcase
 
         // shift register functionality
@@ -191,7 +191,7 @@ module axi_opt_lfsr #(
             for (int unsigned i = 0; i < Width - 1; i++) begin : gen_comp_conection
                 reg_d[i] = reg_q[i+1] ^ data_i[i];
             end
-        // generation mode
+            // generation mode
         end else begin
             for (int unsigned i = 0; i < Width - 1; i++) begin : gen_gen_conection
                 reg_d[i] = reg_q[i+1];
@@ -201,7 +201,7 @@ module axi_opt_lfsr #(
         if (ser_en_i) begin
             // new head element
             reg_d[Width-1] = ser_data_i;
-        // LFSR mode
+            // LFSR mode
         end else begin
             xnor_feedback = reg_q[XnorFeedback[MaxNumTabs-1]-1];
             for (int unsigned t = 0; t < MaxNumTabs - 1; t++) begin : gen_feedback_path

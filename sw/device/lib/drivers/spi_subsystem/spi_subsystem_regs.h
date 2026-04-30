@@ -15,7 +15,7 @@ extern "C" {
 #define SPI_SUBSYSTEM_CONTROL_A2F_CTR_POWERON_EN_BIT 1
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
-#endif  // _SPI_SUBSYSTEM_REG_DEFS_
-// End generated register defines for spi_subsystem
+#endif // _SPI_SUBSYSTEM_REG_DEFS_
+       // End generated register defines for spi_subsystem

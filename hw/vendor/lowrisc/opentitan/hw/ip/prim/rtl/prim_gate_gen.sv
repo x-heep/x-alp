@@ -33,77 +33,77 @@
 
 `include "prim_assert.sv"
 module prim_gate_gen #(
-  parameter int DataWidth = 32,
-  parameter int NumGates = 1000
+    parameter int DataWidth = 32,
+    parameter int NumGates  = 1000
 ) (
-  input                        clk_i,
-  input                        rst_ni,
+    input clk_i,
+    input rst_ni,
 
-  input                        valid_i,
-  input        [DataWidth-1:0] data_i,
-  output logic [DataWidth-1:0] data_o,
-  output                       valid_o
+    input                        valid_i,
+    input        [DataWidth-1:0] data_i,
+    output logic [DataWidth-1:0] data_o,
+    output                       valid_o
 );
 
-  /////////////////////////////////////
-  // Local parameters and assertions //
-  /////////////////////////////////////
+    /////////////////////////////////////
+    // Local parameters and assertions //
+    /////////////////////////////////////
 
-  // technology specific tuning, do not modify.
-  // an inner round is comprised of a 2bit rotation, followed by a 4bit SBox Layer.
-  localparam int NumInnerRounds = 2;
-  localparam int GatesPerRound  = DataWidth * 14;
-  // an outer round consists of NumInnerRounds, followed by a register.
-  localparam int NumOuterRounds = (NumGates + GatesPerRound / 2) / GatesPerRound;
+    // technology specific tuning, do not modify.
+    // an inner round is comprised of a 2bit rotation, followed by a 4bit SBox Layer.
+    localparam int NumInnerRounds = 2;
+    localparam int GatesPerRound = DataWidth * 14;
+    // an outer round consists of NumInnerRounds, followed by a register.
+    localparam int NumOuterRounds = (NumGates + GatesPerRound / 2) / GatesPerRound;
 
-  // do not use for fewer than 500 GE
-  `ASSERT(MinimumNumGates_A, NumGates >= 500)
-  `ASSERT(DataMustBeMultipleOfFour_A, DataWidth % 4 == 0)
+    // do not use for fewer than 500 GE
+    `ASSERT(MinimumNumGates_A, NumGates >= 500)
+    `ASSERT(DataMustBeMultipleOfFour_A, DataWidth % 4 == 0)
 
-  /////////////////////
-  // Generator Loops //
-  /////////////////////
+    /////////////////////
+    // Generator Loops //
+    /////////////////////
 
-  logic [NumOuterRounds-1:0][DataWidth-1:0] regs_d, regs_q;
-  logic [NumOuterRounds-1:0] valid_d, valid_q;
+    logic [NumOuterRounds-1:0][DataWidth-1:0] regs_d, regs_q;
+    logic [NumOuterRounds-1:0] valid_d, valid_q;
 
-  for (genvar k = 0; k < NumOuterRounds; k++) begin : gen_outer_round
+    for (genvar k = 0; k < NumOuterRounds; k++) begin : gen_outer_round
 
-    logic [NumInnerRounds:0][DataWidth-1:0] inner_data;
+        logic [NumInnerRounds:0][DataWidth-1:0] inner_data;
 
-    if (k==0) begin : gen_first
-      assign inner_data[0] = data_i;
-      assign valid_d[0]    = valid_i;
-    end else begin : gen_others
-      assign inner_data[0] = regs_q[k-1];
-      assign valid_d[k]    = valid_q[k-1];
-    end
-
-    for (genvar l = 0; l < NumInnerRounds; l++) begin : gen_inner
-      // 2bit rotation + sbox layer
-      assign inner_data[l+1] = prim_cipher_pkg::sbox4_32bit({inner_data[l][1:0],
-                                                             inner_data[l][DataWidth-1:2]},
-                                                             prim_cipher_pkg::PRINCE_SBOX4);
-    end
-
-    assign regs_d[k] = inner_data[NumInnerRounds];
-  end
-
-  always_ff @(posedge clk_i or negedge rst_ni) begin : p_regs
-    if (!rst_ni) begin
-      regs_q <= '0;
-      valid_q <= '0;
-    end else begin
-      valid_q <= valid_d;
-      for (int k = 0; k < NumOuterRounds; k++) begin
-        if (valid_d[k]) begin
-          regs_q[k] <= regs_d[k];
+        if (k == 0) begin : gen_first
+            assign inner_data[0] = data_i;
+            assign valid_d[0]    = valid_i;
+        end else begin : gen_others
+            assign inner_data[0] = regs_q[k-1];
+            assign valid_d[k]    = valid_q[k-1];
         end
-      end
-    end
-  end
 
-  assign data_o = regs_q[NumOuterRounds-1];
-  assign valid_o = valid_q[NumOuterRounds-1];
+        for (genvar l = 0; l < NumInnerRounds; l++) begin : gen_inner
+            // 2bit rotation + sbox layer
+            assign inner_data[l+1] = prim_cipher_pkg::sbox4_32bit(
+                {inner_data[l][1:0], inner_data[l][DataWidth-1:2]}, prim_cipher_pkg::PRINCE_SBOX4
+            );
+        end
+
+        assign regs_d[k] = inner_data[NumInnerRounds];
+    end
+
+    always_ff @(posedge clk_i or negedge rst_ni) begin : p_regs
+        if (!rst_ni) begin
+            regs_q  <= '0;
+            valid_q <= '0;
+        end else begin
+            valid_q <= valid_d;
+            for (int k = 0; k < NumOuterRounds; k++) begin
+                if (valid_d[k]) begin
+                    regs_q[k] <= regs_d[k];
+                end
+            end
+        end
+    end
+
+    assign data_o  = regs_q[NumOuterRounds-1];
+    assign valid_o = valid_q[NumOuterRounds-1];
 
 endmodule : prim_gate_gen

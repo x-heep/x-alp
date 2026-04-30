@@ -17,19 +17,19 @@
 
 /// A connector that joins two AXI-Lite interfaces.
 module axi_lite_join_intf (
-  AXI_LITE.Slave  in,
-  AXI_LITE.Master out
+    AXI_LITE.Slave  in,
+    AXI_LITE.Master out
 );
 
-  `AXI_LITE_ASSIGN(out, in)
+    `AXI_LITE_ASSIGN(out, in)
 
-// pragma translate_off
+    // pragma translate_off
 `ifndef VERILATOR
-  initial begin
-    assert(in.AXI_ADDR_WIDTH == out.AXI_ADDR_WIDTH);
-    assert(in.AXI_DATA_WIDTH == out.AXI_DATA_WIDTH);
-  end
+    initial begin
+        assert (in.AXI_ADDR_WIDTH == out.AXI_ADDR_WIDTH);
+        assert (in.AXI_DATA_WIDTH == out.AXI_DATA_WIDTH);
+    end
 `endif
-// pragma translate_on
+    // pragma translate_on
 
 endmodule
