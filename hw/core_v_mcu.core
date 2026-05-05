@@ -12,12 +12,16 @@ filesets:
       - subsystems/bootrom_subsystem.sv
       - subsystems/uart_subsystem.sv
       - subsystems/debug_subsystem.sv
+      - subsystems/dma_subsystem.sv
 
   files_rtl:
     file_type: systemVerilogSource
     files:
       - include/core_v_mcu_pkg.sv
       - include/cva6_config_pkg.sv
+      - include/obi_xalp_pkg.sv
+      - include/fifo_pkg.sv
+      - include/reg_pkg.sv
       - system/pad_ring.sv
       - system/core_v_mcu.sv
 
@@ -27,8 +31,11 @@ filesets:
       - pulp-platform.org::axi_riscv_atomics
       - pulp-platform.org:riscv-dbg:0.9.0
       - pulp-platform.org::register_interface:0.4.7
+      - pulp-platform.org::obi
+      - pulp-platform.org::axi_obi
       - openhwgroup.org::cva6:1.4.0
       - lowrisc:ip:uart
+      - xheep_dma:ip:dma
   
   ip_modules:
     depend:
@@ -58,6 +65,7 @@ filesets:
       - misc/vendor/hpdcache-waivers.vlt
       - misc/vendor/tech_cells-waivers.vlt
       - misc/vendor/axi_riscv_atomics-waivers.vlt
+      - misc/vendor/obi_to_axi-waivers.vlt
       - misc/simulation.vlt
       
 targets:

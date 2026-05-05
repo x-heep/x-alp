@@ -1,0 +1,21 @@
+CAPI=2:
+
+name: pulp-platform.org::axi_obi
+
+# Copyright 2021 OpenHW Group
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_rtl:
+    files:
+    - pulpplatform_axi_obi/axi_to_obi.sv
+    - pulpplatform_axi_obi/obi_to_axi.sv
+    - pulpplatform_axi_obi/axi_to_detailed_mem.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:  
+    filesets:
+    - files_rtl
+      
