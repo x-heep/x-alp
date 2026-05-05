@@ -24,6 +24,15 @@ module x_alp (
     output logic jtag_tdo_o,
     output logic jtag_tdo_oe_o,
 
+    // SPI Interface
+    output logic                               spi_flash_sck_o,
+    output logic                               spi_flash_sck_en_o,
+    output logic [spi_host_reg_pkg::NumCS-1:0] spi_flash_csb_o,
+    output logic [spi_host_reg_pkg::NumCS-1:0] spi_flash_csb_en_o,
+    output logic [                        3:0] spi_flash_sd_o,
+    output logic [                        3:0] spi_flash_sd_en_o,
+    input  logic [                        3:0] spi_flash_sd_i,
+
     // External Peripheral Interface
     output core_v_mcu_pkg::axi_slv_req_t ext_slv_req_o,
     input  core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp_i,
@@ -44,26 +53,33 @@ module x_alp (
 );
 
     core_v_mcu u_core_v_mcu (
-        .clk_i        (clk_i),
-        .rst_ni       (rst_ni),
-        .boot_select_i(1'b0),
-        .exit_valid_o (exit_valid_o),
-        .exit_value_o (exit_value_o),
-        .uart_rx_i    (uart_rx_i),
-        .uart_tx_o    (uart_tx_o),
-        .jtag_tck_i   (jtag_tck_i),
-        .jtag_tms_i   (jtag_tms_i),
-        .jtag_trst_ni (jtag_trst_ni),
-        .jtag_tdi_i   (jtag_tdi_i),
-        .jtag_tdo_o   (jtag_tdo_o),
-        .jtag_tdo_oe_o(jtag_tdo_oe_o),
-        .test_mode_i  (test_mode_i),
-        .ext_slv_req_o(ext_slv_req_o),
-        .ext_slv_rsp_i(ext_slv_rsp_i),
-        .ext_mst_req_i(ext_mst_req_i),
-        .ext_mst_rsp_o(ext_mst_rsp_o),
-        .ext_reg_req_o(ext_reg_req_o),
-        .ext_reg_rsp_i(ext_reg_rsp_i)
+        .clk_i             (clk_i),
+        .rst_ni            (rst_ni),
+        .boot_select_i     (1'b0),
+        .exit_valid_o      (exit_valid_o),
+        .exit_value_o      (exit_value_o),
+        .uart_rx_i         (uart_rx_i),
+        .uart_tx_o         (uart_tx_o),
+        .jtag_tck_i        (jtag_tck_i),
+        .jtag_tms_i        (jtag_tms_i),
+        .jtag_trst_ni      (jtag_trst_ni),
+        .jtag_tdi_i        (jtag_tdi_i),
+        .jtag_tdo_o        (jtag_tdo_o),
+        .jtag_tdo_oe_o     (jtag_tdo_oe_o),
+        .spi_flash_sck_o   (spi_flash_sck_o),
+        .spi_flash_sck_en_o(spi_flash_sck_en_o),
+        .spi_flash_csb_o   (spi_flash_csb_o),
+        .spi_flash_csb_en_o(spi_flash_csb_en_o),
+        .spi_flash_sd_o    (spi_flash_sd_o),
+        .spi_flash_sd_en_o (spi_flash_sd_en_o),
+        .spi_flash_sd_i    (spi_flash_sd_i),
+        .test_mode_i       (test_mode_i),
+        .ext_slv_req_o     (ext_slv_req_o),
+        .ext_slv_rsp_i     (ext_slv_rsp_i),
+        .ext_mst_req_i     (ext_mst_req_i),
+        .ext_mst_rsp_o     (ext_mst_rsp_o),
+        .ext_reg_req_o     (ext_reg_req_o),
+        .ext_reg_rsp_i     (ext_reg_rsp_i)
     );
 
 endmodule : x_alp

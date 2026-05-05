@@ -5,6 +5,7 @@ filesets:
   rtl:
     files:
       - openhwgroup/cva6/core/include/config_pkg.sv
+      - ../include/core_v_mcu_pkg.sv  # included in cva6_config_pkg
       - ../include/cva6_config_pkg.sv
       - openhwgroup/cva6/core/include/iti_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
       - openhwgroup/cva6/core/include/cvxif_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
