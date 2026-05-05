@@ -19,6 +19,10 @@ filesets:
     depend:
     - lowrisc:dv_dpi:uartdpi
 
+  spi:
+    depend:
+    - lowrisc:ip:spi_host:1.0
+
   systemverilog_only_uart:
     files:
     - ../hw/vendor/lowrisc_opentitan/hw/dv/dpi/uartdpi/uartdpi.sv
@@ -48,3 +52,4 @@ targets:
     - tool_verilator ? (verilator_tb_waivers)
     - tool_verilator ? (verilator_tb)
     - tool_verilator ? (uartdpi)
+    - tool_verilator ? (spi)

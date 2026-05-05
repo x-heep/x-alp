@@ -13,12 +13,12 @@ lint_off -rule SYNCASYNCNET -file "*/hw/target/simulation/pad_cell_*.sv" -match 
 lint_off -rule UNOPTFLAT -file "*.sv"
 
 // package was included in both tb core and hw core, however it is required in both (last time added was in tb core)
-lint_off -rule MODDUP -file "*hw/include/core_v_mcu_pkg.sv"
+lint_off -rule MODDUP -file "*/include/core_v_mcu_pkg.sv"
 
 // package was included in both cva6 core and hw core, however it is required in both (last time added was in cva6 core)
-lint_off -rule MODDUP -file "*hw/include/cva6_config_pkg.sv"
+lint_off -rule MODDUP -file "*/include/cva6_config_pkg.sv"
 
-lint_off -rule DECLFILENAME -file  "*hw/include/core_v_mcu_pkg.sv"
-lint_off -rule DECLFILENAME -file  "*hw/include/cva6_config_pkg.sv"
+lint_off -rule DECLFILENAME -file  "*/include/core_v_mcu_pkg.sv"
+lint_off -rule DECLFILENAME -file  "*/include/cva6_config_pkg.sv"
 
-lint_off -rule WIDTHCONCAT -file  "*hw/include/core_v_mcu_pkg.sv"
+lint_off -rule WIDTHCONCAT -file  "*/include/core_v_mcu_pkg.sv"
