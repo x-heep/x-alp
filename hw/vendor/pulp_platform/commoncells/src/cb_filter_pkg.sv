@@ -12,15 +12,15 @@
 
 /// Package with the struct definition for the seeds and an example.
 package cb_filter_pkg;
-  typedef struct packed {
-    int unsigned PermuteSeed;
-    int unsigned XorSeed;
-  } cb_seed_t;
+    typedef struct packed {
+        int unsigned PermuteSeed;
+        int unsigned XorSeed;
+    } cb_seed_t;
 
-  // example seeding struct
-  localparam cb_seed_t [2:0] EgSeeds = '{
-    '{PermuteSeed: 32'd299034753, XorSeed: 32'd4094834  },
-    '{PermuteSeed: 32'd19921030,  XorSeed: 32'd995713   },
-    '{PermuteSeed: 32'd294388,    XorSeed: 32'd65146511 }
-  };
+    // example seeding struct
+    localparam cb_seed_t [2:0] EgSeeds = '{
+        '{PermuteSeed: 32'd299034753, XorSeed: 32'd4094834},
+        '{PermuteSeed: 32'd19921030, XorSeed: 32'd995713},
+        '{PermuteSeed: 32'd294388, XorSeed: 32'd65146511}
+    };
 endpackage

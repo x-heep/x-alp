@@ -31,18 +31,18 @@ module bus_subsystem (
 
     // Internal signals
     // ----------------
-    axi_slv_req_t [totalAxiSlaves-1:0] axi_slave_req;
-    axi_slv_rsp_t [totalAxiSlaves-1:0] axi_slave_rsp;
+    axi_slv_req_t [                     totalAxiSlaves-1:0] axi_slave_req;
+    axi_slv_rsp_t [                     totalAxiSlaves-1:0] axi_slave_rsp;
     // AMO <--> CUT
-    axi_mst_req_t                      axi_reg_amo_req;
-    axi_mst_rsp_t                      axi_reg_amo_rsp;
+    axi_mst_req_t                                           axi_reg_amo_req;
+    axi_mst_rsp_t                                           axi_reg_amo_rsp;
     // CUT <--> AXI to REG
-    axi_mst_req_t                      axi_reg_cut_req;
-    axi_mst_rsp_t                      axi_reg_cut_rsp;
-    reg_req_t                          reg_in_req;
-    reg_rsp_t                          reg_in_rsp;
+    axi_mst_req_t                                           axi_reg_cut_req;
+    axi_mst_rsp_t                                           axi_reg_cut_rsp;
+    reg_req_t                                               reg_in_req;
+    reg_rsp_t                                               reg_in_rsp;
     // Reg demux 
-    logic         [regSelectWidth-1:0] reg_select;
+    logic           [regSelectWidth-1:0]                    reg_select;
 
     // AXI XBAR
     //---------

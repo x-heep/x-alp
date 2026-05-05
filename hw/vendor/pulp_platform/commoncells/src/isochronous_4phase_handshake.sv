@@ -42,39 +42,39 @@
 `include "common_cells/assertions.svh"
 
 module isochronous_4phase_handshake (
-  input  logic src_clk_i,
-  input  logic src_rst_ni,
-  input  logic src_valid_i,
-  output logic src_ready_o,
-  input  logic dst_clk_i,
-  input  logic dst_rst_ni,
-  output logic dst_valid_o,
-  input  logic dst_ready_i
+    input  logic src_clk_i,
+    input  logic src_rst_ni,
+    input  logic src_valid_i,
+    output logic src_ready_o,
+    input  logic dst_clk_i,
+    input  logic dst_rst_ni,
+    output logic dst_valid_o,
+    input  logic dst_ready_i
 );
 
-  logic src_req_q, src_ack_q;
-  logic dst_req_q, dst_ack_q;
+    logic src_req_q, src_ack_q;
+    logic dst_req_q, dst_ack_q;
 
-  // source is making a request
-  `FFLARN(src_req_q, ~src_req_q, (src_valid_i && src_ready_o), 1'b0, src_clk_i, src_rst_ni)
-  // "synchronize" the acknowledge into the sending clock-domain
-  `FFARN(src_ack_q, dst_ack_q, 1'b0, src_clk_i, src_rst_ni)
-  // source is ready if the request wasn't yet acknowledged
-  assign src_ready_o = (src_req_q == src_ack_q);
+    // source is making a request
+    `FFLARN(src_req_q, ~src_req_q, (src_valid_i && src_ready_o), 1'b0, src_clk_i, src_rst_ni)
+    // "synchronize" the acknowledge into the sending clock-domain
+    `FFARN(src_ack_q, dst_ack_q, 1'b0, src_clk_i, src_rst_ni)
+    // source is ready if the request wasn't yet acknowledged
+    assign src_ready_o = (src_req_q == src_ack_q);
 
-  // down-stream circuit is acknowledging the handshake
-  `FFLARN(dst_ack_q, ~dst_ack_q, (dst_valid_o && dst_ready_i), 1'b0, dst_clk_i, dst_rst_ni)
-  // "synchronize" the request into the receiving clock domain
-  `FFARN(dst_req_q, src_req_q, 1'b0, dst_clk_i, dst_rst_ni)
-  // destination is valid if we didn't yet get acknowledge
-  assign dst_valid_o = (dst_req_q != dst_ack_q);
+    // down-stream circuit is acknowledging the handshake
+    `FFLARN(dst_ack_q, ~dst_ack_q, (dst_valid_o && dst_ready_i), 1'b0, dst_clk_i, dst_rst_ni)
+    // "synchronize" the request into the receiving clock domain
+    `FFARN(dst_req_q, src_req_q, 1'b0, dst_clk_i, dst_rst_ni)
+    // destination is valid if we didn't yet get acknowledge
+    assign dst_valid_o = (dst_req_q != dst_ack_q);
 
- // stability guarantees
-  `ifndef COMMON_CELLS_ASSERTS_OFF
-  `ASSERT(src_valid_unstable, src_valid_i && !src_ready_o |=> $stable(src_valid_i),
-          src_clk_i, !src_rst_ni, "src_valid_i is unstable")
-  `ASSERT(dst_valid_unstable, dst_valid_o && !dst_ready_i |=> $stable(dst_valid_o),
-          dst_clk_i, !dst_rst_ni, "dst_valid_o is unstable")
-  `endif
+    // stability guarantees
+`ifndef COMMON_CELLS_ASSERTS_OFF
+    `ASSERT(src_valid_unstable, src_valid_i && !src_ready_o |=> $stable(src_valid_i), src_clk_i,
+            !src_rst_ni, "src_valid_i is unstable")
+    `ASSERT(dst_valid_unstable, dst_valid_o && !dst_ready_i |=> $stable(dst_valid_o), dst_clk_i,
+            !dst_rst_ni, "dst_valid_o is unstable")
+`endif
 
 endmodule

@@ -24,24 +24,24 @@ module sync_wedge #(
     logic clk;
     logic serial, serial_q;
 
-    assign serial_o =  serial_q;
+    assign serial_o = serial_q;
     assign f_edge_o = (~serial) & serial_q;
-    assign r_edge_o =  serial & (~serial_q);
+    assign r_edge_o = serial & (~serial_q);
 
     sync #(
-        .STAGES (STAGES)
+        .STAGES(STAGES)
     ) i_sync (
         .clk_i,
         .rst_ni,
         .serial_i,
-        .serial_o ( serial )
+        .serial_o(serial)
     );
 
     pulp_clock_gating i_pulp_clock_gating (
         .clk_i,
         .en_i,
-        .test_en_i ( 1'b0 ),
-        .clk_o     ( clk  )
+        .test_en_i(1'b0),
+        .clk_o    (clk)
     );
 
     always_ff @(posedge clk, negedge rst_ni) begin

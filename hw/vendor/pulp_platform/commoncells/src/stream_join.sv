@@ -15,27 +15,27 @@
 /// dependency rules as in AXI4) to a single output stream.  The output handshake happens only once
 /// all inputs are valid.  The data channel flows outside of this module.
 module stream_join #(
-  /// Number of input streams
-  parameter int unsigned N_INP = 32'd0 // Synopsys DC requires a default value for parameters.
+    /// Number of input streams
+    parameter int unsigned N_INP = 32'd0  // Synopsys DC requires a default value for parameters.
 ) (
-  /// Input streams valid handshakes
-  input  logic  [N_INP-1:0] inp_valid_i,
-  /// Input streams ready handshakes
-  output logic  [N_INP-1:0] inp_ready_o,
-  /// Output stream valid handshake
-  output logic              oup_valid_o,
-  /// Output stream ready handshake
-  input  logic              oup_ready_i
+    /// Input streams valid handshakes
+    input  logic [N_INP-1:0] inp_valid_i,
+    /// Input streams ready handshakes
+    output logic [N_INP-1:0] inp_ready_o,
+    /// Output stream valid handshake
+    output logic             oup_valid_o,
+    /// Output stream ready handshake
+    input  logic             oup_ready_i
 );
 
-  stream_join_dynamic #(
-    .N_INP(N_INP)
-  ) i_stream_join_dynamic (
-    .inp_valid_i(inp_valid_i),
-    .inp_ready_o(inp_ready_o),
-    .sel_i      ({N_INP{1'b1}}),
-    .oup_valid_o(oup_valid_o),
-    .oup_ready_i(oup_ready_i)
-  );
+    stream_join_dynamic #(
+        .N_INP(N_INP)
+    ) i_stream_join_dynamic (
+        .inp_valid_i(inp_valid_i),
+        .inp_ready_o(inp_ready_o),
+        .sel_i      ({N_INP{1'b1}}),
+        .oup_valid_o(oup_valid_o),
+        .oup_ready_i(oup_ready_i)
+    );
 
 endmodule

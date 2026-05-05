@@ -11,22 +11,22 @@
 // Antonio Pullini <pullinia@iis.ee.ethz.ch>
 
 module edge_propagator (
-  input  logic clk_tx_i,
-  input  logic rstn_tx_i,
-  input  logic edge_i,
-  input  logic clk_rx_i,
-  input  logic rstn_rx_i,
-  output logic edge_o
+    input  logic clk_tx_i,
+    input  logic rstn_tx_i,
+    input  logic edge_i,
+    input  logic clk_rx_i,
+    input  logic rstn_rx_i,
+    output logic edge_o
 );
 
-  edge_propagator_ack i_edge_propagator_ack (
-    .clk_tx_i,
-    .rstn_tx_i,
-    .edge_i,
-    .ack_tx_o (/* unused */),
-    .clk_rx_i,
-    .rstn_rx_i,
-    .edge_o
-  );
+    edge_propagator_ack i_edge_propagator_ack (
+        .clk_tx_i,
+        .rstn_tx_i,
+        .edge_i,
+        .ack_tx_o(  /* unused */),
+        .clk_rx_i,
+        .rstn_rx_i,
+        .edge_o
+    );
 
 endmodule

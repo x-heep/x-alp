@@ -7,7 +7,7 @@
  * Utility functions
  */
 package prim_util_pkg;
-  /**
+    /**
    * Math function: $clog2 as specified in Verilog-2005
    *
    * Do not use this function if $clog2() is available.
@@ -25,20 +25,20 @@ package prim_util_pkg;
    *   vector value. The argument shall be treated as an unsigned
    *   value, and an argument value of 0 shall produce a result of 0.
    */
-  function automatic integer _clog2(integer value);
-    integer result;
-    // Use an intermediate value to avoid assigning to an input port, which produces a warning in
-    // Synopsys DC.
-    integer v = value;
-    v = v - 1;
-    for (result = 0; v > 0; result++) begin
-      v = v >> 1;
-    end
-    return result;
-  endfunction
+    function automatic integer _clog2(integer value);
+        integer result;
+        // Use an intermediate value to avoid assigning to an input port, which produces a warning in
+        // Synopsys DC.
+        integer v = value;
+        v = v - 1;
+        for (result = 0; v > 0; result++) begin
+            v = v >> 1;
+        end
+        return result;
+    endfunction
 
 
-  /**
+    /**
    * Math function: Number of bits needed to address |value| items.
    *
    *                  0        for value == 0
@@ -71,19 +71,19 @@ package prim_util_pkg;
    *   logic [vbits(64)-1:0]     store_64_logic_values; // width is [5:0]
    *   logic [vbits(64 + 1)-1:0] store_number_64;       // width is [6:0]
    */
-  function automatic integer vbits(integer value);
+    function automatic integer vbits(integer value);
 `ifdef XCELIUM
-    // The use of system functions was not allowed here in Verilog-2001, but is
-    // valid since (System)Verilog-2005, which is also when $clog2() first
-    // appeared.
-    // Xcelium < 19.10 does not yet support the use of $clog2() here, fall back
-    // to an implementation without a system function. Remove this workaround
-    // if we require a newer Xcelium version.
-    // See #2579 and #2597.
-    return (value == 1) ? 1 : _clog2(value);
+        // The use of system functions was not allowed here in Verilog-2001, but is
+        // valid since (System)Verilog-2005, which is also when $clog2() first
+        // appeared.
+        // Xcelium < 19.10 does not yet support the use of $clog2() here, fall back
+        // to an implementation without a system function. Remove this workaround
+        // if we require a newer Xcelium version.
+        // See #2579 and #2597.
+        return (value == 1) ? 1 : _clog2(value);
 `else
-    return (value == 1) ? 1 : $clog2(value);
+        return (value == 1) ? 1 : $clog2(value);
 `endif
-  endfunction
+    endfunction
 
 endpackage

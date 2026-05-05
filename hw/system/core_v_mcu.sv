@@ -26,6 +26,15 @@ module core_v_mcu (
     output logic jtag_tdo_o,
     output logic jtag_tdo_oe_o,
 
+    // SPI Interface
+    output logic                               spi_flash_sck_o,
+    output logic                               spi_flash_sck_en_o,
+    output logic [spi_host_reg_pkg::NumCS-1:0] spi_flash_csb_o,
+    output logic [spi_host_reg_pkg::NumCS-1:0] spi_flash_csb_en_o,
+    output logic [                        3:0] spi_flash_sd_o,
+    output logic [                        3:0] spi_flash_sd_en_o,
+    input  logic [                        3:0] spi_flash_sd_i,
+
     // Test mode
     input logic test_mode_i,
 
@@ -51,18 +60,18 @@ module core_v_mcu (
     import core_v_mcu_pkg::*;
 
     // Internal signals
-    core_v_mcu_pkg::axi_mst_req_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_req_sig;
-    core_v_mcu_pkg::axi_mst_rsp_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_rsp_sig;
-    core_v_mcu_pkg::axi_slv_req_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_req_sig;
-    core_v_mcu_pkg::axi_slv_rsp_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_rsp_sig;
+    core_v_mcu_pkg::axi_mst_req_t [       NumAxiMasters+NumExtAxiMasters-1:0] axi_master_req_sig;
+    core_v_mcu_pkg::axi_mst_rsp_t [       NumAxiMasters+NumExtAxiMasters-1:0] axi_master_rsp_sig;
+    core_v_mcu_pkg::axi_slv_req_t [         NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_req_sig;
+    core_v_mcu_pkg::axi_slv_rsp_t [         NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_rsp_sig;
 
-    core_v_mcu_pkg::reg_req_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_req_sig;
-    core_v_mcu_pkg::reg_rsp_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_rsp_sig;
+    core_v_mcu_pkg::reg_req_t     [         NumRegSlaves+NumExtRegSlaves-1:0] reg_req_sig;
+    core_v_mcu_pkg::reg_rsp_t     [         NumRegSlaves+NumExtRegSlaves-1:0] reg_rsp_sig;
 
-    logic                         [                              15:0] fast_intr;
-    logic                         [                              15:0] fast_irq;
+    logic                           [15:0]                                    fast_intr;
+    logic                           [15:0]                                    fast_irq;
 
-    logic                                                              debug_req;
+    logic                                                                     debug_req;
 
     //
     //       █████████  ███████████  █████  █████
@@ -162,6 +171,38 @@ module core_v_mcu (
     //                                        █████                                                          
     //                                       ░░░░░                                                           
     // 
+
+
+    spi_subsystem #(
+        .DataWidth            (64),
+        .AddrWidth            (64),
+        .ByteOrder            (1),
+        .ClockFrequencyMAX_MHz(500),
+        .axi_req_t            (core_v_mcu_pkg::axi_slv_req_t),
+        .axi_resp_t           (core_v_mcu_pkg::axi_slv_rsp_t),
+        .reg_req_t            (core_v_mcu_pkg::reg_req_t),
+        .reg_rsp_t            (core_v_mcu_pkg::reg_rsp_t)
+    ) DUT_spi_subsystem (
+        .clk_i                 (clk_i),
+        .rst_ni                (rst_ni),
+        .axi_req_i             (axi_slave_req_sig[SPI_FLASH_IDX]),
+        .axi_rsp_o             (axi_slave_rsp_sig[SPI_FLASH_IDX]),
+        .top_reg_req_i         (reg_req_sig[SPI_SUBSYSTEM_IDX]),
+        .top_reg_rsp_o         (reg_rsp_sig[SPI_SUBSYSTEM_IDX]),
+        .spihost_reg_req_i     (reg_req_sig[SPI_HOST_IDX]),
+        .spihost_reg_rsp_o     (reg_rsp_sig[SPI_HOST_IDX]),
+        .spi_flash_sck_o       (spi_flash_sck_o),
+        .spi_flash_sck_en_o    (spi_flash_sck_en_o),
+        .spi_flash_csb_o       (spi_flash_csb_o),
+        .spi_flash_csb_en_o    (spi_flash_csb_en_o),
+        .spi_flash_sd_o        (spi_flash_sd_o),
+        .spi_flash_sd_en_o     (spi_flash_sd_en_o),
+        .spi_flash_sd_i        (spi_flash_sd_i),
+        .spi_flash_intr_error_o(),
+        .spi_flash_intr_event_o(),
+        .spi_flash_rx_valid_o  (),
+        .spi_flash_tx_ready_o  ()
+    );
 
     soc_ctrl #(
         .reg_req_t(core_v_mcu_pkg::reg_req_t),

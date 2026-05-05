@@ -98,195 +98,214 @@
 `include "common_cells/registers.svh"
 `include "common_cells/assertions.svh"
 
-(* no_ungroup *)
-(* no_boundary_optimization *)
+(* no_ungroup *) (* no_boundary_optimization *)
 module cdc_fifo_gray #(
-  /// The width of the default logic type.
-  parameter int unsigned WIDTH = 1,
-  /// The data type of the payload transported by the FIFO.
-  parameter type T = logic [WIDTH-1:0],
-  /// The FIFO's depth given as 2**LOG_DEPTH.
-  parameter int LOG_DEPTH = 3,
-  /// The number of synchronization registers to insert on the async pointers.
-  parameter int SYNC_STAGES = 2
+    /// The width of the default logic type.
+    parameter int unsigned WIDTH = 1,
+    /// The data type of the payload transported by the FIFO.
+    parameter type T = logic [WIDTH-1:0],
+    /// The FIFO's depth given as 2**LOG_DEPTH.
+    parameter int LOG_DEPTH = 3,
+    /// The number of synchronization registers to insert on the async pointers.
+    parameter int SYNC_STAGES = 2
 ) (
-  input  logic src_rst_ni,
-  input  logic src_clk_i,
-  input  T     src_data_i,
-  input  logic src_valid_i,
-  output logic src_ready_o,
+    input  logic src_rst_ni,
+    input  logic src_clk_i,
+    input  T     src_data_i,
+    input  logic src_valid_i,
+    output logic src_ready_o,
 
-  input  logic dst_rst_ni,
-  input  logic dst_clk_i,
-  output T     dst_data_o,
-  output logic dst_valid_o,
-  input  logic dst_ready_i
+    input  logic dst_rst_ni,
+    input  logic dst_clk_i,
+    output T     dst_data_o,
+    output logic dst_valid_o,
+    input  logic dst_ready_i
 );
 
-  T [2**LOG_DEPTH-1:0] async_data;
-  logic [LOG_DEPTH:0]  async_wptr;
-  logic [LOG_DEPTH:0]  async_rptr;
+    T     [              2**LOG_DEPTH-1:0] async_data;
+    logic   [LOG_DEPTH:0]                  async_wptr;
+    logic   [LOG_DEPTH:0]                  async_rptr;
 
-  cdc_fifo_gray_src #(
-    .T         ( T         ),
-    .LOG_DEPTH ( LOG_DEPTH )
-  ) i_src (
-    .src_rst_ni,
-    .src_clk_i,
-    .src_data_i,
-    .src_valid_i,
-    .src_ready_o,
+    cdc_fifo_gray_src #(
+        .T        (T),
+        .LOG_DEPTH(LOG_DEPTH)
+    ) i_src (
+        .src_rst_ni,
+        .src_clk_i,
+        .src_data_i,
+        .src_valid_i,
+        .src_ready_o,
 
-    (* async *) .async_data_o ( async_data ),
-    (* async *) .async_wptr_o ( async_wptr ),
-    (* async *) .async_rptr_i ( async_rptr )
-  );
+        (* async *) .async_data_o(async_data),
+        (* async *) .async_wptr_o(async_wptr),
+        (* async *) .async_rptr_i(async_rptr)
+    );
 
-  cdc_fifo_gray_dst #(
-    .T         ( T         ),
-    .LOG_DEPTH ( LOG_DEPTH )
-  ) i_dst (
-    .dst_rst_ni,
-    .dst_clk_i,
-    .dst_data_o,
-    .dst_valid_o,
-    .dst_ready_i,
+    cdc_fifo_gray_dst #(
+        .T        (T),
+        .LOG_DEPTH(LOG_DEPTH)
+    ) i_dst (
+        .dst_rst_ni,
+        .dst_clk_i,
+        .dst_data_o,
+        .dst_valid_o,
+        .dst_ready_i,
 
-    (* async *) .async_data_i ( async_data ),
-    (* async *) .async_wptr_i ( async_wptr ),
-    (* async *) .async_rptr_o ( async_rptr )
-  );
+        (* async *) .async_data_i(async_data),
+        (* async *) .async_wptr_i(async_wptr),
+        (* async *) .async_rptr_o(async_rptr)
+    );
 
-  // Check the invariants.
-  `ifndef COMMON_CELLS_ASSERTS_OFF
-  `ASSERT_INIT(log_depth_0, LOG_DEPTH > 0)
-  `ASSERT_INIT(sync_stages_gt_2, SYNC_STAGES >= 2)
-  `endif
+    // Check the invariants.
+`ifndef COMMON_CELLS_ASSERTS_OFF
+    `ASSERT_INIT(log_depth_0, LOG_DEPTH > 0)
+    `ASSERT_INIT(sync_stages_gt_2, SYNC_STAGES >= 2)
+`endif
 
 endmodule
 
 
-(* no_ungroup *)
-(* no_boundary_optimization *)
+(* no_ungroup *) (* no_boundary_optimization *)
 module cdc_fifo_gray_src #(
-  parameter type T = logic,
-  parameter int LOG_DEPTH = 3,
-  parameter int SYNC_STAGES = 2
-)(
-  input  logic src_rst_ni,
-  input  logic src_clk_i,
-  input  T     src_data_i,
-  input  logic src_valid_i,
-  output logic src_ready_o,
+    parameter type T = logic,
+    parameter int LOG_DEPTH = 3,
+    parameter int SYNC_STAGES = 2
+) (
+    input  logic src_rst_ni,
+    input  logic src_clk_i,
+    input  T     src_data_i,
+    input  logic src_valid_i,
+    output logic src_ready_o,
 
-  output T [2**LOG_DEPTH-1:0] async_data_o,
-  output logic [LOG_DEPTH:0]  async_wptr_o,
-  input  logic [LOG_DEPTH:0]  async_rptr_i
+    output T     [2**LOG_DEPTH-1:0] async_data_o,
+    output logic [     LOG_DEPTH:0] async_wptr_o,
+    input  logic [     LOG_DEPTH:0] async_rptr_i
 );
 
-  localparam int PtrWidth = LOG_DEPTH+1;
-  localparam logic [PtrWidth-1:0] PtrFull = (1 << LOG_DEPTH);
+    localparam int PtrWidth = LOG_DEPTH + 1;
+    localparam logic [PtrWidth-1:0] PtrFull = (1 << LOG_DEPTH);
 
-  T [2**LOG_DEPTH-1:0] data_q;
-  logic [PtrWidth-1:0] wptr_q, wptr_d, wptr_bin, wptr_next, rptr, rptr_bin;
+    T [2**LOG_DEPTH-1:0] data_q;
+    logic [PtrWidth-1:0] wptr_q, wptr_d, wptr_bin, wptr_next, rptr, rptr_bin;
 
-  // Data FIFO.
-  assign async_data_o = data_q;
-  for (genvar i = 0; i < 2**LOG_DEPTH; i++) begin : gen_word
-    `FFLNR(data_q[i], src_data_i,
-          src_valid_i & src_ready_o & (wptr_bin[LOG_DEPTH-1:0] == i), src_clk_i)
-  end
+    // Data FIFO.
+    assign async_data_o = data_q;
+    for (genvar i = 0; i < 2 ** LOG_DEPTH; i++) begin : gen_word
+        `FFLNR(data_q[i], src_data_i, src_valid_i & src_ready_o & (wptr_bin[LOG_DEPTH-1:0] == i),
+               src_clk_i)
+    end
 
-  // Read pointer.
-  for (genvar i = 0; i < PtrWidth; i++) begin : gen_sync
-    sync #(.STAGES(SYNC_STAGES)) i_sync (
-      .clk_i    ( src_clk_i       ),
-      .rst_ni   ( src_rst_ni      ),
-      .serial_i ( async_rptr_i[i] ),
-      .serial_o ( rptr[i]         )
+    // Read pointer.
+    for (genvar i = 0; i < PtrWidth; i++) begin : gen_sync
+        sync #(
+            .STAGES(SYNC_STAGES)
+        ) i_sync (
+            .clk_i   (src_clk_i),
+            .rst_ni  (src_rst_ni),
+            .serial_i(async_rptr_i[i]),
+            .serial_o(rptr[i])
+        );
+    end
+    gray_to_binary #(PtrWidth) i_rptr_g2b (
+        .A(rptr),
+        .Z(rptr_bin)
     );
-  end
-  gray_to_binary #(PtrWidth) i_rptr_g2b (.A(rptr), .Z(rptr_bin));
 
-  // Write pointer.
-  assign wptr_next = wptr_bin+1;
-  gray_to_binary #(PtrWidth) i_wptr_g2b (.A(wptr_q), .Z(wptr_bin));
-  binary_to_gray #(PtrWidth) i_wptr_b2g (.A(wptr_next), .Z(wptr_d));
-  `FFLARN(wptr_q, wptr_d, src_valid_i & src_ready_o, '0, src_clk_i, src_rst_ni)
-  assign async_wptr_o = wptr_q;
+    // Write pointer.
+    assign wptr_next = wptr_bin + 1;
+    gray_to_binary #(PtrWidth) i_wptr_g2b (
+        .A(wptr_q),
+        .Z(wptr_bin)
+    );
+    binary_to_gray #(PtrWidth) i_wptr_b2g (
+        .A(wptr_next),
+        .Z(wptr_d)
+    );
+    `FFLARN(wptr_q, wptr_d, src_valid_i & src_ready_o, '0, src_clk_i, src_rst_ni)
+    assign async_wptr_o = wptr_q;
 
-  // The pointers into the FIFO are one bit wider than the actual address into
-  // the FIFO. This makes detecting critical states very simple: if all but the
-  // topmost bit of rptr and wptr agree, the FIFO is in a critical state. If the
-  // topmost bit is equal, the FIFO is empty, otherwise it is full.
-  assign src_ready_o = ((wptr_bin ^ rptr_bin) != PtrFull);
+    // The pointers into the FIFO are one bit wider than the actual address into
+    // the FIFO. This makes detecting critical states very simple: if all but the
+    // topmost bit of rptr and wptr agree, the FIFO is in a critical state. If the
+    // topmost bit is equal, the FIFO is empty, otherwise it is full.
+    assign src_ready_o  = ((wptr_bin ^ rptr_bin) != PtrFull);
 
 endmodule
 
 
-(* no_ungroup *)
-(* no_boundary_optimization *)
+(* no_ungroup *) (* no_boundary_optimization *)
 module cdc_fifo_gray_dst #(
-  parameter type T = logic,
-  parameter int LOG_DEPTH = 3,
-  parameter int SYNC_STAGES = 2
-)(
-  input  logic dst_rst_ni,
-  input  logic dst_clk_i,
-  output T     dst_data_o,
-  output logic dst_valid_o,
-  input  logic dst_ready_i,
+    parameter type T = logic,
+    parameter int LOG_DEPTH = 3,
+    parameter int SYNC_STAGES = 2
+) (
+    input  logic dst_rst_ni,
+    input  logic dst_clk_i,
+    output T     dst_data_o,
+    output logic dst_valid_o,
+    input  logic dst_ready_i,
 
-  input  T [2**LOG_DEPTH-1:0] async_data_i,
-  input  logic [LOG_DEPTH:0]  async_wptr_i,
-  output logic [LOG_DEPTH:0]  async_rptr_o
+    input  T     [2**LOG_DEPTH-1:0] async_data_i,
+    input  logic [     LOG_DEPTH:0] async_wptr_i,
+    output logic [     LOG_DEPTH:0] async_rptr_o
 );
 
-  localparam int PtrWidth = LOG_DEPTH+1;
-  localparam logic [PtrWidth-1:0] PtrEmpty = '0;
+    localparam int PtrWidth = LOG_DEPTH + 1;
+    localparam logic [PtrWidth-1:0] PtrEmpty = '0;
 
-  T dst_data;
-  logic [PtrWidth-1:0] rptr_q, rptr_d, rptr_bin, rptr_bin_d, rptr_next, wptr, wptr_bin;
-  logic dst_valid, dst_ready;
-  // Data selector and register.
-  assign dst_data = async_data_i[rptr_bin[LOG_DEPTH-1:0]];
+    T dst_data;
+    logic [PtrWidth-1:0] rptr_q, rptr_d, rptr_bin, rptr_bin_d, rptr_next, wptr, wptr_bin;
+    logic dst_valid, dst_ready;
+    // Data selector and register.
+    assign dst_data  = async_data_i[rptr_bin[LOG_DEPTH-1:0]];
 
-  // Read pointer.
-  assign rptr_next = rptr_bin+1;
-  gray_to_binary #(PtrWidth) i_rptr_g2b (.A(rptr_q), .Z(rptr_bin));
-  binary_to_gray #(PtrWidth) i_rptr_b2g (.A(rptr_next), .Z(rptr_d));
-  `FFLARN(rptr_q, rptr_d, dst_valid & dst_ready, '0, dst_clk_i, dst_rst_ni)
-  assign async_rptr_o = rptr_q;
-
-  // Write pointer.
-  for (genvar i = 0; i < PtrWidth; i++) begin : gen_sync
-    sync #(.STAGES(SYNC_STAGES)) i_sync (
-      .clk_i    ( dst_clk_i       ),
-      .rst_ni   ( dst_rst_ni      ),
-      .serial_i ( async_wptr_i[i] ),
-      .serial_o ( wptr[i]         )
+    // Read pointer.
+    assign rptr_next = rptr_bin + 1;
+    gray_to_binary #(PtrWidth) i_rptr_g2b (
+        .A(rptr_q),
+        .Z(rptr_bin)
     );
-  end
-  gray_to_binary #(PtrWidth) i_wptr_g2b (.A(wptr), .Z(wptr_bin));
+    binary_to_gray #(PtrWidth) i_rptr_b2g (
+        .A(rptr_next),
+        .Z(rptr_d)
+    );
+    `FFLARN(rptr_q, rptr_d, dst_valid & dst_ready, '0, dst_clk_i, dst_rst_ni)
+    assign async_rptr_o = rptr_q;
 
-  // The pointers into the FIFO are one bit wider than the actual address into
-  // the FIFO. This makes detecting critical states very simple: if all but the
-  // topmost bit of rptr and wptr agree, the FIFO is in a critical state. If the
-  // topmost bit is equal, the FIFO is empty, otherwise it is full.
-  assign dst_valid = ((wptr_bin ^ rptr_bin) != PtrEmpty);
+    // Write pointer.
+    for (genvar i = 0; i < PtrWidth; i++) begin : gen_sync
+        sync #(
+            .STAGES(SYNC_STAGES)
+        ) i_sync (
+            .clk_i   (dst_clk_i),
+            .rst_ni  (dst_rst_ni),
+            .serial_i(async_wptr_i[i]),
+            .serial_o(wptr[i])
+        );
+    end
+    gray_to_binary #(PtrWidth) i_wptr_g2b (
+        .A(wptr),
+        .Z(wptr_bin)
+    );
 
-  // Cut the combinatorial path with a spill register.
-  spill_register #(
-    .T       ( T           )
-  ) i_spill_register (
-    .clk_i   ( dst_clk_i   ),
-    .rst_ni  ( dst_rst_ni  ),
-    .valid_i ( dst_valid   ),
-    .ready_o ( dst_ready   ),
-    .data_i  ( dst_data    ),
-    .valid_o ( dst_valid_o ),
-    .ready_i ( dst_ready_i ),
-    .data_o  ( dst_data_o  )
-  );
+    // The pointers into the FIFO are one bit wider than the actual address into
+    // the FIFO. This makes detecting critical states very simple: if all but the
+    // topmost bit of rptr and wptr agree, the FIFO is in a critical state. If the
+    // topmost bit is equal, the FIFO is empty, otherwise it is full.
+    assign dst_valid = ((wptr_bin ^ rptr_bin) != PtrEmpty);
+
+    // Cut the combinatorial path with a spill register.
+    spill_register #(
+        .T(T)
+    ) i_spill_register (
+        .clk_i  (dst_clk_i),
+        .rst_ni (dst_rst_ni),
+        .valid_i(dst_valid),
+        .ready_o(dst_ready),
+        .data_i (dst_data),
+        .valid_o(dst_valid_o),
+        .ready_i(dst_ready_i),
+        .data_o (dst_data_o)
+    );
 
 endmodule

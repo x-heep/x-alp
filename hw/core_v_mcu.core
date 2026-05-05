@@ -28,21 +28,23 @@ filesets:
       - pulp-platform.org::register_interface:0.4.7
       - openhwgroup.org::cva6:1.4.0
       - lowrisc:ip:uart
+      - x-heep:ip:spi
   
   ip_modules:
     depend:
       - x-alp:ip:boot_rom
       - x-heep:ip:soc_ctrl
       - x-heep:ip:fast_intr_ctrl
+      - x-heep:ip:spi_subsys
 
   simulation_rtl:
     file_type: systemVerilogSource
     files:
       - target/simulation/pad_cell_bypass_input.sv 
       - target/simulation/pad_cell_bypass_output.sv 
-      - target/simulation/pad_cell_inout.sv 
-      - target/simulation/pad_cell_input.sv 
-      - target/simulation/pad_cell_output.sv 
+      # - target/simulation/pad_cell_inout.sv # core_v_mcu_pkg.sv is missing side_pad_e type
+      # - target/simulation/pad_cell_input.sv # core_v_mcu_pkg.sv is missing side_pad_e type
+      # - target/simulation/pad_cell_output.sv # core_v_mcu_pkg.sv is missing side_pad_e type
       - target/simulation/sram_wrapper.sv
 
   waivers:
@@ -57,6 +59,7 @@ filesets:
       - misc/vendor/hpdcache-waivers.vlt
       - misc/vendor/tech_cells-waivers.vlt
       - misc/vendor/axi_riscv_atomics-waivers.vlt
+      - misc/vendor/spi-waivers.vlt
       - misc/simulation.vlt
       
 targets:

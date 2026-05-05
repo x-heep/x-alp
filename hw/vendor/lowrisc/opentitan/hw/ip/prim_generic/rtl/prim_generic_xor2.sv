@@ -5,13 +5,13 @@
 `include "prim_assert.sv"
 
 module prim_generic_xor2 #(
-  parameter int Width = 1
+    parameter int Width = 1
 ) (
-  input        [Width-1:0] in0_i,
-  input        [Width-1:0] in1_i,
-  output logic [Width-1:0] out_o
+    input        [Width-1:0] in0_i,
+    input        [Width-1:0] in1_i,
+    output logic [Width-1:0] out_o
 );
 
-  assign out_o = in0_i ^ in1_i;
+    assign out_o = in0_i ^ in1_i;
 
 endmodule

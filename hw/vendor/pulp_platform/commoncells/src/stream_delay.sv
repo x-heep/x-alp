@@ -12,13 +12,13 @@
 // Description: Delay (or randomize) AXI-like handshaking
 
 module stream_delay #(
-    parameter bit   StallRandom = 0,
-    parameter int   FixedDelay  = 1,
-    parameter type  payload_t  = logic,
+    parameter bit StallRandom = 0,
+    parameter int FixedDelay = 1,
+    parameter type payload_t = logic,
     parameter logic [15:0] Seed = '0
-)(
-    input  logic     clk_i,
-    input  logic     rst_ni,
+) (
+    input logic clk_i,
+    input logic rst_ni,
 
     input  payload_t payload_i,
     output logic     ready_o,
@@ -30,22 +30,24 @@ module stream_delay #(
 );
 
     if (FixedDelay == 0 && !StallRandom) begin : gen_pass_through
-        assign ready_o = ready_i;
-        assign valid_o = valid_i;
+        assign ready_o   = ready_i;
+        assign valid_o   = valid_i;
         assign payload_o = payload_i;
     end else begin : gen_delay
 
         localparam int unsigned CounterBits = 32;
 
         typedef enum logic [1:0] {
-            Idle, Valid, Ready
+            Idle,
+            Valid,
+            Ready
         } state_e;
 
         state_e state_d, state_q;
 
-        logic       load;
+        logic                   load;
         logic [CounterBits-1:0] count_out;
-        logic       en;
+        logic                   en;
 
         logic [CounterBits-1:0] counter_load;
 
@@ -61,7 +63,7 @@ module stream_delay #(
             unique case (state_q)
                 Idle: begin
                     if (valid_i) begin
-                        load = 1'b1;
+                        load    = 1'b1;
                         state_d = Valid;
                         // Just one cycle delay
                         if (FixedDelay == 1 || (StallRandom && counter_load == 1)) begin
@@ -88,38 +90,38 @@ module stream_delay #(
                     ready_o = ready_i;
                     if (ready_i) state_d = Idle;
                 end
-                default : /* default */;
+                default:  /* default */;
             endcase
 
         end
 
         if (StallRandom) begin : gen_random_stall
             lfsr_16bit #(
-              .WIDTH ( 16   ),
-              .SEED  ( Seed )
+                .WIDTH(16),
+                .SEED (Seed)
             ) i_lfsr_16bit (
-              .clk_i          ( clk_i        ),
-              .rst_ni         ( rst_ni       ),
-              .en_i           ( load         ),
-              .refill_way_oh  (              ),
-              .refill_way_bin ( counter_load )
+                .clk_i         (clk_i),
+                .rst_ni        (rst_ni),
+                .en_i          (load),
+                .refill_way_oh (),
+                .refill_way_bin(counter_load)
             );
         end else begin : gen_fixed_delay
             assign counter_load = FixedDelay;
         end
 
         counter #(
-            .WIDTH      ( CounterBits )
+            .WIDTH(CounterBits)
         ) i_counter (
-            .clk_i      ( clk_i        ),
-            .rst_ni     ( rst_ni       ),
-            .clear_i    ( 1'b0         ),
-            .en_i       ( en           ),
-            .load_i     ( load         ),
-            .down_i     ( 1'b1         ),
-            .d_i        ( counter_load ),
-            .q_o        ( count_out    ),
-            .overflow_o (              )
+            .clk_i     (clk_i),
+            .rst_ni    (rst_ni),
+            .clear_i   (1'b0),
+            .en_i      (en),
+            .load_i    (load),
+            .down_i    (1'b1),
+            .d_i       (counter_load),
+            .q_o       (count_out),
+            .overflow_o()
         );
 
         always_ff @(posedge clk_i or negedge rst_ni) begin

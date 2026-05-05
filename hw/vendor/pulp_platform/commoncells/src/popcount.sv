@@ -27,14 +27,13 @@ module popcount #(
     output logic [PopcountWidth-1:0] popcount_o
 );
 
-  if (INPUT_WIDTH < 1)
-    $error("INPUT_WIDTH must be larger or equal to 1.");
+    if (INPUT_WIDTH < 1) $error("INPUT_WIDTH must be larger or equal to 1.");
 
-  always_comb begin
-    popcount_o = 0;
-    for (int i = 0; i < INPUT_WIDTH; i++) begin
-      popcount_o += data_i[i];
+    always_comb begin
+        popcount_o = 0;
+        for (int i = 0; i < INPUT_WIDTH; i++) begin
+            popcount_o += data_i[i];
+        end
     end
-  end
 
 endmodule : popcount

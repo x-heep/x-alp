@@ -1,0 +1,11 @@
+`verilator_config
+
+// sram_wrapper version used in xheep_spi didn't have the UPF power pins
+lint_off -rule PINMISSING -file "*/axi_to_flash_controller.sv" -match "**"
+
+// WIDTH warnings : truncations and extentions
+lint_off -rule WIDTHEXPAND -file "*/axi_to_flash_controller.sv" -match "**"
+lint_off -rule WIDTHTRUNC -file "*/axi_to_flash_controller.sv" -match "**"
+
+lint_off -rule WIDTHEXPAND -file "*/hw/target/simulation/sram_wrapper.sv" -match "**"
+

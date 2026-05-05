@@ -16,34 +16,26 @@
 /// A stream interface with custom payload of type `payload_t`.
 /// Handshaking rules as defined in the AXI standard.
 interface STREAM_DV #(
-  /// Custom payload type.
-  parameter type payload_t = logic
-)(
-  /// Interface clock.
-  input logic clk_i
+    /// Custom payload type.
+    parameter type payload_t = logic
+) (
+    /// Interface clock.
+    input logic clk_i
 );
-  payload_t data;
-  logic valid;
-  logic ready;
+    payload_t data;
+    logic     valid;
+    logic     ready;
 
-  modport In (
-    output ready,
-    input valid, data
-  );
+    modport In(output ready, input valid, data);
 
-  modport Out (
-    output valid, data,
-    input ready
-  );
+    modport Out(output valid, data, input ready);
 
-  /// Passive modport for scoreboard and monitors.
-  modport Passive (
-    input valid, ready, data
-  );
+    /// Passive modport for scoreboard and monitors.
+    modport Passive(input valid, ready, data);
 
-  // Make sure that the handshake and payload is stable
-  `ifndef COMMON_CELLS_ASSERTS_OFF
-  `ASSERT(data_unstable, (valid && !ready |=> $stable(data)), clk_i, 1'b0)
-  `ASSERT(valid_unstable, (valid && !ready |=> valid), clk_i, 1'b0)
-  `endif
+    // Make sure that the handshake and payload is stable
+`ifndef COMMON_CELLS_ASSERTS_OFF
+    `ASSERT(data_unstable, (valid && !ready |=> $stable(data)), clk_i, 1'b0)
+    `ASSERT(valid_unstable, (valid && !ready |=> valid), clk_i, 1'b0)
+`endif
 endinterface
