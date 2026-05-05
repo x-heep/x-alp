@@ -1,0 +1,17 @@
+// DESCRIPTION: Verilator output: Waivers generated with --waiver-output
+
+`verilator_config
+
+// Below are suggested waivers. You have three options:
+//   1. Fix the reason for the linter warning in the Verilog sources
+//   2. Keep the waiver permanently if you are sure it is okay
+//   3. Keep the waiver temporarily to suppress the output
+
+ lint_off -rule MODDUP -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_obi/obi/src/obi_rready_converter.sv" -match "Duplicate declaration of module: 'obi_rready_converter'*"
+ lint_off -rule WIDTHEXPAND -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_axi_obi/obi_to_axi.sv" -match "Operator VAR 'AxiBurstType' expects 32 bits on the Initial value, but Initial value's VARREF 'BURST_INCR' generates 2 bits.*"
+ lint_off -rule WIDTHEXPAND -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_axi_obi/obi_to_axi.sv" -match "Operator VAR 'AxiSize' expects 32 bits on the Initial value, but Initial value's CASTWRAP generates 3 bits.*"
+ lint_off -rule WIDTHTRUNC -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_axi_obi/obi_to_axi.sv" -match "Logical operator GENIF expects 1 bit on the If, but If's SEL generates 32 bits.*"
+ lint_off -rule ASCRANGE -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_axi_obi/obi_to_axi.sv" -match "Ascending bit range vector: left < right of bit range: [-1:0]*"
+ lint_off -rule UNOPTFLAT -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_axi_obi/obi_to_axi.sv" -match "Signal unoptimizable: Circular combinational logic: 'testharness.u_x_alp.u_core_v_mcu.u_dma_subsystem.dma_addr_unit_bridge.obi_rsp_o'*"
+ lint_off -rule UNOPTFLAT -file "*../../../tb/src/verilator/../../../hw/vendor/pulpplatform_axi_obi/obi_to_axi.sv" -match "Signal unoptimizable: Circular combinational logic: 'testharness.u_x_alp.u_core_v_mcu.u_dma_subsystem.dma_read_unit_bridge.axi_rsp_i'*"
+

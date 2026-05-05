@@ -48,32 +48,32 @@ module testharness #(
     // Internal signals
     // ----------------
 
-    logic clk;
-    logic rst_n;
-    logic exit_valid;
-    logic [31:0] exit_value;
+    logic                                clk;
+    logic                                rst_n;
+    logic                                exit_valid;
+    logic                         [31:0] exit_value;
 
     // JTAG
-    logic                         sim_jtag_enable;
-    logic                         sim_jtag_tck;
-    logic                         sim_jtag_trst_n;
-    logic                         sim_jtag_tms;
-    logic                         sim_jtag_tdi;
-    logic                         sim_jtag_tdo;
+    logic                                sim_jtag_enable;
+    logic                                sim_jtag_tck;
+    logic                                sim_jtag_trst_n;
+    logic                                sim_jtag_tms;
+    logic                                sim_jtag_tdi;
+    logic                                sim_jtag_tdo;
 
-    logic                         jtag_tck;
-    logic                         jtag_trst_n;
-    logic                         jtag_tms;
-    logic                         jtag_tdi;
-    logic                         jtag_tdo;
+    logic                                jtag_tck;
+    logic                                jtag_trst_n;
+    logic                                jtag_tms;
+    logic                                jtag_tdi;
+    logic                                jtag_tdo;
 
     // UART
-    logic                         uart_tx;
-    logic                         uart_rx;
+    logic                                uart_tx;
+    logic                                uart_rx;
 
     // External Peripheral Interface
-    core_v_mcu_pkg::axi_slv_req_t ext_slv_req;
-    core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp;
+    core_v_mcu_pkg::axi_slv_req_t        ext_slv_req;
+    core_v_mcu_pkg::axi_slv_rsp_t        ext_slv_rsp;
 
     // Memory interface
     localparam int AddrWidth = $clog2(256) + 1;
@@ -83,8 +83,8 @@ module testharness #(
     logic                 tb_mem_we;
     logic [         63:0] tb_mem_rdata;
 
-    assign clk = clk_i;
-    assign rst_n = rst_ni;
+    assign clk          = clk_i;
+    assign rst_n        = rst_ni;
     assign exit_valid_o = exit_valid;
 
     //----

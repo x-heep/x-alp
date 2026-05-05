@@ -53,16 +53,16 @@ module axi_to_reg_v2 #(
     localparam type reg_strb_t = logic [RegDataWidth/8-1:0];
 
     // TCDM BUS
-    logic      [NumBanks-1:0] mem_qvalid;
-    logic      [NumBanks-1:0] mem_qready;
-    addr_t     [NumBanks-1:0] mem_addr;
-    reg_data_t [NumBanks-1:0] mem_wdata;
-    reg_strb_t [NumBanks-1:0] mem_strb;
-    logic      [NumBanks-1:0] mem_we;
-    id_t       [NumBanks-1:0] mem_id;
-    logic      [NumBanks-1:0] mem_pvalid;
-    reg_data_t [NumBanks-1:0] mem_rdata;
-    logic      [NumBanks-1:0] mem_err;
+    logic        [NumBanks-1:0]              mem_qvalid;
+    logic        [NumBanks-1:0]              mem_qready;
+    addr_t     [               NumBanks-1:0] mem_addr;
+    reg_data_t [               NumBanks-1:0] mem_wdata;
+    reg_strb_t [               NumBanks-1:0] mem_strb;
+    logic        [NumBanks-1:0]              mem_we;
+    id_t       [               NumBanks-1:0] mem_id;
+    logic        [NumBanks-1:0]              mem_pvalid;
+    reg_data_t [               NumBanks-1:0] mem_rdata;
+    logic        [NumBanks-1:0]              mem_err;
 
     // sub reg buses
     reg_req_t [NumBanks-1:0] reg_req, valid_req, zero_w_req;

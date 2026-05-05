@@ -1,0 +1,25 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+  name: "pulpplatform_obi",
+  target_dir: "pulpplatform_obi",
+
+  upstream: {
+    url: "https://github.com/pulp-platform/obi.git",
+    rev: "6a724da5c8d6412b88b6948746e04c1adf39d017",
+  },
+
+  exclude_from_upstream: [
+    ".github",
+    "src/test",
+    ".gitignore",
+    ".gitlab-ci.yml",
+    "Bender.yml",
+    "Bender.lock",
+    "CHANGELOG.md",
+    "LICENSE",
+    "Makefile",
+    "Readme.md",
+  ],
+}

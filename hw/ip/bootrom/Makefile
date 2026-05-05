@@ -8,7 +8,7 @@ OBJDUMP?=$(RISCV_XALP)/bin/$(COMPILER_PREFIX)elf-objdump
 PYTHON?=python
 
 INC_FOLDERS                 = $(sort $(dir $(wildcard ../../../sw/device/lib/drivers/*/)))
-INC_FOLDERS                += $(sort $(dir $(wildcard ../../../sw/device/lib/base/*/)))
+INC_FOLDERS                += $(sort $(dir $(wildcard ../../../sw/device/lib/base/ ../../../sw/device/lib/base/*/)))
 INC_FOLDERS                += $(sort $(dir $(wildcard ../../../sw/device/lib/runtime/)))
 INC_FOLDERS_GCC             = $(addprefix -I ,$(INC_FOLDERS))
 

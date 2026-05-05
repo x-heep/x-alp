@@ -14,7 +14,7 @@ package core_v_mcu_pkg;
     //-----------
     // BUS Config
     //-----------
-    localparam int unsigned NumAxiMasters = 3;
+    localparam int unsigned NumAxiMasters = 6;
     // localparam int unsigned NumExtAxiMasters = 1;
 
     localparam int unsigned totalAxiMasters = NumAxiMasters;
@@ -24,7 +24,7 @@ package core_v_mcu_pkg;
 
     localparam int unsigned totalAxiSlaves = NumAxiSlaves;
 
-    localparam int unsigned NumRegSlaves = 5;
+    localparam int unsigned NumRegSlaves = 6;
     // localparam int unsigned NumExtRegSlaves = 1;
 
     localparam int unsigned totalRegSlaves = NumRegSlaves;
@@ -64,6 +64,9 @@ package core_v_mcu_pkg;
     localparam int unsigned CPU_M_BUS_IDX = 0;
     localparam int unsigned DEBUG_MODULE_M_BUS_IDX = 1;
     localparam int unsigned EXT_MASTER_M_BUS_IDX = 2;
+    localparam int unsigned DMA_WRITE_MODULE_M_BUS_IDX = 3;
+    localparam int unsigned DMA_READ_MODULE_M_BUS_IDX = 4;
+    localparam int unsigned DMA_ADDR_MODULE_M_BUS_IDX = 5;
 
     // Slave indexes
     localparam int unsigned MEM_S_BUS_IDX = 0;
@@ -100,6 +103,7 @@ package core_v_mcu_pkg;
     localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
     localparam int unsigned UART_REG_IDX = 3;
     localparam int unsigned EXT_PERIPHERAL_REG_IDX = 4;
+    localparam int unsigned DMA_REG_IDX = 5;
 
     // Register addresses
     localparam addr_t SOC_CTRL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h0000000000000000;
@@ -117,6 +121,9 @@ package core_v_mcu_pkg;
     localparam addr_t EXT_PERIPHERAL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h0000000000040000;
     localparam addr_t EXT_PERIPHERAL_REG_SIZE = 64'h0000000000001000;
     localparam addr_t EXT_PERIPHERAL_REG_END_ADDR = EXT_PERIPHERAL_REG_BASE_ADDR + EXT_PERIPHERAL_REG_SIZE;
+    localparam addr_t DMA_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h0000000000050000;
+    localparam addr_t DMA_REG_SIZE = 64'h0000000000001000;
+    localparam addr_t DMA_REG_END_ADDR = DMA_REG_BASE_ADDR + DMA_REG_SIZE;
 
     // Address mapping rules
     localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
@@ -159,7 +166,8 @@ package core_v_mcu_pkg;
             idx : EXT_PERIPHERAL_REG_IDX,
             start_addr : EXT_PERIPHERAL_REG_BASE_ADDR,
             end_addr : EXT_PERIPHERAL_REG_END_ADDR
-        }
+        },
+        '{idx : DMA_REG_IDX, start_addr : DMA_REG_BASE_ADDR, end_addr : DMA_REG_END_ADDR}
     };
 
 

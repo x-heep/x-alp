@@ -1,0 +1,20 @@
+// Copyright 2020 OpenHW Group
+// Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+// SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+{
+    name: "xheep_dma",
+    target_dir: "xheep_dma",
+
+    upstream: {
+        // will be updated when pr is merged
+      url: "https://github.com/Matteocaroleo/xheep_dma.git",
+      rev: "39a2d5729dede1e8d1a6eb91f58df0845737efcc",
+    },
+  
+    exclude_from_upstream: [
+      ".gitignore",
+      "util",
+      "vendor",
+      "tb"
+    ]  
+}
