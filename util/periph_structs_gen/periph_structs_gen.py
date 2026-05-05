@@ -403,8 +403,8 @@ def format_dma_channels(file_path):
 
         # Replace 'DMA_START_ADDRESS' with 'new_address'
         updated_content = content.replace(
-            "#define dma_peri ((volatile dma *) DMA_START_ADDRESS)",
-            "#define dma_peri(channel) ((volatile dma *) (DMA_START_ADDRESS + DMA_CH_SIZE * channel))",
+            "#define dma_peri ((volatile dma *) DMA_BASE_ADDRESS)",
+            "#define dma_peri(channel) ((volatile dma *) (DMA_BASE_ADDRESS + DMA_CH_SIZE * channel))",
         )
 
         # Write the updated content back to the file
