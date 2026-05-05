@@ -51,18 +51,18 @@ module core_v_mcu (
     import core_v_mcu_pkg::*;
 
     // Internal signals
-    core_v_mcu_pkg::axi_mst_req_t [NumAxiMasters-1:0] axi_master_req_sig;
-    core_v_mcu_pkg::axi_mst_rsp_t [NumAxiMasters-1:0] axi_master_rsp_sig;
-    core_v_mcu_pkg::axi_slv_req_t [ NumAxiSlaves-1:0] axi_slave_req_sig;
-    core_v_mcu_pkg::axi_slv_rsp_t [ NumAxiSlaves-1:0] axi_slave_rsp_sig;
+    core_v_mcu_pkg::axi_mst_req_t [       NumAxiMasters-1:0] axi_master_req_sig;
+    core_v_mcu_pkg::axi_mst_rsp_t [       NumAxiMasters-1:0] axi_master_rsp_sig;
+    core_v_mcu_pkg::axi_slv_req_t [        NumAxiSlaves-1:0] axi_slave_req_sig;
+    core_v_mcu_pkg::axi_slv_rsp_t [        NumAxiSlaves-1:0] axi_slave_rsp_sig;
 
-    core_v_mcu_pkg::reg_req_t     [ NumRegSlaves-1:0] reg_req_sig;
-    core_v_mcu_pkg::reg_rsp_t     [ NumRegSlaves-1:0] reg_rsp_sig;
+    core_v_mcu_pkg::reg_req_t     [        NumRegSlaves-1:0] reg_req_sig;
+    core_v_mcu_pkg::reg_rsp_t     [        NumRegSlaves-1:0] reg_rsp_sig;
 
-    logic                         [             15:0] fast_intr;
-    logic                         [             15:0] fast_irq;
+    logic                           [15:0]                   fast_intr;
+    logic                           [15:0]                   fast_irq;
 
-    logic                                             debug_req;
+    logic                                                    debug_req;
 
     //
     //       █████████  ███████████  █████  █████
@@ -244,4 +244,48 @@ module core_v_mcu (
 
     );
 
+
+    logic                     clk_gate_en_n = 'b1;
+    // for now it assumes only one DMA channel
+    dma_reg_pkg::dma_hw2reg_t external_dma_hw2reg;
+    assign external_dma_hw2reg = '0;
+
+
+    dma_subsystem u_dma_subsystem (
+        // input signals
+        .clk_i         (clk_i),
+        .rst_ni        (rst_ni),
+        .clk_gate_en_ni(clk_gate_en_n),
+        .ext_dma_stop_i(),
+
+        // registers
+        .reg_req_i(reg_req_sig[DMA_REG_IDX]),
+        .reg_rsp_o(reg_rsp_sig[DMA_REG_IDX]),
+
+        // read unit
+        .dma_read_req_o (axi_master_req_sig[DMA_READ_MODULE_M_BUS_IDX]),
+        .dma_read_resp_i(axi_master_rsp_sig[DMA_READ_MODULE_M_BUS_IDX]),
+
+        // write unit
+        .dma_write_req_o (axi_master_req_sig[DMA_WRITE_MODULE_M_BUS_IDX]),
+        .dma_write_resp_i(axi_master_rsp_sig[DMA_WRITE_MODULE_M_BUS_IDX]),
+
+        // address unit
+        .dma_addr_req_o (axi_master_req_sig[DMA_ADDR_MODULE_M_BUS_IDX]),
+        .dma_addr_resp_i(axi_master_rsp_sig[DMA_ADDR_MODULE_M_BUS_IDX]),
+
+        // FIFO signals
+        .hw_fifo_done_i(),
+        .hw_fifo_resp_i(),
+        .hw_fifo_req_o (),
+
+        .trigger_slot_i   (),
+        .external_hw2reg_i(external_dma_hw2reg),
+
+        // output signals - left unconn
+        .dma_done_intr_o  (),
+        .dma_window_intr_o(),
+        .dma_ready_o      (),
+        .dma_done_o       ()
+    );
 endmodule

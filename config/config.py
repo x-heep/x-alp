@@ -12,6 +12,7 @@ from XheepGen.peripherals.base_peripherals import (
     Bootrom,
     Fast_intr_ctrl,
     Ext_peripheral,
+    DMA
 )
 from XheepGen.peripherals.user_peripherals import UART
 from XheepGen.peripherals.generic_peripheral_domain import GenericPeripheralDomain
@@ -27,6 +28,9 @@ def config():
     bus.add_master("CPU")
     bus.add_master("DEBUG_MODULE")
     bus.add_master("EXT_MASTER")
+    bus.add_master("DMA_WRITE_MODULE")
+    bus.add_master("DMA_READ_MODULE")
+    bus.add_master("DMA_ADDR_MODULE")
 
     bus.add_slave("MEM", 0x00000000, 0x10000)
     bus.add_slave("DEBUG_MODULE", 0x00010000, 0x10000)
@@ -45,6 +49,8 @@ def config():
     peripheral_domain.add_peripheral(Fast_intr_ctrl(0x20000, 0x1000))
     peripheral_domain.add_peripheral(UART(0x30000, 0x1000))
     peripheral_domain.add_peripheral(Ext_peripheral(0x40000, 0x1000))
+    peripheral_domain.add_peripheral(DMA(0x50000, 0x1000))
+    
 
     system.add_peripheral_domain(peripheral_domain)
 

@@ -1,0 +1,31 @@
+CAPI=2:
+
+name: pulp-platform.org::obi
+
+# Copyright 2021 OpenHW Group
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_rtl:
+    files:
+    - pulpplatform_obi/obi/include/obi/assign.svh :  {is_include_file : true, include_path : pulpplatform_obi/obi/include}
+    - pulpplatform_obi/obi/include/obi/typedef.svh :  {is_include_file : true, include_path : pulpplatform_obi/obi/include}
+    - pulpplatform_obi/obi/src/apb_to_obi.sv 
+    - pulpplatform_obi/obi/src/obi_atop_resolver.sv 
+    - pulpplatform_obi/obi/src/obi_cut.sv 
+    - pulpplatform_obi/obi/src/obi_demux.sv 
+    - pulpplatform_obi/obi/src/obi_err_sbr.sv 
+    - pulpplatform_obi/obi/src/obi_intf.sv 
+    - pulpplatform_obi/obi/src/obi_mux.sv 
+    - pulpplatform_obi/obi/src/obi_pkg.sv 
+    - pulpplatform_obi/obi/src/obi_rready_converter.sv
+    - pulpplatform_obi/obi/src/obi_sram_shim.sv
+    - pulpplatform_obi/obi/src/obi_rready_converter.sv
+    - pulpplatform_obi/obi/src/obi_xbar.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+    - files_rtl

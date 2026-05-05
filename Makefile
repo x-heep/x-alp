@@ -7,7 +7,7 @@
 # ============================================================================
 XALP := x-heep:x-alp:x-alp:0.0.1
 mkfile_path := $(shell dirname "$(realpath $(firstword $(MAKEFILE_LIST)))")
-
+# ROOT = mkfile_path # used by DMA reg gen
 $(info Executing from: $(mkfile_path))
 
 # ============================================================================
@@ -62,7 +62,7 @@ ARCH ?= rv64gc_zifencei
 SOURCE ?=
 
 # MCU-Gen template files to generate
-MCU_GEN_TEMPLATES = $(shell find . \( -path './hw/vendor' -o -path './util' -o -path './test' \) -prune -o -name '*.tpl' -print)
+MCU_GEN_TEMPLATES = $(shell find . \( -path './hw/vendor' -o -path './util' -o -path './test' -o -path '.hw/vendor/xheep_dma/data' \) -prune -o -name '*.tpl' -print)
 # Optionally, additional external template files can be provided to mcu-gen
 EXTERNAL_MCU_GEN_TEMPLATES ?=
 
@@ -117,6 +117,7 @@ mcu-gen:
 reg-gen:
 	@cd hw/ip/fast_intr_ctrl && ./fast_intr_ctrl_gen.sh && cd - > /dev/null
 	@cd hw/ip/soc_ctrl && ./soc_ctrl_gen.sh && cd - > /dev/null
+	@cd hw/vendor/xheep_dma && ./dma_gen.sh && cd - > /dev/null
 
 ## @section Boot ROM Build
 boot-rom:

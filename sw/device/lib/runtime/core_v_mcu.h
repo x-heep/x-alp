@@ -47,6 +47,19 @@ extern "C" {
 #define EXT_PERIPHERAL_SIZE 0x0000000000001000
 #define EXT_PERIPHERAL_END_ADDRESS (EXT_PERIPHERAL_BASE_ADDRESS + EXT_PERIPHERAL_SIZE)
 
+#define DMA_BASE_ADDRESS (PERIPHERALS_START_ADDRESS + 0x0000000000050000)
+#define DMA_SIZE 0x0000000000001000
+#define DMA_END_ADDRESS (DMA_BASE_ADDRESS + DMA_SIZE)
+
+// Parametrize it with object DMA once the py object XAlp gets developed
+#define DMA_CH_NUM 1
+#define DMA_CH_SIZE 0x100
+#define DMA_NUM_MASTER_PORTS 1
+#define DMA_ADDR_MODE 1
+#define DMA_SUBADDR_MODE 1
+#define DMA_HW_FIFO_MODE 0
+#define DMA_ZERO_PADDING 1
+
 #ifdef __cplusplus
 } // extern "C"
 #endif // __cplusplus
