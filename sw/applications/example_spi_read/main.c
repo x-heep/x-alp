@@ -46,8 +46,8 @@ uint32_t flash_data[256];
 #define FLASH_ONLY_WORDS 32
 #define FLASH_ONLY_BYTES (FLASH_ONLY_WORDS * 4)
 
-int32_t __attribute__((section(".xheep_data_flash_only"))) __attribute__((aligned(16)))
-flash_only_buffer[FLASH_ONLY_WORDS] = {
+int32_t __attribute__((section(".xheep_data_flash_only")))
+__attribute__((aligned(16))) flash_only_buffer[FLASH_ONLY_WORDS] = {
     0xABCDEF00, 0xABCDEF01, 0xABCDEF02, 0xABCDEF03, 0xABCDEF04, 0xABCDEF05, 0xABCDEF06, 0xABCDEF07,
     0xABCDEF08, 0xABCDEF09, 0xABCDEF0A, 0xABCDEF0B, 0xABCDEF0C, 0xABCDEF0D, 0xABCDEF0E, 0xABCDEF0F,
     0xABCDEF10, 0xABCDEF11, 0xABCDEF12, 0xABCDEF13, 0xABCDEF14, 0xABCDEF15, 0xABCDEF16, 0xABCDEF17,

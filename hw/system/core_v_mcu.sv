@@ -60,18 +60,18 @@ module core_v_mcu (
     import core_v_mcu_pkg::*;
 
     // Internal signals
-    core_v_mcu_pkg::axi_mst_req_t [       NumAxiMasters+NumExtAxiMasters-1:0] axi_master_req_sig;
-    core_v_mcu_pkg::axi_mst_rsp_t [       NumAxiMasters+NumExtAxiMasters-1:0] axi_master_rsp_sig;
-    core_v_mcu_pkg::axi_slv_req_t [         NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_req_sig;
-    core_v_mcu_pkg::axi_slv_rsp_t [         NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_rsp_sig;
+    core_v_mcu_pkg::axi_mst_req_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_req_sig;
+    core_v_mcu_pkg::axi_mst_rsp_t [NumAxiMasters+NumExtAxiMasters-1:0] axi_master_rsp_sig;
+    core_v_mcu_pkg::axi_slv_req_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_req_sig;
+    core_v_mcu_pkg::axi_slv_rsp_t [  NumAxiSlaves+NumExtAxiSlaves-1:0] axi_slave_rsp_sig;
 
-    core_v_mcu_pkg::reg_req_t     [         NumRegSlaves+NumExtRegSlaves-1:0] reg_req_sig;
-    core_v_mcu_pkg::reg_rsp_t     [         NumRegSlaves+NumExtRegSlaves-1:0] reg_rsp_sig;
+    core_v_mcu_pkg::reg_req_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_req_sig;
+    core_v_mcu_pkg::reg_rsp_t     [  NumRegSlaves+NumExtRegSlaves-1:0] reg_rsp_sig;
 
-    logic                           [15:0]                                    fast_intr;
-    logic                           [15:0]                                    fast_irq;
+    logic                         [                              15:0] fast_intr;
+    logic                         [                              15:0] fast_irq;
 
-    logic                                                                     debug_req;
+    logic                                                              debug_req;
 
     //
     //       █████████  ███████████  █████  █████
