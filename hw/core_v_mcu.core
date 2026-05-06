@@ -16,8 +16,6 @@ filesets:
   files_rtl:
     file_type: systemVerilogSource
     files:
-      - include/core_v_mcu_pkg.sv
-      - include/cva6_config_pkg.sv
       - system/core_v_mcu.sv
 
   vendor_modules:

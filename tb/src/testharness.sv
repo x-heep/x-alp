@@ -35,16 +35,6 @@ module testharness #(
     input  logic jtag_tdi_i,
     output logic jtag_tdo_o,
 
-    // SPI
-    // --------
-    output logic                               spi_flash_sck_o,
-    output logic                               spi_flash_sck_en_o,
-    output logic [spi_host_reg_pkg::NumCS-1:0] spi_flash_csb_o,
-    output logic [spi_host_reg_pkg::NumCS-1:0] spi_flash_csb_en_o,
-    output logic [                        3:0] spi_flash_sd_o,
-    output logic [                        3:0] spi_flash_sd_en_o,
-    input  logic [                        3:0] spi_flash_sd_i,
-
     // Exit sim
     // --------
     output logic [31:0] exit_value_o,
@@ -112,13 +102,13 @@ module testharness #(
         .ext_mst_rsp_o     (),
         .ext_reg_req_o     (),
         .ext_reg_rsp_i     ('0),
-        .spi_flash_sck_o   (spi_flash_sck_o),
-        .spi_flash_sck_en_o(spi_flash_sck_en_o),
-        .spi_flash_csb_o   (spi_flash_csb_o),
-        .spi_flash_csb_en_o(spi_flash_csb_en_o),
-        .spi_flash_sd_o    (spi_flash_sd_o),
-        .spi_flash_sd_en_o (spi_flash_sd_en_o),
-        .spi_flash_sd_i    (spi_flash_sd_i),
+        .spi_flash_sck_o   (),
+        .spi_flash_sck_en_o(),
+        .spi_flash_csb_o   (),
+        .spi_flash_csb_en_o(),
+        .spi_flash_sd_o    (),
+        .spi_flash_sd_en_o (),
+        .spi_flash_sd_i    (),
         .test_mode_i       (1'b0)
     );
 

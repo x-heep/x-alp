@@ -5,7 +5,6 @@ filesets:
 
   testbench:
     files:
-    - ../hw/include/core_v_mcu_pkg.sv
     - src/testharness.sv
     - src/verilator/tb_util.svh: {is_include_file: true, include_path: src/verilator} 
     file_type: systemVerilogSource
@@ -18,10 +17,6 @@ filesets:
   uartdpi:
     depend:
     - lowrisc:dv_dpi:uartdpi
-
-  spi:
-    depend:
-    - lowrisc:ip:spi_host:1.0
 
   systemverilog_only_uart:
     files:
