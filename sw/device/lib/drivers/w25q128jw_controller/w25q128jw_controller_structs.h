@@ -5,7 +5,7 @@
 **                                                                         **
 ** project  : x-alp                                                        **
 ** filename : w25q128jw_controller_structs.h                                 **
-** date     : 30/04/2026                                                      **
+** date     : 07/05/2026                                                      **
 **                                                                         **
 *****************************************************************************
 **                                                                         **
@@ -16,7 +16,7 @@
 
 /**
  * @file   w25q128jw_controller_structs.h
- * @date   30/04/2026
+ * @date   07/05/2026
  * @brief  Contains structs for every register
  *
  * This file contains the structs of the registes of the peripheral.
