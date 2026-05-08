@@ -8,9 +8,10 @@ description: "x-alp boot rom"
 # SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
 filesets:
-  files_rtl:
+  vendor_modules:
     depend:
       - pulp-platform.org::register_interface
+  files_rtl:
     files:
     - bootrom.sv
     file_type: systemVerilogSource
@@ -18,4 +19,5 @@ filesets:
 targets:
   default:
     filesets:
+    - "!target_format ? (!target_lint ? (vendor_modules))"
     - files_rtl
