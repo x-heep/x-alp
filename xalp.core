@@ -60,7 +60,10 @@ targets:
         # - '-CFLAGS "-Wall -g"'
   # Format with Verible
   format:
-    <<: *default
+    filesets:
+    - x-alp
+    - testbench
+    toplevel: x_alp
     description: Format source files using verible-verilog-format
     default_tool: veribleformat
     tools:

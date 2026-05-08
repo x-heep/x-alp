@@ -54,21 +54,20 @@ COMPILER_FLAGS ?= -mabi=lp64d
 ARCH ?= rv64gc_zifencei
 SOURCE ?=
 
+# ============================================================================
+# Third-party IP Vendoring
+# ============================================================================
+# Vendored IPs
+VENDOR_FILES	:= $(shell find hw/vendor -maxdepth 1 -type f -name "*.vendor.hjson" -print)
+VENDOR_LOCKS	:= $(subst .vendor.hjson,.lock.hjson,$(VENDOR_FILES))
+
 # Export variables to sub-makefiles
 export
 
 # ============================================================================
-# Phony Targets
-# ============================================================================
-.PHONY: help conda clean clean-app clean-all \
-        app app-list \
-        verilator-build verilator-run verilator-waves \
-        format lint \
-        .check-fusesoc .check-gtkwave .check-verible .check-verilator
-
-# ============================================================================
 # Default Target
 # ============================================================================
+.PHONY: help
 help:
 	@$(mkfile_path)/util/MakefileHelp
 
@@ -77,6 +76,7 @@ help:
 # ============================================================================
 
 ## @section Conda
+.PHONY: conda
 conda:
 	@conda env create -f util/conda_environment.yml
 
@@ -85,14 +85,17 @@ conda:
 # ============================================================================
 
 ## @section MCU Code Generation
+.PHONY: mcu-gen
 mcu-gen: reg-gen boot-rom format
 
 ## @section Register Generation
+.PHONY: reg-gen
 reg-gen:
 	@cd hw/ip/fast_intr_ctrl && ./fast_intr_ctrl_gen.sh && cd - > /dev/null
 	@cd hw/ip/soc_ctrl && ./soc_ctrl_gen.sh && cd - > /dev/null
 
 ## @section Boot ROM Build
+.PHONY: boot-rom
 boot-rom:
 	@$(MAKE) -C hw/ip/bootrom clean all
 
@@ -109,6 +112,7 @@ boot-rom:
 ## @param COMPILER=gcc(default),clang
 ## @param COMPILER_PREFIX=riscv32-corev-(default),riscv32-unknown-
 ## @param ARCH=rv32imc(default),<any_RISC-V_ISA_string_supported_by_the_CPU>
+.PHONY: app
 app: clean-app
 	@$(MAKE) -C sw \
 		PROJECT=$(PROJECT) \
@@ -132,6 +136,7 @@ app: clean-app
 	@$(PYTHON) util/mem_usage.py
 
 ## Just list the different application names available
+.PHONY: app-list
 app-list:
 	@echo "Note: Applications outside the X-ALP sw/applications directory will not be listed."
 	@tree sw/applications/
@@ -143,11 +148,13 @@ app-list:
 ## @section Simulation
 
 ## Verilator simulation build
+.PHONY: verilator-build
 verilator-build:
 	@$(FUSESOC) --cores-root . run --no-export --target sim --tool verilator --build $(XALP) $(FUSESOC_ARGS) 2>&1 | tee buildsim.log
 	@mkdir -p $(dir $@)
 
 ## Verilator simulation run
+.PHONY: verilator-run
 verilator-run:
 	@$(FUSESOC) run --no-export --target sim --tool verilator --run $(XALP) \
 		--LOG_LEVEL=$(LOG_LEVEL) \
@@ -159,7 +166,21 @@ verilator-run:
 	@echo "Simulation finished."
 	@cat ./build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/uart0.log
 
+## Verilator simulation run without waveform generation (faster)
+.PHONY: verilator-opt
+verilator-opt:
+	@$(FUSESOC) run --no-export --target sim --tool verilator --run $(XALP) \
+		--LOG_LEVEL=$(LOG_LEVEL) \
+		--BINARY=$(BINARY) \
+		--BOOTMODE=$(BOOTMODE) \
+		--MAX_CYCLES=$(MAX_CYCLES) \
+		--trace=false \
+		$(FUSESOC_ARGS)
+	@echo "Simulation finished."
+	@cat ./build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/uart0.log
+
 ## Verilator wave viewer
+.PHONY: verilator-waves
 verilator-waves: .check-gtkwave
 	@gtkwave build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/waveform.fst util/wave.gtkw
 
@@ -170,11 +191,13 @@ verilator-waves: .check-gtkwave
 ## @section formatting and linting
 
 ## Format
+PHONY: format
 format: .check-fusesoc
 	@$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target format $(XALP)
 	git ls-files -z -- '*.c' '*.h' '*.cpp' '*.hpp' ':(exclude)build/**' ':(exclude)**/vendor/**' | xargs -0 clang-format -i -style=file:util/.clang-format
 
 ## Lint
+PHONY: lint
 lint: .check-fusesoc
 	@$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target lint $(XALP)
 
@@ -185,14 +208,17 @@ lint: .check-fusesoc
 ## @section Cleaning commands
 
 ## Remove the sw build folder
+.PHONY: clean-app
 clean-app:
 	@rm -rf sw/build
 
 ## Remove the build folders
+.PHONY: clean
 clean: clean-app
 	@rm -rf $(BUILD_DIR) $(BUILD_STAMP)
 
 ## Leave the repository in a clean state, removing all generated files
+.PHONY: clean-all
 clean-all: clean
 
 # ============================================================================
@@ -200,6 +226,19 @@ clean-all: clean
 # ============================================================================
 
 ## @section Utilities
+
+# Update the vendored IPs based on the .vendor.hjson description files
+.PHONY: vendor-update
+vendor-update: $(VENDOR_LOCKS)
+	python3 util/check-vendor.py
+
+$(VENDOR_LOCKS): %.lock.hjson: %.vendor.hjson util/vendor.py
+	@echo "### Updating vendored IP '$(notdir $*)'..."
+	python3 util/vendor.py -vU $<
+
+.PHONY: vendor-clean
+vendor-clean:
+	$(RM) $(VENDOR_LOCKS)
 
 # Check if FuseSoC is available
 .check-fusesoc:
@@ -211,6 +250,7 @@ clean-all: clean
 
 # Generic program checker template
 define CHECK_PROGRAM
+.PHONY: .check-$(1)
 .check-$(1):
 	@command -v $(2) >/dev/null 2>&1 || { \
 		printf "\033[0;31m✗ ERROR: '$(2)' not found in PATH\033[0m\n" >&2; \
