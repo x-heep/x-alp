@@ -551,9 +551,8 @@ class Desc:
                 if "target_dir" not in project_data:
                     project_data["target_dir"] = str(Path(vendor_name) / project_name)
                 desc = Desc(path, project_data, desc_overrides)
-                # Multi-entry files share a single lock file.
-                desc.use_named_lock_entry = True
-                desc._lock_file_override = path.with_name(vendor_name + ".lock.hjson")
+                desc.use_named_lock_entry = False
+                desc._lock_file_override = path.with_name(project_name + ".lock.hjson")
                 descs.append(desc)
 
             if module_filter and not descs:
@@ -812,7 +811,7 @@ def process_vendor(desc, args):
                 log.fatal("Re-cloned revision: %s", upstream_new_rev)
                 raise SystemExit(1)
 
-        clone_subdir = Path(clone_dir)
+        clone_subdir = Path(clone_dir).resolve()
         if desc.upstream.only_subdir is not None:
             clone_subdir = clone_subdir / desc.upstream.only_subdir
             if not clone_subdir.is_dir():

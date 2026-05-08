@@ -15,26 +15,26 @@
 /// This is useful for regtool generated register files because these
 /// categorically reject empty strobes.
 module reg_filter_empty_writes #(
-    parameter type req_t = logic,
-    parameter type rsp_t = logic
+  parameter type req_t = logic,
+  parameter type rsp_t = logic
 ) (
-    input  logic clk_i,
-    input  logic rst_ni,
-    input  req_t in_req_i,
-    output rsp_t in_rsp_o,
-    output req_t out_req_o,
-    input  rsp_t out_rsp_i
+  input  logic clk_i,
+  input  logic rst_ni,
+  input  req_t in_req_i,
+  output rsp_t in_rsp_o,
+  output req_t out_req_o,
+  input  rsp_t out_rsp_i
 );
 
-    always_comb begin
-        out_req_o = in_req_i;
-        in_rsp_o  = out_rsp_i;
+  always_comb begin
+    out_req_o = in_req_i;
+    in_rsp_o = out_rsp_i;
 
-        if (in_req_i.valid && in_req_i.write && in_req_i.wstrb == '0) begin
-            out_req_o.valid = 1'b0;
-            in_rsp_o.ready  = 1'b1;
-            in_rsp_o.error  = 1'b0;
-        end
+    if (in_req_i.valid && in_req_i.write && in_req_i.wstrb == '0) begin
+      out_req_o.valid = 1'b0;
+      in_rsp_o.ready = 1'b1;
+      in_rsp_o.error = 1'b0;
     end
+  end
 
 endmodule

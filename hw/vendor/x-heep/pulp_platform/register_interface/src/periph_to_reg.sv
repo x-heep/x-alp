@@ -11,72 +11,72 @@
 // Translates XBAR_PERIPH_BUS to register_interface
 
 module periph_to_reg #(
-    parameter int unsigned AW    = 32,     // Address Width
-    parameter int unsigned DW    = 32,     // Data Width
-    parameter int unsigned BW    = 8,      // Byte Width
-    parameter int unsigned IW    = 0,      // ID Width
-    parameter type         req_t = logic,  // reg request type
-    parameter type         rsp_t = logic   // reg response type
+  parameter int unsigned AW    = 32,    // Address Width
+  parameter int unsigned DW    = 32,    // Data Width
+  parameter int unsigned BW    = 8,     // Byte Width
+  parameter int unsigned IW    = 0,     // ID Width
+  parameter type         req_t = logic, // reg request type
+  parameter type         rsp_t = logic  // reg response type
 ) (
-    input logic clk_i,  // Clock
-    input logic rst_ni, // Asynchronous reset active low
+  input  logic             clk_i,    // Clock
+  input  logic             rst_ni,   // Asynchronous reset active low
 
-    input  logic             req_i,
-    input  logic [   AW-1:0] add_i,
-    input  logic             wen_i,
-    input  logic [   DW-1:0] wdata_i,
-    input  logic [DW/BW-1:0] be_i,
-    input  logic [   IW-1:0] id_i,
-    output logic             gnt_o,
-    output logic [   DW-1:0] r_rdata_o,
-    output logic             r_opc_o,
-    output logic [   IW-1:0] r_id_o,
-    output logic             r_valid_o,
+  input  logic             req_i,
+  input  logic [   AW-1:0] add_i,
+  input  logic             wen_i,
+  input  logic [   DW-1:0] wdata_i,
+  input  logic [DW/BW-1:0] be_i,
+  input  logic [   IW-1:0] id_i,
+  output logic             gnt_o,
+  output logic [   DW-1:0] r_rdata_o,
+  output logic             r_opc_o,
+  output logic [   IW-1:0] r_id_o,
+  output logic             r_valid_o,
 
-    output req_t reg_req_o,
-    input  rsp_t reg_rsp_i
+  output req_t             reg_req_o,
+  input  rsp_t             reg_rsp_i
 );
 
-    logic [IW-1:0] r_id_d, r_id_q;
-    logic r_opc_d, r_opc_q;
-    logic r_valid_d, r_valid_q;
-    logic [DW-1:0] r_rdata_d, r_rdata_q;
+  logic [IW-1:0] r_id_d, r_id_q;
+  logic          r_opc_d, r_opc_q;
+  logic          r_valid_d, r_valid_q;
+  logic [DW-1:0] r_rdata_d, r_rdata_q;
 
-    always_comb begin : proc_logic
-        r_id_d    = id_i;
-        r_opc_d   = reg_rsp_i.error;
-        r_valid_d = gnt_o;
-        r_rdata_d = reg_rsp_i.rdata;
+  always_comb begin : proc_logic
+    r_id_d = id_i;
+    r_opc_d = reg_rsp_i.error;
+    r_valid_d = gnt_o;
+    r_rdata_d = reg_rsp_i.rdata;
+  end
+
+  always_ff @(posedge clk_i or negedge rst_ni) begin : proc_seq
+    if (!rst_ni) begin
+      r_id_q <= '0;
+      r_opc_q <= '0;
+      r_valid_q <= '0;
+      r_rdata_q <= '0;
+    end else begin
+      r_id_q <= r_id_d;
+      r_opc_q <= r_opc_d;
+      r_valid_q <= r_valid_d;
+      r_rdata_q <= r_rdata_d;
     end
+  end
 
-    always_ff @(posedge clk_i or negedge rst_ni) begin : proc_seq
-        if (!rst_ni) begin
-            r_id_q    <= '0;
-            r_opc_q   <= '0;
-            r_valid_q <= '0;
-            r_rdata_q <= '0;
-        end else begin
-            r_id_q    <= r_id_d;
-            r_opc_q   <= r_opc_d;
-            r_valid_q <= r_valid_d;
-            r_rdata_q <= r_rdata_d;
-        end
-    end
+  assign reg_req_o.addr  = add_i;
+  assign reg_req_o.write = ~wen_i;
+  assign reg_req_o.wdata = wdata_i;
+  assign reg_req_o.wstrb = be_i;
+  assign reg_req_o.valid = req_i;
 
-    assign reg_req_o.addr  = add_i;
-    assign reg_req_o.write = ~wen_i;
-    assign reg_req_o.wdata = wdata_i;
-    assign reg_req_o.wstrb = be_i;
-    assign reg_req_o.valid = req_i;
+  assign gnt_o     = req_i & reg_rsp_i.ready;
 
-    assign gnt_o           = req_i & reg_rsp_i.ready;
+  assign r_rdata_o = r_rdata_q;
+  assign r_opc_o   = r_opc_q;
+  assign r_id_o    = r_id_q;
+  assign r_valid_o = r_valid_q;
 
-    assign r_rdata_o       = r_rdata_q;
-    assign r_opc_o         = r_opc_q;
-    assign r_id_o          = r_id_q;
-    assign r_valid_o       = r_valid_q;
-
-    /* Signal explanation for reference
+/* Signal explanation for reference
 {signal: [
   {name: 'clk',        wave: 'p.|....'},
   {name: 'PE_req',     wave: '01|..0.'},
