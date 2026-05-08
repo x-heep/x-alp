@@ -18,15 +18,10 @@
     "fusesoc.conf",
     "rtl/spi_subsystem.sv"
     "vendor/lowrisc_opentitan",
-    "vendor/lowrisc_opentitan.vendor.hjson",
-    "vendor/lowrisc_opentitan.lock.hjson",
     "vendor/pulp_platform_axi",
-    "vendor/pulp_platform_axi.vendor.hjson",
-    "vendor/pulp_platform_axi.lock.hjson",
     "vendor/pulp_platform_register_interface",
-    "vendor/pulp_platform_register_interface.vendor.hjson",
-    "vendor/pulp_platform_register_interface.lock.hjson",
     "vendor/pulp_platform_register_interface.core",
+    "vendor/pulp_platform_common_cells",
   ],
 
 }
