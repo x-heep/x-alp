@@ -8,9 +8,12 @@ description: "OpenHW Group core-v-mini-mcu soc controller"
 # SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
 filesets:
-  files_rtl:
+
+  vendor_modules:
     depend:
       - pulp-platform.org::register_interface
+
+  files_rtl:
     files:
     - rtl/soc_ctrl_reg_pkg.sv
     - rtl/soc_ctrl_reg_top.sv
@@ -24,5 +27,6 @@ filesets:
 targets:
   default:
     filesets:
+    - "!target_format ? (!target_lint ? (vendor_modules))"
     - files_rtl
     - tool_verilator ? (waivers)

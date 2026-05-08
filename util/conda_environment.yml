@@ -1,15 +1,1 @@
-name: core-v-mini-mcu
-channels:
-  - conda-forge
-dependencies:
-  - python=3.13
-  - pip
-  - cmake
-  - ninja
-  - cffi
-  - ruamel.yaml
-  - ruamel.yaml.clib
-  - setuptools
-  - pip:
-    - -r python-requirements.txt
-    - -r ../docs/python-requirements.txt
+../hw/vendor/x-heep/util/conda_environment.yml

@@ -298,8 +298,7 @@ void TbSimCtrl::PrintStatistics() const {
             << "=====================" << std::endl
             << "Executed cycles:  " << (sim_cycles_ / CLK_PERIOD_ps) << std::endl
             << "Wallclock time:   " << GetExecutionTimeMs() / 1000.0 << " s" << std::endl
-            << "Simulation speed: " << speed_hz << " cycles/s "
-            << "(" << speed_khz << " kHz)" << std::endl;
+            << "Simulation speed: " << speed_hz << " cycles/s " << "(" << speed_khz << " kHz)" << std::endl;
 }
 
 unsigned TbSimCtrl::RunSimulation(int argc, char **argv) {
