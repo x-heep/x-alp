@@ -37,7 +37,7 @@ endif
 FUSESOC_ARGS ?=
 
 # MCU generation parameters
-REGTOOL ?= hw/vendor/pulp_platform/register_interface/vendor/lowrisc_opentitan/util/regtool.py
+REGTOOL ?= hw/vendor/x-heep/pulp_platform/register_interface/vendor/lowrisc_opentitan/util/regtool.py
 PERIPH_STRUCTS_GEN ?= util/periph_structs_gen/periph_structs_gen.py
 TEMPLATE_FILE ?= util/periph_structs_gen/periph_structs.tpl
 IP_DIR ?= hw/ip
