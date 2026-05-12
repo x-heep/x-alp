@@ -1,0 +1,27 @@
+{
+  spi: {
+    
+    upstream: {
+        url: "https://github.com/alebaroc/xheep_spi.git",
+        rev: "837f6905f0b831bbf7fe66ed6dfd99362bee2f16",
+    },
+
+    exclude_from_upstream: [
+      ".gitignore",
+      "sw",
+      "tb",
+      "util",
+      "lint",
+      "data",
+      "README.md",
+      "fusesoc.conf",
+      "rtl/spi_subsystem.sv"
+      "vendor/lowrisc_opentitan",
+      "vendor/pulp_platform_axi",
+      "vendor/pulp_platform_register_interface",
+      "vendor/pulp_platform_register_interface.core",
+      "vendor/pulp_platform_common_cells",
+    ],
+    
+  },
+}

@@ -4,6 +4,8 @@
 
 `verilator_config
 
+lint_off -rule SYMRSVDWORD -file "*"
+
 lint_off -rule UNOPTFLAT -file "*/hw/target/simulation/pad_cell_*.sv" -match "Signal unoptimizable*"
 lint_off -rule UNUSED -file "*/hw/target/simulation/sram_wrapper.sv" -match "Signal is not used: 'pwrgate_ni*"
 lint_off -rule UNUSED -file "*/hw/target/simulation/sram_wrapper.sv" -match "Signal is not used: 'set_retentive_ni*"

@@ -6,7 +6,7 @@
   Uses a local scratchpad memory as sector buffer and a fifo as queue for AXI beats.
   RAM is not involved.
 
-  axi_burst = INC , always.
+  ax_burst = INC , always.
  
   Author : Alessandro Barocci
  
@@ -22,21 +22,19 @@
 
  */
  
-module axi_to_flash_controller
-  import spi_host_reg_pkg::*;
-#(
+module axi_to_flash_controller #(
   localparam int MaxBeats = 17,
   localparam int MaxBeatsDW = sizeInBits(MaxBeats+1),
   localparam int PageCountDW = sizeInBits(SE_PSIZE+1),
   localparam int SectorBufferLatency = 1,
   localparam int SecBuffLatencyDW = sizeInBits(SectorBufferLatency+1),
   localparam int w25q128jw_tRES1_us = 30, // from datasheet p. 64
+  parameter int ClockFrequencyMAX_MHz = 1e3,
   localparam int PowerOnWaitCycles = ClockFrequencyMAX_MHz * w25q128jw_tRES1_us,
   localparam int PoweronWaitCycles_SIM = 300,
   localparam int PowerOnWaitCyclesDW = sizeInBits(PowerOnWaitCycles+1),
   localparam int SPI_FLASH_TX_FIFO_DEPTH = spi_host_reg_pkg::TxDepth,
-  parameter int ClockFrequencyMAX_MHz = 1e3,
-  parameter logic ByteOrder = 1, // 1 == Little Endian , 0 == Big Endian  ; @ 0 , beat_queues swap bytes.
+  parameter logic ByteOrder = 1, // 1 == Little Endian , 0 == Big Endian  ; if 0 then beat_queues will swap bytes.
   parameter int AddrWidth = 64,
   parameter int FlashAddrW = 24,
   parameter int DataWidth = 64,
@@ -50,10 +48,10 @@ module axi_to_flash_controller
   input logic clk_i,
   input logic rst_ni,
 
-  // Enable by xspi register
+  // Enable from spi_subsystem register
   input logic en_i,
 
-  // Enable power-on subrutine
+  // Enable power-on sub-rutine
   input logic poweron_en_i,
 
   // Enable quad spi
@@ -63,7 +61,7 @@ module axi_to_flash_controller
   output reg_req_t spi_host_reg_req_o,
   input  reg_rsp_t spi_host_reg_rsp_i,
 
-  // SPI HW2REG status register direct access
+  // spi_host hw2reg status register direct access
   input spi_host_reg_pkg::spi_host_hw2reg_status_reg_t external_spi_host_hw2reg_status_i,
 
   // AXI interface
@@ -101,7 +99,7 @@ module axi_to_flash_controller
   logic                     r_last;
   logic                     r_valid;
   logic                     r_ready;
-  // assignments
+  // Assignments
   always_comb begin
     aw_addr  = axi_req_i.aw.addr;
     aw_size  = axi_req_i.aw.size;
@@ -153,7 +151,7 @@ module axi_to_flash_controller
                           SE_BSIZE = 13'h1000,                        // Sector size in bytes
                           PAGE_WSIZE = 13'h40,                        // Page size in words
                           PAGE_BSIZE = 13'h100;                       // Page size in bytes
-  localparam int          SE_WSIZE_DW = sizeInBits(32'(SE_WSIZE+1));  // used for signa declaration
+  localparam int          SE_WSIZE_DW = sizeInBits(32'(SE_WSIZE+1));  // Used for signa declaration
   localparam int          SE_PSIZE = 32'(SE_WSIZE) / 32'(PAGE_WSIZE); // Sector size in pages
   // --------------------------------------------------------------------------------
 
@@ -724,7 +722,7 @@ int actual_poweron_wait_cycles;
 
           POWERON_SPI_FILL_TX_FIFO: begin
             // Write "power on" command in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {19'b0, FC_PO};
@@ -748,7 +746,7 @@ int actual_poweron_wait_cycles;
             //   [28:27] = Direction (2 = TX only)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (0 = 1 byte) (FC_OP is 1 byte command)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -816,7 +814,7 @@ int actual_poweron_wait_cycles;
             // but we need to preserve other bits when modifying RXWM
             // this is why here we first read the entire spi_host control register to then write back the rest of the bits alongside the new wm
             // Read the control register:
-            spi_host_reg_req_offset = SPI_HOST_CONTROL_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_CONTROL_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -830,7 +828,7 @@ int actual_poweron_wait_cycles;
 
           READ_SET_RXWM_W: begin
             // Rewrite the command with updated wm:
-            spi_host_reg_req_offset = SPI_HOST_CONTROL_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_CONTROL_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             // Keep upper CONTROL bits, set RXWM = 1
@@ -856,7 +854,7 @@ int actual_poweron_wait_cycles;
           READ_SPI_FILL_TX_FIFO: begin
             // Here starts the standard spi speed read branch
             // Write standard read command + flash address in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata =  {
@@ -883,7 +881,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (3 = 4 bytes: 1 command + 3 address)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -910,7 +908,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (0 = release CS after transfer, no more commands to send)
             //   [23:0]  = Length-1 (See comments below)
-            spi_host_reg_req_offset  = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             if (rnw_q) begin
@@ -935,7 +933,7 @@ int actual_poweron_wait_cycles;
           READ_QUAD_SPI_FILL_TX_FIFO_1: begin
             // Here starts the quad spi speed read branch
             // Write quad read command in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {19'h0, FC_RDQIO};
@@ -959,7 +957,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (0 = 1 byte) (FC_RDQIO is 1 byte command)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -980,7 +978,7 @@ int actual_poweron_wait_cycles;
 
           READ_QUAD_SPI_FILL_TX_FIFO_2: begin
             // Write flash address in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata =  {
@@ -1007,7 +1005,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (2 = quad spi)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (3 = ff + 3 bytes of address)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1034,7 +1032,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (2 = quad spi)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (3 = 4 dummy wait cycles)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1061,7 +1059,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (2 = quad spi)
             //   [24]    = CSAAT (0 = release CS after transfer, no more commands to send)
             //   [23:0]  = Length-1 (See comments below)
-            spi_host_reg_req_offset  = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             if (rnw_q) begin
@@ -1110,7 +1108,7 @@ int actual_poweron_wait_cycles;
           READ_W_SECTOR_STORE: begin
             // Copy the sector from flash to buffer
             // Send a pop request to rx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_RXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_RXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1137,7 +1135,7 @@ int actual_poweron_wait_cycles;
           READ_R_BEAT_PUSH_DW32: begin
             // Bring the beat into rd_queue_buffer, where spi_host rx_fifo data is stored temporarily before going into the rd_beat_queue
             // Send a pop request to rx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_RXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_RXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1157,7 +1155,7 @@ int actual_poweron_wait_cycles;
             Here we write the lower 32 bites of the rd_queue_buffer.
             */
             // Send a pop request to rx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_RXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_RXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1174,7 +1172,7 @@ int actual_poweron_wait_cycles;
             // Here we write the upper 32 bites of the rd_queue_buffer
             // If the beat size is not higher than 4 bytes, then we can bypass the request and just write zeroes
             if (beat_size_q > 4) begin
-              spi_host_reg_req_offset  = SPI_HOST_RXDATA_OFFSET;
+              spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_RXDATA_OFFSET;
               spi_host_reg_req_o.write = 1'b0;
               spi_host_reg_req_o.valid = 1'b1;
               if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1249,7 +1247,7 @@ int actual_poweron_wait_cycles;
             // but we need to preserve other bits when modifying RXWM
             // this is why here we first read the entire spi_host control register to then write back the rest of the bits alongside the new wm
             // Read the control register:
-            spi_host_reg_req_offset = SPI_HOST_CONTROL_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_CONTROL_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1263,7 +1261,7 @@ int actual_poweron_wait_cycles;
 
           FWAIT_SET_RXWM_W: begin
             // Rewrite the command with updated wm:
-            spi_host_reg_req_offset = SPI_HOST_CONTROL_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_CONTROL_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             // Keep upper CONTROL bits, set RXWM = 1
@@ -1285,7 +1283,7 @@ int actual_poweron_wait_cycles;
         
           FWAIT_SPI_FILL_TX_FIFO: begin
             // Write Status Register 1 Read command in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {19'b0, FC_RSR1};
@@ -1310,7 +1308,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (0 = 1 byte) (FC_RSR1 is 1 byte command)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1337,7 +1335,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (0 = release CS after transfer, no more commands to send)
             //   [23:0]  = Length-1 (0 = 1 byte)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1360,7 +1358,7 @@ int actual_poweron_wait_cycles;
 
           FWAIT_READ_FLASH_STATUS: begin
             // Check flash status and go next if not busy, otherwise repeat FWAIT
-            spi_host_reg_req_offset  = SPI_HOST_RXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_RXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b0;
             spi_host_reg_req_o.valid = 1'b1;
             if (spi_host_reg_rsp_i.ready && ~spi_host_reg_rsp_i.error) begin
@@ -1474,7 +1472,7 @@ int actual_poweron_wait_cycles;
 
           ERASE_WE_FILL_TX_FIFO: begin
             // Write "write enable" command in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {19'b0, FC_WE};
@@ -1499,7 +1497,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (0 = release CS after, WE is standalone command)
             //   [23:0]  = Length-1 (0 = 1 byte)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1520,7 +1518,7 @@ int actual_poweron_wait_cycles;
 
           ERASE_SE_FILL_TX_FIFO: begin
             // Write sector erase command + address in tx_fifo
-            spi_host_reg_req_offset = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata =  {
@@ -1547,7 +1545,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (0 = release CS after transfer, no more commands to send)
             //   [23:0]  = Length-1 (3 = 4 bytes: 1 cmd + 3 addr bytes)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1797,7 +1795,7 @@ int actual_poweron_wait_cycles;
 
           WRITE_WE_FILL_TX_FIFO: begin
             // Write "write enable" command in tx_fifo
-            spi_host_reg_req_offset  = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset  = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {19'b0, FC_WE};
@@ -1821,7 +1819,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (0 = release CS after, WE is standalone command)
             //   [23:0]  = Length-1 (0 = 1 byte)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1845,7 +1843,7 @@ int actual_poweron_wait_cycles;
             // page program speed is decided by quadspi_en_i (from external top reg)
             OPCODE = quadspi_en_i ? FC_PPQ : FC_PP;
             // Write page program command + page address in tx_fifo
-            spi_host_reg_req_offset = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             // Compute page address: sector base + sector offset + page offset
@@ -1873,7 +1871,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0 = standard)
             //   [24]    = CSAAT (1 = keep CS asserted for next command)
             //   [23:0]  = Length-1 (3 = 4 bytes: 1 cmd + 3 addr)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -1919,7 +1917,7 @@ int actual_poweron_wait_cycles;
 
           WRITE_PP_PAGE_WRITE_4: begin
             // send 32bit word to tx_fifo from the current page in the sector buffer
-            spi_host_reg_req_offset = SPI_HOST_TXDATA_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_TXDATA_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = sec_buf_buffer_d;
@@ -1956,7 +1954,7 @@ int actual_poweron_wait_cycles;
             //   [26:25] = Speed (0/2 = standard/quad spi)
             //   [24]    = CSAAT (0 = release CS after transfer, no more commands to send)
             //   [23:0]  = Length-1 (255 = 256 bytes = 1 page)
-            spi_host_reg_req_offset = SPI_HOST_COMMAND_OFFSET;
+            spi_host_reg_req_offset = spi_host_reg_pkg::SPI_HOST_COMMAND_OFFSET;
             spi_host_reg_req_o.write = 1'b1;
             spi_host_reg_req_o.valid = 1'b1;
             spi_host_reg_req_o.wdata = {
@@ -2145,7 +2143,7 @@ int actual_poweron_wait_cycles;
 
   sram_wrapper #(
       .NumWords(SE_WSIZE),
-      .DataWidth(SectorBuffer_DataWidth),
+      .DataWidth(SectorBuffer_DataWidth)
   ) sector_buffer_i (
       .clk_i,
       .rst_ni,
