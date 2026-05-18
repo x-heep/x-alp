@@ -24,8 +24,8 @@ filesets:
     depend:
       - pulp-platform.org::axi:0.39.8
       - pulp-platform.org::axi_riscv_atomics
-      - pulp-platform.org:riscv-dbg:0.9.0
-      - pulp-platform.org::register_interface:0.4.7
+      - pulp-platform.org::riscv_dbg
+      - pulp-platform.org::register_interface
       - openhwgroup.org::cva6:1.4.0
       - lowrisc:ip:uart
   
