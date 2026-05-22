@@ -41,6 +41,12 @@ LOG_LEVEL ?= LOG_DEBUG
 BINARY ?= $(mkfile_path)/sw/build/main.spm.elf
 BOOTMODE ?= force
 MAX_CYCLES ?= 1000000
+# In JTAG mode, omit MAX_CYCLES so the sim runs until exit_valid (run_all=true)
+ifeq ($(BOOTMODE),jtag)
+MAX_CYCLES_ARG =
+else
+MAX_CYCLES_ARG = --MAX_CYCLES=$(MAX_CYCLES)
+endif
 BUILD_STAMP := build/.verilator-build-stamp
 
 # Application build parameters
@@ -160,7 +166,7 @@ verilator-run:
 		--LOG_LEVEL=$(LOG_LEVEL) \
 		--BINARY=$(BINARY) \
 		--BOOTMODE=$(BOOTMODE) \
-		--MAX_CYCLES=$(MAX_CYCLES) \
+		$(MAX_CYCLES_ARG) \
 		--trace=true \
 		$(FUSESOC_ARGS)
 	@echo "Simulation finished."
@@ -173,7 +179,7 @@ verilator-opt:
 		--LOG_LEVEL=$(LOG_LEVEL) \
 		--BINARY=$(BINARY) \
 		--BOOTMODE=$(BOOTMODE) \
-		--MAX_CYCLES=$(MAX_CYCLES) \
+		$(MAX_CYCLES_ARG) \
 		--trace=false \
 		$(FUSESOC_ARGS)
 	@echo "Simulation finished."
