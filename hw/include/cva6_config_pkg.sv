@@ -20,7 +20,7 @@ package cva6_config_pkg;
 
     // address where data0-15 is shadowed or if shadowed in a CSR
     // address of the first CSR used for shadowing the data
-    localparam logic [11:0] DataAddr = 12'h380;  // we are aligned with Rocket here
+    localparam logic [11:0] DataAddr = 12'h380;
     typedef struct packed {
         logic [31:24] zero1;
         logic [23:20] nscratch;
