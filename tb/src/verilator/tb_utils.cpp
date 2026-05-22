@@ -41,32 +41,18 @@ std::string TbUtils::getCmdOption(int argc, char *argv[], const std::string &opt
 }
 
 bool TbUtils::get_use_openocd() {
-
   std::string arg_openocd = this->getCmdOption(this->argc, this->argv, "+openOCD=");
-  ;
-
-  bool use_openocd = false;
-
-  if (arg_openocd.empty()) {
-    std::cout << "[TESTBENCH]: No OpenOCD is used" << std::endl;
-  } else {
-    std::cout << "[TESTBENCH]: OpenOCD is used" << std::endl;
-    use_openocd = true;
-  }
-
+  bool use_openocd = !arg_openocd.empty();
   return use_openocd;
 }
 
 std::string TbUtils::get_firmware() {
-
   std::string firmware = this->getCmdOption(this->argc, this->argv, "+BINARY=");
-
   if (firmware.empty()) {
-    std::cout << "[TESTBENCH]: No firmware  specified" << std::endl;
+    TB_WARN("No firmware specified");
   } else {
-    std::cout << "[TESTBENCH]: loading firmware  " << firmware << std::endl;
+    TB_CONFIG("Firmware: %s", firmware.c_str());
   }
-
   return firmware;
 }
 
@@ -101,10 +87,10 @@ unsigned int TbUtils::extract_memory_type() {
               << std::endl;
     return EXIT_FAILURE;
   } else if (memory_type == "dram") {
-    std::cout << "[TESTBENCH]: Using DRAM as memory type" << std::endl;
+    TB_CONFIG("Memory type: DRAM");
     mem_type = 0; // DRAM
   } else if (memory_type == "spm") {
-    std::cout << "[TESTBENCH]: Using SPM as memory type" << std::endl;
+    TB_CONFIG("Memory type: SPM");
     mem_type = 1; // SPM
   }
 
@@ -118,7 +104,7 @@ unsigned long long TbUtils::get_max_sim_time(bool &run_all) {
 
   max_sim_time = 0;
   if (arg_max_sim_time.empty()) {
-    std::cout << "[TESTBENCH]: No Max time specified" << std::endl;
+    TB_CONFIG("Max cycles: unlimited (runs until exit)");
     run_all = true;
   } else {
     size_t u;
@@ -136,11 +122,10 @@ unsigned long long TbUtils::get_max_sim_time(bool &run_all) {
     else if (arg_max_sim_time[u] == 's')
       max_sim_time *= 1000000000000; // "s" suffix: seconds
     else {
-      std::cout << "[TESTBENCH]: ERROR: Unsupported suffix '" << arg_max_sim_time.substr(u)
-                << "' for +MAX_CYCLES=" << std::endl;
+      TB_ERR("Unsupported suffix '%s' for +MAX_CYCLES=", arg_max_sim_time.substr(u).c_str());
       exit(EXIT_FAILURE);
     }
-    std::cout << "[TESTBENCH]: Max sim time is " << (max_sim_time / CLK_PERIOD_ps) << " clock cycles" << std::endl;
+    TB_CONFIG("Max cycles: %llu", (max_sim_time / CLK_PERIOD_ps));
   }
 
   return max_sim_time;
@@ -149,18 +134,15 @@ unsigned long long TbUtils::get_max_sim_time(bool &run_all) {
 std::string TbUtils::get_boot_mode() {
   std::string arg_boot_mode = this->getCmdOption(this->argc, this->argv, "+BOOTMODE=");
   if (arg_boot_mode.empty()) {
-    std::cout << "[TESTBENCH]: No Boot Option specified, using force boot" << std::endl;
+    TB_WARN("No boot mode specified, defaulting to force boot");
     arg_boot_mode = "force";
   } else {
     if (arg_boot_mode == "force") {
-      std::cout << "[TESTBENCH]: Force boot from testbench" << std::endl;
+      TB_CONFIG("Boot mode: force (testbench)");
     } else if (arg_boot_mode == "jtag") {
-      std::cout << "[TESTBENCH]: Autonomous boot using JTAG and GDB" << std::endl;
+      TB_CONFIG("Boot mode: JTAG — launch OpenOCD and GDB to proceed");
     } else {
-      std::cerr << "[TESTBENCH]: Wrong Boot Option specified, supported "
-                   "options are ( force, jtag)"
-                << std::endl;
-      std::cerr << "[TESTBENCH]: Defaulting to force boot" << std::endl;
+      TB_WARN("Unknown boot mode '%s', defaulting to force boot", arg_boot_mode.c_str());
       arg_boot_mode = "force";
     }
     return arg_boot_mode;
