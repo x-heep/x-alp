@@ -36,6 +36,16 @@ endif
 # FuseSoC arguments
 FUSESOC_ARGS ?=
 
+# MCU generation parameters
+REGTOOL ?= hw/vendor/x-heep/pulp_platform/register_interface/vendor/lowrisc_opentitan/util/regtool.py
+PERIPH_STRUCTS_GEN ?= util/periph_structs_gen/periph_structs_gen.py
+TEMPLATE_FILE ?= util/periph_structs_gen/periph_structs.tpl
+IP_DIR ?= hw/ip
+SW_DIR ?= sw/device/lib/drivers/
+SPISUBSYS_CFG ?= $(IP_DIR)/spi_subsystem/data/spi_subsystem.hjson
+W25Q_CFG_CFG ?= $(IP_DIR)/spi_subsystem/data/w25q128jw_controller.hjson
+
+
 # Verilator simulation parameters
 LOG_LEVEL ?= LOG_DEBUG
 BINARY ?= $(mkfile_path)/sw/build/main.spm.elf
@@ -58,7 +68,7 @@ COMPILER ?= gcc
 COMPILER_PREFIX ?= riscv32-corev-
 COMPILER_FLAGS ?= -mabi=lp64d
 ARCH ?= rv64gc_zifencei
-SOURCE ?=
+SOURCE ?= 
 
 # ============================================================================
 # Third-party IP Vendoring
@@ -99,6 +109,13 @@ mcu-gen: reg-gen boot-rom format
 reg-gen:
 	@cd hw/ip/fast_intr_ctrl && ./fast_intr_ctrl_gen.sh && cd - > /dev/null
 	@cd hw/ip/soc_ctrl && ./soc_ctrl_gen.sh && cd - > /dev/null
+	@$(MAKE) -C hw/vendor/xheep/spi reg \
+		SW_DIR=$(mkfile_path)/$(SW_DIR) \
+		REGTOOL=$(mkfile_path)/$(REGTOOL) \
+		PERIPH_STRUCTS_GEN=$(mkfile_path)/$(PERIPH_STRUCTS_GEN) \
+		TEMPLATE_FILE=$(mkfile_path)/$(TEMPLATE_FILE) \
+		SPISUBSYS_CFG=$(mkfile_path)/$(SPISUBSYS_CFG) \
+		W25Q_CFG_CFG=$(mkfile_path)/$(W25Q_CFG_CFG)
 
 ## @section Boot ROM Build
 .PHONY: boot-rom

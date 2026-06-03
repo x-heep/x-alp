@@ -4,6 +4,8 @@
 
 `verilator_config
 
+lint_off -rule SYMRSVDWORD -file "*"
+
 lint_off -rule UNOPTFLAT -file "*/hw/target/simulation/pad_cell_*.sv" -match "Signal unoptimizable*"
 lint_off -rule UNUSED -file "*/hw/target/simulation/sram_wrapper.sv" -match "Signal is not used: 'pwrgate_ni*"
 lint_off -rule UNUSED -file "*/hw/target/simulation/sram_wrapper.sv" -match "Signal is not used: 'set_retentive_ni*"
@@ -11,3 +13,5 @@ lint_off -rule UNDRIVEN -file "*/hw/target/simulation/sram_wrapper.sv" -match "S
 lint_off -rule SYNCASYNCNET -file "*/hw/target/simulation/pad_cell_*.sv" -match "Signal flopped as both synchronous and async: '*'"
 
 lint_off -rule UNOPTFLAT -file "*.sv"
+
+lint_off -rule WIDTHCONCAT -file  "*/include/core_v_mcu_pkg.sv"

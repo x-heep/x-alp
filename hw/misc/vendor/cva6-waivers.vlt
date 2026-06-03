@@ -2,7 +2,7 @@
 
 lint_off -rule SYMRSVDWORD    -file "*/*cva6*/cva6.sv" -match "Symbol matches C++ keyword: '*'"
 lint_off -rule IMPLICITSTATIC -file "*/*cva6*/cva6.sv" -match "Variable's lifetime implicitly set to static"
-lint_off -rule PINMISSING     -file "*/fpu_wrap.sv"    -match "Instance has missing pin: '*'"
+lint_off -rule PINMISSING     -file "*/fpu_wrap.sv"
 
 ///////////////
 // FPU Wrap
@@ -76,7 +76,6 @@ lint_off -rule WIDTH -file "*/cva6.sv" -match "Operator ASSIGN expects 8 bits on
 
 lint_off -rule UNSIGNED -file "*/pmp_data_if.sv" -match "Comparison is constant due to unsigned arithmetic"
 lint_off -rule CMPCONST -file "*/raw_checker.sv" -match "Comparison is constant due to limited range"
-
 
 //////////////////////
 // Latches

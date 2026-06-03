@@ -40,6 +40,7 @@ module testharness #(
     // --------
     output logic [31:0] exit_value_o,
     output logic        exit_valid_o
+
 );
 
     // Includes
@@ -84,25 +85,32 @@ module testharness #(
     // DUT
     //----
     x_alp u_x_alp (
-        .clk_i        (clk_i),
-        .rst_ni       (rst_ni),
-        .uart_tx_o    (uart_tx),
-        .uart_rx_i    (uart_rx),
-        .exit_valid_o (exit_valid_o),
-        .exit_value_o (exit_value_o),
-        .jtag_tck_i   (jtag_tck),
-        .jtag_tms_i   (jtag_tms),
-        .jtag_trst_ni (jtag_trst_n),
-        .jtag_tdi_i   (jtag_tdi),
-        .jtag_tdo_o   (jtag_tdo),
-        .jtag_tdo_oe_o(),
-        .ext_slv_req_o(ext_slv_req),
-        .ext_slv_rsp_i(ext_slv_rsp),
-        .ext_mst_req_i('0),
-        .ext_mst_rsp_o(),
-        .ext_reg_req_o(),
-        .ext_reg_rsp_i('0),
-        .test_mode_i  (1'b0)
+        .clk_i             (clk_i),
+        .rst_ni            (rst_ni),
+        .uart_tx_o         (uart_tx),
+        .uart_rx_i         (uart_rx),
+        .exit_valid_o      (exit_valid_o),
+        .exit_value_o      (exit_value_o),
+        .jtag_tck_i        (jtag_tck),
+        .jtag_tms_i        (jtag_tms),
+        .jtag_trst_ni      (jtag_trst_n),
+        .jtag_tdi_i        (jtag_tdi),
+        .jtag_tdo_o        (jtag_tdo),
+        .jtag_tdo_oe_o     (),
+        .ext_slv_req_o     (ext_slv_req),
+        .ext_slv_rsp_i     (ext_slv_rsp),
+        .ext_mst_req_i     ('0),
+        .ext_mst_rsp_o     (),
+        .ext_reg_req_o     (),
+        .ext_reg_rsp_i     ('0),
+        .spi_flash_sck_o   (),
+        .spi_flash_sck_en_o(),
+        .spi_flash_csb_o   (),
+        .spi_flash_csb_en_o(),
+        .spi_flash_sd_o    (),
+        .spi_flash_sd_en_o (),
+        .spi_flash_sd_i    (),
+        .test_mode_i       (1'b0)
     );
 
     // --------

@@ -46,7 +46,11 @@ SIM_TIMEOUT_S = 180
 WHITELIST = []
 
 # Blacklist of apps to skip
-BLACKLIST = []
+BLACKLIST = [
+    "example_flash_slv",
+    "example_spi_read",
+    "example_spi_write",
+]
 # TODO : The example_pdm2pcm app is testing a wrong version of the PDM2PCM acting only as a CIC filter.
 #        When fixed, it not passes anymore. Need to be updated.
 

@@ -19,12 +19,12 @@ package core_v_mcu_pkg;
 
     localparam int unsigned totalAxiMasters = NumAxiMasters + NumExtAxiMasters;
 
-    localparam int unsigned NumAxiSlaves = 3;
+    localparam int unsigned NumAxiSlaves = 4;
     localparam int unsigned NumExtAxiSlaves = 1;
 
     localparam int unsigned totalAxiSlaves = NumAxiSlaves + NumExtAxiSlaves;
 
-    localparam int unsigned NumRegSlaves = 4;
+    localparam int unsigned NumRegSlaves = 6;
     localparam int unsigned NumExtRegSlaves = 1;
 
     localparam int unsigned totalRegSlaves = NumRegSlaves + NumExtRegSlaves;
@@ -68,8 +68,9 @@ package core_v_mcu_pkg;
     // Slave indexes
     localparam int unsigned MEM_BUS_IDX = 0;
     localparam int unsigned DEBUG_S_BUS_IDX = 1;
-    localparam int unsigned PERIPH_BUS_IDX = 2;
-    localparam int unsigned EXT_S_BUS_IDX = 3;
+    localparam int unsigned SPI_FLASH_IDX = 2;
+    localparam int unsigned PERIPH_BUS_IDX = 3;
+    localparam int unsigned EXT_S_BUS_IDX = 4;
 
     // Slave addresses
     localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000_0000_0000_0000;
@@ -78,7 +79,10 @@ package core_v_mcu_pkg;
     localparam addr_t DEBUG_S_BUS_BASE_ADDR = MEM_BUS_END_ADDR;
     localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0001_0000;
     localparam addr_t DEBUG_S_BUS_END_ADDR = DEBUG_S_BUS_BASE_ADDR + DEBUG_S_BUS_SIZE;
-    localparam addr_t PERIPH_BUS_BASE_ADDR = DEBUG_S_BUS_END_ADDR;
+    localparam addr_t SPI_FLASH_START_ADDR = DEBUG_S_BUS_END_ADDR;
+    localparam addr_t SPI_FLASH_SIZE = 64'h0000_0000_0100_0000;
+    localparam addr_t SPI_FLASH_END_ADDR = SPI_FLASH_START_ADDR + SPI_FLASH_SIZE;
+    localparam addr_t PERIPH_BUS_BASE_ADDR = SPI_FLASH_END_ADDR;
     localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_1000_0000;
     localparam addr_t PERIPH_BUS_END_ADDR = PERIPH_BUS_BASE_ADDR + PERIPH_BUS_SIZE;
     localparam addr_t EXT_S_BUS_BASE_ADDR = PERIPH_BUS_END_ADDR;
@@ -98,7 +102,9 @@ package core_v_mcu_pkg;
     localparam int unsigned BOOT_ROM_REG_IDX = 1;
     localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
     localparam int unsigned UART_REG_IDX = 3;
-    localparam int unsigned EXT_REG_IDX = 4;
+    localparam int unsigned SPI_SUBSYSTEM_IDX = 4;
+    localparam int unsigned SPI_HOST_IDX = 5;
+    localparam int unsigned EXT_REG_IDX = 6;
 
     // Register addresses
     localparam addr_t SOC_CTRL_REG_START_ADDR = PERIPH_BUS_BASE_ADDR + 64'h0000_0000_0000_0000;
@@ -113,7 +119,13 @@ package core_v_mcu_pkg;
     localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
     localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t UART_REG_END_ADDR = UART_REG_START_ADDR + UART_REG_SIZE;
-    localparam addr_t EXT_REG_START_ADDR = UART_REG_END_ADDR;
+    localparam addr_t SPI_SUBSYSTEM_START_ADDR = UART_REG_END_ADDR;
+    localparam addr_t SPI_SUBSYSTEM_SIZE = 64'h0000_0000_0000_0003;
+    localparam addr_t SPI_SUBSYSTEM_END_ADDR = SPI_SUBSYSTEM_START_ADDR + SPI_SUBSYSTEM_SIZE;
+    localparam addr_t SPI_HOST_START_ADDR = SPI_SUBSYSTEM_END_ADDR;
+    localparam addr_t SPI_HOST_SIZE = 64'h0000_0000_0001_0000;
+    localparam addr_t SPI_HOST_END_ADDR = SPI_HOST_START_ADDR + SPI_HOST_SIZE;
+    localparam addr_t EXT_REG_START_ADDR = SPI_HOST_END_ADDR;
     localparam addr_t EXT_REG_SIZE = 64'h0000_0000_0000_1000;
     localparam addr_t EXT_REG_END_ADDR = EXT_REG_START_ADDR + EXT_REG_SIZE;
 
@@ -125,6 +137,7 @@ package core_v_mcu_pkg;
             start_addr : DEBUG_S_BUS_BASE_ADDR,
             end_addr : DEBUG_S_BUS_END_ADDR
         },
+        '{idx : SPI_FLASH_IDX, start_addr : SPI_FLASH_START_ADDR, end_addr : SPI_FLASH_END_ADDR},
         '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
         '{idx : EXT_S_BUS_IDX, start_addr : EXT_S_BUS_BASE_ADDR, end_addr : EXT_S_BUS_END_ADDR}
     };
@@ -146,6 +159,12 @@ package core_v_mcu_pkg;
             end_addr : FAST_INTR_CTRL_REG_END_ADDR
         },
         '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
+        '{
+            idx : SPI_SUBSYSTEM_IDX,
+            start_addr : SPI_SUBSYSTEM_START_ADDR,
+            end_addr : SPI_SUBSYSTEM_END_ADDR
+        },
+        '{idx : SPI_HOST_IDX, start_addr : SPI_HOST_START_ADDR, end_addr : SPI_HOST_END_ADDR},
         '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR}
     };
 
