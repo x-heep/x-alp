@@ -73,7 +73,11 @@ MCU_GEN_TEMPLATES = $(shell find -L . \
   -name '*.tpl' -print)
 
 # Optionally, additional external template files can be provided to mcu-gen
-EXTERNAL_MCU_GEN_TEMPLATES ?= 
+EXTERNAL_MCU_GEN_TEMPLATES ?=
+
+# Sources that trigger MCU regeneration
+MCU_GEN_SOURCES = $(MCU_GEN_TEMPLATES) $(shell find configs -type f -not -path '*/__pycache__/*')
+MCU_GEN_STAMP   := build/.mcu-gen-stamp
 
 # ============================================================================
 # Third-party IP Vendoring
@@ -106,16 +110,27 @@ conda:
 # ============================================================================
 
 ## @section MCU Code Generation
-.PHONY: mcu-gen
-mcu-gen: reg-gen boot-rom
+
+# Stamp-based target: regenerates only when tpl or configs files change
+$(MCU_GEN_STAMP): $(MCU_GEN_SOURCES)
+	@mkdir -p $(dir $@)
+	@$(MAKE) reg-gen boot-rom
 	$(PYTHON) util/xheep_gen/mcu_gen.py --config configs/python_unsupported.hjson --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
 	@$(MAKE) format
+	@touch $@
+
+## Force MCU regeneration regardless of source timestamps
+.PHONY: mcu-gen
+mcu-gen:
+	@rm -f $(MCU_GEN_STAMP)
+	@$(MAKE) $(MCU_GEN_STAMP)
 
 ## @section Register Generation
 .PHONY: reg-gen
 reg-gen:
 	@cd hw/ip/fast_intr_ctrl && ./fast_intr_ctrl_gen.sh && cd - > /dev/null
 	@cd hw/ip/soc_ctrl && ./soc_ctrl_gen.sh && cd - > /dev/null
+	@cd hw/ip/pad_control && ./pad_control_gen.sh && cd - > /dev/null
 
 ## @section Boot ROM Build
 .PHONY: boot-rom
@@ -172,9 +187,8 @@ app-list:
 
 ## Verilator simulation build
 .PHONY: verilator-build
-verilator-build:
+verilator-build: $(MCU_GEN_STAMP)
 	@$(FUSESOC) --cores-root . run --no-export --target sim --tool verilator --build $(XALP) $(FUSESOC_ARGS) 2>&1 | tee buildsim.log
-	@mkdir -p $(dir $@)
 
 ## Verilator simulation run
 .PHONY: verilator-run
@@ -238,7 +252,7 @@ clean-app:
 ## Remove the build folders
 .PHONY: clean
 clean: clean-app
-	@rm -rf $(BUILD_DIR) $(BUILD_STAMP)
+	@rm -rf $(BUILD_DIR) $(BUILD_STAMP) $(MCU_GEN_STAMP)
 
 ## Leave the repository in a clean state, removing all generated files
 .PHONY: clean-all

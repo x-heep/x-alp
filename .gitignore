@@ -24,6 +24,7 @@ tb/tb_util.svh
 # Automatically generated C header files, linker scripts, and assembly files
 sw/device/lib/drivers/fast_intr_ctrl/fast_intr_ctrl_structs.h
 sw/device/lib/drivers/soc_ctrl/soc_ctrl_structs.h
+hw/vendor/x-heep/hw/ip/pad_ring/pad_ring.sv
 
 # User-dependent configuration files
 .vscode

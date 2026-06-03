@@ -26,6 +26,7 @@ filesets:
       - pulp-platform.org::axi_riscv_atomics
       - pulp-platform.org::riscv_dbg
       - pulp-platform.org::register_interface
+      - pulp-platform.org::reg_to_axi
       - openhwgroup.org::cva6:1.4.0
       - lowrisc:ip:uart
   
@@ -34,16 +35,12 @@ filesets:
       - x-alp:ip:boot_rom
       - x-heep:ip:soc_ctrl
       - x-heep:ip:fast_intr_ctrl
+      - x-heep:ip:pad_control
 
   simulation_rtl:
-    file_type: systemVerilogSource
-    files:
-      - target/simulation/pad_cell_bypass_input.sv 
-      - target/simulation/pad_cell_bypass_output.sv 
-      - target/simulation/pad_cell_inout.sv 
-      - target/simulation/pad_cell_input.sv 
-      - target/simulation/pad_cell_output.sv 
-      - target/simulation/sram_wrapper.sv
+    depend:
+      - x-heep:sim:pad_cells
+      - x-heep:sim:sram_wrapper
 
   waivers:
     file_type: vlt

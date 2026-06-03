@@ -54,7 +54,7 @@ task automatic tb_writetoSram;
   input [7:0] val1;
   input [7:0] val0;
 
-    u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.u_tc_sram.sram[addr] = {val7, val6, val5, val4, val3, val2, val1, val0};
+    u_x_alp.u_core_v_mcu.u_memory_subsystem.u_ram0.tc_ram_i.sram[addr] = {val7, val6, val5, val4, val3, val2, val1, val0};
 endtask
 
 task tb_preload_force;

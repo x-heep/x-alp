@@ -169,21 +169,15 @@ package core_v_mcu_pkg;
     // Boot address
     localparam addr_t BOOT_ADDR = BOOT_ROM_REG_START_ADDR;
 
-    localparam PAD_CLK = 0;
-    localparam PAD_RST = 1;
-    localparam PAD_JTAG_TCK = 2;
-    localparam PAD_JTAG_TMS = 3;
-    localparam PAD_JTAG_TRST = 4;
-    localparam PAD_JTAG_TDI = 5;
-    localparam PAD_JTAG_TDO = 6;
-    localparam PAD_JTAG_TDO_OE = 7;
-    localparam PAD_UART_RX = 8;
-    localparam PAD_UART_TX = 9;
-    localparam PAD_EXIT_VALID = 10;
+    % for pad in xheep.get_padring().pad_list:
+  % if pad.global_index is not None:
+  localparam PAD_${pad.name.upper()} = ${pad.global_index};
+  % endif
+% endfor
 
-    localparam NUM_PAD = 11;
+  localparam NUM_PAD = ${len(xheep.get_padring().pad_list)};
 
-    localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
+  localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
 
 
 endpackage : core_v_mcu_pkg
