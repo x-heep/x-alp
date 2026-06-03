@@ -14,15 +14,15 @@
 
 module serial_deglitch #(
     parameter int unsigned SIZE = 4
-)(
-    input  logic clk_i,    // clock
-    input  logic rst_ni,   // asynchronous reset active low
-    input  logic en_i,     // enable
-    input  logic d_i,      // serial data in
-    output logic q_o       // filtered data out
+) (
+    input  logic clk_i,   // clock
+    input  logic rst_ni,  // asynchronous reset active low
+    input  logic en_i,    // enable
+    input  logic d_i,     // serial data in
+    output logic q_o      // filtered data out
 );
     logic [SIZE-1:0] count_q;
-    logic q;
+    logic            q;
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (~rst_ni) begin

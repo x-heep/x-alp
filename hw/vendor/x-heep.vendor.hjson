@@ -26,19 +26,16 @@
   mapping: [
     {from: "LICENSE", to: "LICENSE"},
 
-    // Top-level files
-    {from: "hw/system/pad_control", to: "hw/ip/pad_control"},
-    {from: "hw/system/pad_ring.core", to: "hw/ip/pad_ring.core"},
-    {from: "hw/system/pad_ring.sv.tpl", to: "hw/ip/pad_ring.sv.tpl"},
-
     // Tools and utilities
     {from: "util", to: "util"},
+    {from: "hw/simulation", to: "hw/simulation"},
 
     // Third-party IPs
     {from: "hw/vendor/pulp_platform/axi", to: "pulp_platform/axi"},
     {from: "hw/vendor/pulp_platform/common_cells", to: "pulp_platform/common_cells"},
     {from: "hw/vendor/pulp_platform/register_interface", to: "pulp_platform/register_interface"},
     {from: "hw/vendor/pulp_platform_register_interface.core", to: "pulp_platform_register_interface.core"},
+    {from: "hw/vendor/pulp_platform_reg_to_axi.core", to: "pulp_platform_reg_to_axi.core"},
     {from: "hw/vendor/pulp_platform/riscv_dbg", to: "pulp_platform/riscv_dbg"},
     {from: "hw/vendor/pulp_platform_riscv_dbg.core", to: "pulp_platform_riscv_dbg.core"},
     {from: "hw/vendor/pulp_platform_riscv_dbg_pkg.core", to: "pulp_platform_riscv_dbg_pkg.core"},
