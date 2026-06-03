@@ -279,14 +279,14 @@ unsigned int TbSimCtrl::GetExecutionTimeMs() const {
 }
 
 void TbSimCtrl::PrintStatistics() const {
-  double speed_hz  = (sim_cycles_ / CLK_PERIOD_ps) / (GetExecutionTimeMs() / 1000.0);
+  double speed_hz = (sim_cycles_ / CLK_PERIOD_ps) / (GetExecutionTimeMs() / 1000.0);
   double speed_khz = speed_hz / 1000.0;
   unsigned long long cycles = sim_cycles_ / CLK_PERIOD_ps;
   double wall_s = GetExecutionTimeMs() / 1000.0;
 
-  printf("\n\033[1m  %-18s %llu cycles\033[0m\n",  "Executed:",   cycles);
-  printf(  "  %-18s %.2f s\n",                      "Wall time:",  wall_s);
-  printf(  "  %-18s %.1f kHz\n\n",                  "Sim speed:",  speed_khz);
+  printf("\n\033[1m  %-18s %llu cycles\033[0m\n", "Executed:", cycles);
+  printf("  %-18s %.2f s\n", "Wall time:", wall_s);
+  printf("  %-18s %.1f kHz\n\n", "Sim speed:", speed_khz);
 }
 
 unsigned TbSimCtrl::RunSimulation(int argc, char **argv) {
