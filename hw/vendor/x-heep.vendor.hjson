@@ -20,11 +20,16 @@
 
   upstream: {
     url: "https://github.com/x-heep/x-heep.git",
-    rev: "29e10bfc2f59d980f43831e06da2eae4ae318238",
+    rev: "main",
   },
 
   mapping: [
     {from: "LICENSE", to: "LICENSE"},
+
+    // Top-level files
+    {from: "hw/system/pad_control", to: "hw/ip/pad_control"},
+    {from: "hw/system/pad_ring.core", to: "hw/ip/pad_ring.core"},
+    {from: "hw/system/pad_ring.sv.tpl", to: "hw/ip/pad_ring.sv.tpl"},
 
     // Tools and utilities
     {from: "util", to: "util"},
@@ -44,6 +49,9 @@
   ],
 
   exclude_from_upstream: [
+    # Unused X-HEEP files
+    "util/xheep_gen",
+    "util/xheep_gen.lock.hjson",
     # Unused PULP Platform files
     "hw/vendor/pulp_platform/common_cells/.github",
     "hw/vendor/pulp_platform/common_cells/lint",

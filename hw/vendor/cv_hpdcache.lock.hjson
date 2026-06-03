@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/x-heep/x-heep.git
-    rev: efea8698a69ded3850294287363286878f77201f
+    url: https://github.com/openhwgroup/cv-hpdcache.git
+    rev: 04de80896981527c34fbbd35d7b1ef787a082d7c
   }
 }

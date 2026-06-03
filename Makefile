@@ -61,10 +61,25 @@ ARCH ?= rv64gc_zifencei
 SOURCE ?=
 
 # ============================================================================
+# System Configuration
+# ============================================================================
+PADS_CFG ?= configs/pad_cfg.py
+X_ALP_CFG  ?= configs/system.py
+
+# MCU-Gen template files to generate
+MCU_GEN_TEMPLATES = $(shell find -L . \
+  \( -path './hw/vendor/x-heep' -o -path './util/profile' \) -prune -o \
+  \( -path './hw/vendor/*' -o -path './util/*' -o -path './test/*' \) -prune -o \
+  -name '*.tpl' -print)
+
+# Optionally, additional external template files can be provided to mcu-gen
+EXTERNAL_MCU_GEN_TEMPLATES ?= 
+
+# ============================================================================
 # Third-party IP Vendoring
 # ============================================================================
 # Vendored IPs
-VENDOR_FILES	:= $(shell find hw/vendor -maxdepth 1 -type f -name "*.vendor.hjson" -print)
+VENDOR_FILES	:= $(shell find hw/vendor util -maxdepth 1 -type f -name "*.vendor.hjson" -print)
 VENDOR_LOCKS	:= $(subst .vendor.hjson,.lock.hjson,$(VENDOR_FILES))
 
 # Export variables to sub-makefiles
@@ -92,7 +107,9 @@ conda:
 
 ## @section MCU Code Generation
 .PHONY: mcu-gen
-mcu-gen: reg-gen boot-rom format
+mcu-gen: reg-gen boot-rom
+	$(PYTHON) util/xheep_gen/mcu_gen.py --config configs/python_unsupported.hjson --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
+	@$(MAKE) format
 
 ## @section Register Generation
 .PHONY: reg-gen
