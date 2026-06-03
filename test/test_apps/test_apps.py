@@ -35,7 +35,7 @@ SIMULATORS = ["verilator"]
 # Pattern to look for when simulating an app to see if the app finished
 # correctly or not
 ERROR_PATTERN_DICT = {
-    "verilator": r"Exit code received: (\d+)",
+    "verilator": r"Exit code: (\d+)",
 }
 
 # Timeout for the simulation in seconds
