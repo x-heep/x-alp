@@ -13,12 +13,8 @@
 // Careful, they do not correspond to the values the registers expect
 // as SPI and EEPROM are not supported
 typedef enum {
-  BOOT_MODE_PASSIVE = 0,
-  BOOT_MODE_SD = 1,
-  BOOT_MODE_SPI =2,
-  BOOT_MODE_I2C =3,
-  BOOT_MODE_FORCE = 4,  // default to passive in the bootrom`
-  BOOT_MODE_AUTONOMOUS = 5 // default to passive in the bootrom 
+  BOOT_MODE_FORCE = 0,
+  BOOT_MODE_WAIT_FOR_DEBUGGER = 1,
 } boot_mode_t;
 
 

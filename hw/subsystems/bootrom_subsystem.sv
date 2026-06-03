@@ -24,10 +24,11 @@ module bootrom_subsystem #(
         .clk_i ('0),
         .rst_ni(1'b1),
         .req_i (reg_req_i.valid),
-        .addr_i(reg_req_i.addr[31:0]),
+        .addr_i(32'(reg_req_i.addr) - 32'(BOOT_ROM_REG_START_ADDR)),
         .data_o(reg_rsp_o.rdata)
     );
 
     assign reg_rsp_o.ready = 1'b1;
+    assign reg_rsp_o.error = 1'b0;
 
 endmodule

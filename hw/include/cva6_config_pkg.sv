@@ -20,7 +20,7 @@ package cva6_config_pkg;
 
     // address where data0-15 is shadowed or if shadowed in a CSR
     // address of the first CSR used for shadowing the data
-    localparam logic [11:0] DataAddr = 12'h380;  // we are aligned with Rocket here
+    localparam logic [11:0] DataAddr = 12'h380;
     typedef struct packed {
         logic [31:24] zero1;
         logic [23:20] nscratch;
@@ -151,7 +151,7 @@ package cva6_config_pkg;
         BPType: config_pkg::BHT,
         BHTEntries: unsigned'(CVA6ConfigBHTEntries),
         BHTHist: unsigned'(3),
-        DmBaseAddress: 64'h0,
+        DmBaseAddress: core_v_mcu_pkg::DEBUG_S_BUS_BASE_ADDR,
         TvalEn: bit'(CVA6ConfigTvalEn),
         DirectVecOnly: bit'(0),
         NrPMPEntries: unsigned'(CVA6ConfigNrPMPEntries),
@@ -179,14 +179,22 @@ package cva6_config_pkg;
             core_v_mcu_pkg::EXT_REG_SIZE
         }
         ),
-        NrExecuteRegionRules: unsigned'(2),
+        NrExecuteRegionRules: unsigned'(3),
         ExecuteRegionAddrBase:
         1024'(
-        {core_v_mcu_pkg::BOOT_ROM_REG_START_ADDR, core_v_mcu_pkg::CODE_ZONE_BASE_ADDR}
+        {
+            core_v_mcu_pkg::DEBUG_S_BUS_BASE_ADDR,
+            core_v_mcu_pkg::BOOT_ROM_REG_START_ADDR,
+            core_v_mcu_pkg::CODE_ZONE_BASE_ADDR
+        }
         ),
         ExecuteRegionLength:
         1024'(
-        {core_v_mcu_pkg::BOOT_ROM_REG_SIZE, core_v_mcu_pkg::CODE_ZONE_SIZE}
+        {
+            core_v_mcu_pkg::DEBUG_S_BUS_SIZE,
+            core_v_mcu_pkg::BOOT_ROM_REG_SIZE,
+            core_v_mcu_pkg::CODE_ZONE_SIZE
+        }
         ),
         NrCachedRegionRules: unsigned'(1),
         CachedRegionAddrBase: 1024'({core_v_mcu_pkg::MEM_BUS_BASE_ADDR}),
