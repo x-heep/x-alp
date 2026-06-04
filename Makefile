@@ -135,7 +135,7 @@ $(MCU_GEN_PRIMARY): $(MCU_GEN_SOURCES)
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen
-mcu-gen:
+mcu-gen: reg-gen boot-rom
 	@rm -f $(MCU_GEN_PRIMARY)
 	@$(MAKE) $(MCU_GEN_PRIMARY)
 

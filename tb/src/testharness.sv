@@ -80,10 +80,10 @@ module testharness #(
     logic [         63:0] tb_mem_rdata;
 
     // Internal signals
-    logic clk;
-    logic rst_n;
+    logic                 clk;
+    logic                 rst_n;
 
-    assign clk = clk_i;
+    assign clk   = clk_i;
     assign rst_n = rst_ni;
 
     //----
