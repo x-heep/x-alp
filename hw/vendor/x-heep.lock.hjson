@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/x-heep/x-heep.git
-    rev: efea8698a69ded3850294287363286878f77201f
+    url: https://github.com/luigigiuffrida98/x-heep.git
+    rev: 8309743168ddc8cf8cc24642dfab66054a64ea66
   }
 }

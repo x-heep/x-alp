@@ -19,8 +19,8 @@
   target_dir: "x-heep",
 
   upstream: {
-    url: "https://github.com/x-heep/x-heep.git",
-    rev: "main",
+    url: "https://github.com/luigigiuffrida98/x-heep.git",
+    rev: "feat/xalp-utils",
   },
 
   mapping: [
