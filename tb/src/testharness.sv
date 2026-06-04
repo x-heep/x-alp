@@ -79,13 +79,19 @@ module testharness #(
     logic                 tb_mem_we;
     logic [         63:0] tb_mem_rdata;
 
+    // Internal signals
+    logic clk;
+    logic rst_n;
+
+    assign clk = clk_i;
+    assign rst_n = rst_ni;
 
     //----
     // DUT
     //----
     x_alp u_x_alp (
-        .clk_i        (clk_i),
-        .rst_ni       (rst_ni),
+        .clk_i        (clk),
+        .rst_ni       (rst_n),
         .uart_tx_o    (uart_tx),
         .uart_rx_i    (uart_rx),
         .exit_valid_o (exit_valid_o),

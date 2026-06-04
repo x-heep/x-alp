@@ -1,1 +1,0 @@
-This interface does not expose any registers.
