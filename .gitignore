@@ -40,6 +40,7 @@ hw/ip/pad_control/rtl/pad_control_reg_pkg.sv
 sw/device/lib/drivers/pad_control/pad_control_regs.h
 sw/device/lib/drivers/pad_control/pad_control_regs.md
 hw/fpga/sram_wrapper.sv
+hw/fpga/scripts/generate_sram.tcl
 
 # bootrom build outputs
 hw/ip/bootrom/bootrom.elf

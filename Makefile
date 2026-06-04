@@ -311,6 +311,19 @@ verilator-waves: .check-gtkwave
 	@gtkwave build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/waveform.fst util/wave.gtkw
 
 # ============================================================================
+# FPGA Build and Run
+# ============================================================================
+
+## @section Vivado
+
+## Builds (synthesis and implementation) the bitstream for the FPGA version using Vivado
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+## @param FUSESOC_FLAGS=--flag=<flagname>
+vivado-fpga:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build openhwgroup.org:systems:core-v-mini-mcu $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+
+# ============================================================================
 # Code Quality
 # ============================================================================
 
