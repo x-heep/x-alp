@@ -22,40 +22,40 @@
 // Dependencies: relies on rr_arb_tree from common_cells.
 
 module rrarbiter #(
-  parameter int unsigned NUM_REQ   = 64,
-  parameter bit          LOCK_IN   = 1'b0
+    parameter int unsigned NUM_REQ = 64,
+    parameter bit          LOCK_IN = 1'b0
 ) (
-  input logic                         clk_i,
-  input logic                         rst_ni,
+    input logic clk_i,
+    input logic rst_ni,
 
-  input logic                         flush_i, // clears arbiter state
-  input logic                         en_i,    // arbiter enable
-  input logic [NUM_REQ-1:0]           req_i,   // request signals
+    input logic               flush_i,  // clears arbiter state
+    input logic               en_i,     // arbiter enable
+    input logic [NUM_REQ-1:0] req_i,    // request signals
 
-  output logic [NUM_REQ-1:0]          ack_o,   // acknowledge signals
-  output logic                        vld_o,   // request ack'ed
-  output logic [$clog2(NUM_REQ)-1:0]  idx_o    // idx output
+    output logic [        NUM_REQ-1:0] ack_o,  // acknowledge signals
+    output logic                       vld_o,  // request ack'ed
+    output logic [$clog2(NUM_REQ)-1:0] idx_o   // idx output
 );
 
-  logic req;
-  assign vld_o = (|req_i) & en_i;
+    logic req;
+    assign vld_o = (|req_i) & en_i;
 
-  rr_arb_tree #(
-    .NumIn     ( NUM_REQ ),
-    .DataWidth ( 1       ),
-    .LockIn    ( LOCK_IN ))
-  i_rr_arb_tree (
-    .clk_i   ( clk_i      ),
-    .rst_ni  ( rst_ni     ),
-    .flush_i ( flush_i    ),
-    .rr_i    ( '0         ),
-    .req_i   ( req_i      ),
-    .gnt_o   ( ack_o      ),
-    .data_i  ( '0         ),
-    .gnt_i   ( en_i & req ),
-    .req_o   ( req        ),
-    .data_o  (            ),
-    .idx_o   ( idx_o      )
-  );
+    rr_arb_tree #(
+        .NumIn    (NUM_REQ),
+        .DataWidth(1),
+        .LockIn   (LOCK_IN)
+    ) i_rr_arb_tree (
+        .clk_i  (clk_i),
+        .rst_ni (rst_ni),
+        .flush_i(flush_i),
+        .rr_i   ('0),
+        .req_i  (req_i),
+        .gnt_o  (ack_o),
+        .data_i ('0),
+        .gnt_i  (en_i & req),
+        .req_o  (req),
+        .data_o (),
+        .idx_o  (idx_o)
+    );
 
 endmodule : rrarbiter

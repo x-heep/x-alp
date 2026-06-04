@@ -20,11 +20,11 @@ package cf_math_pkg;
     /// Ceiled Division of Two Natural Numbers
     ///
     /// Returns the quotient of two natural numbers, rounded towards plus infinity.
-    function automatic integer ceil_div (input longint dividend, input longint divisor);
+    function automatic integer ceil_div(input longint dividend, input longint divisor);
         automatic longint remainder;
 
-        `ifndef SYNTHESIS
-        `ifndef COMMON_CELLS_ASSERTS_OFF
+`ifndef SYNTHESIS
+`ifndef COMMON_CELLS_ASSERTS_OFF
         if (dividend < 0) begin
             $fatal(1, "Dividend %0d is not a natural number!", dividend);
         end
@@ -36,8 +36,8 @@ package cf_math_pkg;
         if (divisor == 0) begin
             $fatal(1, "Division by zero!");
         end
-        `endif
-        `endif
+`endif
+`endif
 
         remainder = dividend;
         for (ceil_div = 0; remainder > 0; ceil_div++) begin
@@ -54,7 +54,7 @@ package cf_math_pkg;
     ///   `parameter type idx_t = logic[cf_math_pkg::idx_width(NumIdx)-1:0]`
     /// As typedef:
     ///   `typedef logic [cf_math_pkg::idx_width(NumIdx)-1:0] idx_t`
-    function automatic integer unsigned idx_width (input integer unsigned num_idx);
+    function automatic integer unsigned idx_width(input integer unsigned num_idx);
         return (num_idx > 32'd1) ? unsigned'($clog2(num_idx)) : 32'd1;
     endfunction
 

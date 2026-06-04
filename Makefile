@@ -138,9 +138,11 @@ $(filter-out $(MCU_GEN_PRIMARY),$(MCU_GEN_OUTPUTS)): $(MCU_GEN_PRIMARY)
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen
-mcu-gen: reg-gen boot-rom
+mcu-gen:
 	@rm -f $(MCU_GEN_PRIMARY)
 	@$(MAKE) $(MCU_GEN_PRIMARY)
+	@$(MAKE) reg-gen 
+	@$(MAKE) boot-rom
 
 ## @section Register Generation
 

@@ -17,26 +17,26 @@
 module find_first_one #(
     /// The width of the input vector.
     parameter int WIDTH = -1,
-    parameter int FLIP = 0
-)(
-    input  logic [WIDTH-1:0]         in_i,
+    parameter int FLIP  = 0
+) (
+    input  logic [        WIDTH-1:0] in_i,
     output logic [$clog2(WIDTH)-1:0] first_one_o,
     output logic                     no_ones_o
 );
 
     localparam int NUM_LEVELS = $clog2(WIDTH);
 
-    `ifndef SYNTHESIS
+`ifndef SYNTHESIS
     initial begin
-        assert(WIDTH >= 0);
+        assert (WIDTH >= 0);
     end
-    `endif
+`endif
 
-    logic [WIDTH-1:0][NUM_LEVELS-1:0]          index_lut;
-    logic [2**NUM_LEVELS-1:0]                  sel_nodes;
-    logic [2**NUM_LEVELS-1:0][NUM_LEVELS-1:0]  index_nodes;
+    logic [        WIDTH-1:0][NUM_LEVELS-1:0] index_lut;
+    logic [2**NUM_LEVELS-1:0]                 sel_nodes;
+    logic [2**NUM_LEVELS-1:0][NUM_LEVELS-1:0] index_nodes;
 
-    logic [WIDTH-1:0] in_tmp;
+    logic [        WIDTH-1:0]                 in_tmp;
 
     for (genvar i = 0; i < WIDTH; i++) begin
         assign in_tmp[i] = FLIP ? in_i[WIDTH-1-i] : in_i[i];
@@ -48,28 +48,28 @@ module find_first_one #(
 
     for (genvar level = 0; level < NUM_LEVELS; level++) begin
 
-        if (level < NUM_LEVELS-1) begin
-            for (genvar l = 0; l < 2**level; l++) begin
+        if (level < NUM_LEVELS - 1) begin
+            for (genvar l = 0; l < 2 ** level; l++) begin
                 assign sel_nodes[2**level-1+l]   = sel_nodes[2**(level+1)-1+l*2] | sel_nodes[2**(level+1)-1+l*2+1];
                 assign index_nodes[2**level-1+l] = (sel_nodes[2**(level+1)-1+l*2] == 1'b1) ?
                     index_nodes[2**(level+1)-1+l*2] : index_nodes[2**(level+1)-1+l*2+1];
             end
         end
 
-        if (level == NUM_LEVELS-1) begin
-            for (genvar k = 0; k < 2**level; k++) begin
+        if (level == NUM_LEVELS - 1) begin
+            for (genvar k = 0; k < 2 ** level; k++) begin
                 // if two successive indices are still in the vector...
-                if (k * 2 < WIDTH-1) begin
-                    assign sel_nodes[2**level-1+k]   = in_tmp[k*2] | in_tmp[k*2+1];
+                if (k * 2 < WIDTH - 1) begin
+                    assign sel_nodes[2**level-1+k] = in_tmp[k*2] | in_tmp[k*2+1];
                     assign index_nodes[2**level-1+k] = (in_tmp[k*2] == 1'b1) ? index_lut[k*2] : index_lut[k*2+1];
                 end
                 // if only the first index is still in the vector...
-                if (k * 2 == WIDTH-1) begin
+                if (k * 2 == WIDTH - 1) begin
                     assign sel_nodes[2**level-1+k]   = in_tmp[k*2];
                     assign index_nodes[2**level-1+k] = index_lut[k*2];
                 end
                 // if index is out of range
-                if (k * 2 > WIDTH-1) begin
+                if (k * 2 > WIDTH - 1) begin
                     assign sel_nodes[2**level-1+k]   = 1'b0;
                     assign index_nodes[2**level-1+k] = '0;
                 end
@@ -78,6 +78,6 @@ module find_first_one #(
     end
 
     assign first_one_o = NUM_LEVELS > 0 ? index_nodes[0] : '0;
-    assign no_ones_o   = NUM_LEVELS > 0 ? ~sel_nodes[0]  : '1;
+    assign no_ones_o   = NUM_LEVELS > 0 ? ~sel_nodes[0] : '1;
 
 endmodule
