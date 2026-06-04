@@ -18,11 +18,7 @@ __pycache__/
 # Apps output files
 run_verif_rtl_log.txt
 
-# Automatically generated hw files
-tb/tb_util.svh
-
 # mcu-gen outputs (from *.tpl + configs)
-hw/x_alp.sv
 hw/include/core_v_mcu_pkg.sv
 hw/ip/pad_ring/pad_ring.sv
 hw/ip/pad_control/rtl/pad_control.sv
