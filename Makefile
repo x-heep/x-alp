@@ -272,7 +272,7 @@ app-list:
 
 ## Verilator simulation build
 .PHONY: verilator-build
-verilator-build: $(MCU_GEN_PRIMARY) $(REG_GEN_OUTPUTS) hw/ip/bootrom/bootrom.sv
+verilator-build: $(MCU_GEN_PRIMARY) $(REG_GEN_OUTPUTS) hw/ip/bootrom/bootrom.sv format
 	@$(FUSESOC) --cores-root . run --no-export --target sim --tool verilator --build $(XALP) $(FUSESOC_ARGS) 2>&1 | tee buildsim.log
 
 ## Verilator simulation run
