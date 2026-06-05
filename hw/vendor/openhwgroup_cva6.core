@@ -114,6 +114,7 @@ filesets:
   rtl_fpga:
     files:
     - openhwgroup/cva6/common/local/util/tc_sram_fpga_wrapper.sv
+    - pulp_platform/fpga-support/rtl/SyncSpRamBeNx64.sv
     file_type : systemVerilogSource
 
 
@@ -122,5 +123,5 @@ targets:
     filesets:
     - "!target_format ? (!target_lint ? (rtl))"
     - target_sim ? (sim_rtl)
-    - target_fpga ? (rtl_fpga)
+    - target_aup-zu3 ? (rtl_fpga)
 
