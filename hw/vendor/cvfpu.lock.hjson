@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/openhwgroup/cvfpu.git
-    rev: 58ca3c376beb914b2b80b811d4b270c063d4e6f7
+    rev: a74d99a32bd11ce0b05a82b0d6d26f98df3bba65
   }
 }
