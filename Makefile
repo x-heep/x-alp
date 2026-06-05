@@ -314,8 +314,20 @@ verilator-waves: .check-gtkwave
 
 ## Format
 PHONY: format
-format: .check-fusesoc
-	@$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target format $(XALP)
+format:
+	git ls-files -z -- '*.sv' '*.svh' ':(exclude)**/vendor/**' | xargs -0 verible-verilog-format \
+		--assignment_statement_alignment=align \
+		--case_items_alignment=align \
+		--formal_parameters_indentation=indent \
+		--named_parameter_alignment=align \
+		--named_parameter_indentation=indent \
+		--named_port_alignment=align \
+		--named_port_indentation=indent \
+		--port_declarations_alignment=align \
+		--port_declarations_indentation=indent \
+		--module_net_variable_alignment=align \
+		--indentation_spaces=4 \
+		--inplace
 	git ls-files -z -- '*.c' '*.h' '*.cpp' '*.hpp' ':(exclude)build/**' ':(exclude)**/vendor/**' | xargs -0 clang-format -i -style=file:util/.clang-format
 
 ## Lint
