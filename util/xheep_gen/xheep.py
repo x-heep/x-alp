@@ -8,9 +8,10 @@ from peripherals.abstractions import PeripheralDomain
 from peripherals.base_peripherals_domain import BasePeripheralDomain
 from peripherals.user_peripherals_domain import UserPeripheralDomain
 from pads.pad_ring import PadRing
+from system import System
 
 
-class XHeep:
+class XHeep(System):
     """
     Represents the whole X-HEEP system.
 
