@@ -39,72 +39,74 @@
 /// There are _no_ restrictions on which clock domain should be the faster, any integer
 /// ratio will work.
 module isochronous_spill_register #(
-  /// Data type of spill register.
-  parameter type T      = logic,
-  /// Make this spill register transparent.
-  parameter bit  Bypass = 1'b0
+    /// Data type of spill register.
+    parameter type T      = logic,
+    /// Make this spill register transparent.
+    parameter bit  Bypass = 1'b0
 ) (
-  /// Clock of source clock domain.
-  input  logic src_clk_i,
-  /// Active low async reset in source domain.
-  input  logic src_rst_ni,
-  /// Source input data is valid.
-  input  logic src_valid_i,
-  /// Source is ready to accept.
-  output logic src_ready_o,
-  /// Source input data.
-  input  T     src_data_i,
-  /// Clock of destination clock domain.
-  input  logic dst_clk_i,
-  /// Active low async reset in destination domain.
-  input  logic dst_rst_ni,
-  /// Destination output data is valid.
-  output logic dst_valid_o,
-  /// Destination is ready to accept.
-  input  logic dst_ready_i,
-  /// Destination output data.
-  output T     dst_data_o
+    /// Clock of source clock domain.
+    input  logic src_clk_i,
+    /// Active low async reset in source domain.
+    input  logic src_rst_ni,
+    /// Source input data is valid.
+    input  logic src_valid_i,
+    /// Source is ready to accept.
+    output logic src_ready_o,
+    /// Source input data.
+    input  T     src_data_i,
+    /// Clock of destination clock domain.
+    input  logic dst_clk_i,
+    /// Active low async reset in destination domain.
+    input  logic dst_rst_ni,
+    /// Destination output data is valid.
+    output logic dst_valid_o,
+    /// Destination is ready to accept.
+    input  logic dst_ready_i,
+    /// Destination output data.
+    output T     dst_data_o
 );
-  // Don't generate the spill register.
-  if (Bypass) begin : gen_bypass
-    assign dst_valid_o = src_valid_i;
-    assign src_ready_o = dst_ready_i;
-    assign dst_data_o  = src_data_i;
-  // Generate the spill register
-  end else begin : gen_isochronous_spill_register
-    /// Read/write pointer are one bit wider than necessary.
-    /// We implicitly capture the full and empty state with the second bit:
-    /// If all but the topmost bit of `rd_pointer_q` and `wr_pointer_q` agree, the
-    /// FIFO is in a critical state. If the topmost bit is equal, the FIFO is
-    /// empty, otherwise it is full.
-    logic [1:0] rd_pointer_q, wr_pointer_q;
-    // Advance write pointer if we pushed a new item into the FIFO. (Source clock domain)
-    `FFLARN(wr_pointer_q, wr_pointer_q+1, (src_valid_i && src_ready_o), '0, src_clk_i, src_rst_ni)
-    // Advance read pointer if downstream consumed an item. (Destination clock domain)
-    `FFLARN(rd_pointer_q, rd_pointer_q+1, (dst_valid_o && dst_ready_i), '0, dst_clk_i, dst_rst_ni)
+    // Don't generate the spill register.
+    if (Bypass) begin : gen_bypass
+        assign dst_valid_o = src_valid_i;
+        assign src_ready_o = dst_ready_i;
+        assign dst_data_o  = src_data_i;
+        // Generate the spill register
+    end else begin : gen_isochronous_spill_register
+        /// Read/write pointer are one bit wider than necessary.
+        /// We implicitly capture the full and empty state with the second bit:
+        /// If all but the topmost bit of `rd_pointer_q` and `wr_pointer_q` agree, the
+        /// FIFO is in a critical state. If the topmost bit is equal, the FIFO is
+        /// empty, otherwise it is full.
+        logic [1:0] rd_pointer_q, wr_pointer_q;
+        // Advance write pointer if we pushed a new item into the FIFO. (Source clock domain)
+        `FFLARN(wr_pointer_q, wr_pointer_q + 1, (src_valid_i && src_ready_o), '0, src_clk_i,
+                src_rst_ni)
+        // Advance read pointer if downstream consumed an item. (Destination clock domain)
+        `FFLARN(rd_pointer_q, rd_pointer_q + 1, (dst_valid_o && dst_ready_i), '0, dst_clk_i,
+                dst_rst_ni)
 
-    T [1:0] mem_d, mem_q;
-    `FFLNR(mem_q, mem_d, (src_valid_i && src_ready_o), src_clk_i)
-    always_comb begin
-      mem_d = mem_q;
-      mem_d[wr_pointer_q[0]] = src_data_i;
+        T [1:0] mem_d, mem_q;
+        `FFLNR(mem_q, mem_d, (src_valid_i && src_ready_o), src_clk_i)
+        always_comb begin
+            mem_d                  = mem_q;
+            mem_d[wr_pointer_q[0]] = src_data_i;
+        end
+
+        assign src_ready_o = (rd_pointer_q ^ wr_pointer_q) != 2'b10;
+
+        assign dst_valid_o = (rd_pointer_q ^ wr_pointer_q) != '0;
+        assign dst_data_o  = mem_q[rd_pointer_q[0]];
     end
 
-    assign src_ready_o = (rd_pointer_q ^ wr_pointer_q) != 2'b10;
-
-    assign dst_valid_o = (rd_pointer_q ^ wr_pointer_q) != '0;
-    assign dst_data_o = mem_q[rd_pointer_q[0]];
-  end
-
-  // stability guarantees
-  `ifndef COMMON_CELLS_ASSERTS_OFF
-  `ASSERT(src_valid_unstable, src_valid_i && !src_ready_o |=> $stable(src_valid_i),
-          src_clk_i, !src_rst_ni, "src_valid_i is unstable")
-  `ASSERT(src_data_unstable, src_valid_i && !src_ready_o |=> $stable(src_data_i),
-          src_clk_i, !src_rst_ni, "src_data_i is unstable")
-  `ASSERT(dst_valid_unstable, dst_valid_o && !dst_ready_i |=> $stable(dst_valid_o),
-          dst_clk_i, !dst_rst_ni, "dst_valid_o is unstable")
-  `ASSERT(dst_data_unstable, dst_valid_o && !dst_ready_i |=> $stable(dst_data_o),
-          dst_clk_i, !dst_rst_ni, "dst_data_o is unstable")
-  `endif
+    // stability guarantees
+`ifndef COMMON_CELLS_ASSERTS_OFF
+    `ASSERT(src_valid_unstable, src_valid_i && !src_ready_o |=> $stable(src_valid_i), src_clk_i,
+            !src_rst_ni, "src_valid_i is unstable")
+    `ASSERT(src_data_unstable, src_valid_i && !src_ready_o |=> $stable(src_data_i), src_clk_i,
+            !src_rst_ni, "src_data_i is unstable")
+    `ASSERT(dst_valid_unstable, dst_valid_o && !dst_ready_i |=> $stable(dst_valid_o), dst_clk_i,
+            !dst_rst_ni, "dst_valid_o is unstable")
+    `ASSERT(dst_data_unstable, dst_valid_o && !dst_ready_i |=> $stable(dst_data_o), dst_clk_i,
+            !dst_rst_ni, "dst_data_o is unstable")
+`endif
 endmodule

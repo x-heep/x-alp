@@ -24,9 +24,9 @@ module pulp_sync_wedge #(
     logic clk;
     logic serial, serial_q;
 
-    assign serial_o =  serial_q;
-    assign f_edge_o = ~serial &  serial_q;
-    assign r_edge_o =  serial & ~serial_q;
+    assign serial_o = serial_q;
+    assign f_edge_o = ~serial & serial_q;
+    assign r_edge_o = serial & ~serial_q;
 
     pulp_sync #(
         .STAGES(STAGES)
@@ -34,14 +34,14 @@ module pulp_sync_wedge #(
         .clk_i,
         .rstn_i,
         .serial_i,
-        .serial_o ( serial )
+        .serial_o(serial)
     );
 
     pulp_clock_gating i_pulp_clock_gating (
         .clk_i,
         .en_i,
-        .test_en_i ( 1'b0    ),
-        .clk_o     ( clk )
+        .test_en_i(1'b0),
+        .clk_o    (clk)
     );
 
     always_ff @(posedge clk, negedge rstn_i) begin
