@@ -6,10 +6,11 @@ filesets:
   x-alp:
     files:
     - hw/x_alp.sv
+    - hw/ip/pad_ring/pad_ring.sv
     file_type : systemVerilogSource
     depend:
       - x-heep:x-alp:core-v-mcu:0.0.1
-
+    
   testbench:
     depend:
       - x-heep:x-alp:tb:0.0.1

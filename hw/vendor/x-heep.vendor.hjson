@@ -20,7 +20,7 @@
 
   upstream: {
     url: "https://github.com/x-heep/x-heep.git",
-    rev: "29e10bfc2f59d980f43831e06da2eae4ae318238",
+    rev: "cc3d3268fdf648634119f7d904bcc45ebdde80a9",
   },
 
   mapping: [
@@ -28,12 +28,14 @@
 
     // Tools and utilities
     {from: "util", to: "util"},
+    {from: "hw/simulation", to: "hw/simulation"},
 
     // Third-party IPs
     {from: "hw/vendor/pulp_platform/axi", to: "pulp_platform/axi"},
     {from: "hw/vendor/pulp_platform/common_cells", to: "pulp_platform/common_cells"},
     {from: "hw/vendor/pulp_platform/register_interface", to: "pulp_platform/register_interface"},
     {from: "hw/vendor/pulp_platform_register_interface.core", to: "pulp_platform_register_interface.core"},
+    {from: "hw/vendor/pulp_platform_reg_to_axi.core", to: "pulp_platform_reg_to_axi.core"},
     {from: "hw/vendor/pulp_platform/riscv_dbg", to: "pulp_platform/riscv_dbg"},
     {from: "hw/vendor/pulp_platform_riscv_dbg.core", to: "pulp_platform_riscv_dbg.core"},
     {from: "hw/vendor/pulp_platform_riscv_dbg_pkg.core", to: "pulp_platform_riscv_dbg_pkg.core"},
@@ -44,6 +46,9 @@
   ],
 
   exclude_from_upstream: [
+    # Unused X-HEEP files
+    "util/xheep_gen",
+    "util/xheep_gen.lock.hjson",
     # Unused PULP Platform files
     "hw/vendor/pulp_platform/common_cells/.github",
     "hw/vendor/pulp_platform/common_cells/lint",

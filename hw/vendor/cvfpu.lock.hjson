@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/x-heep/x-heep.git
-    rev: cc3d3268fdf648634119f7d904bcc45ebdde80a9
+    url: https://github.com/openhwgroup/cvfpu.git
+    rev: 58ca3c376beb914b2b80b811d4b270c063d4e6f7
   }
 }

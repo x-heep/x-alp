@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/x-heep/x-heep.git
-    rev: cc3d3268fdf648634119f7d904bcc45ebdde80a9
+    url: https://github.com/pulp-platform/axi_riscv_atomics.git
+    rev: 0ac3a78fe342c5a5b9b10bff49d58897f773059e
   }
 }

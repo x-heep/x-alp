@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/x-heep/x-heep.git
-    rev: cc3d3268fdf648634119f7d904bcc45ebdde80a9
+    url: https://github.com/openhwgroup/cva6.git
+    rev: 89986dfe867dada9752eee19a4ed4a9d274484a6
   }
 }
