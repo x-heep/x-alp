@@ -20,8 +20,9 @@ module sync #(
     output logic serial_o
 );
 
-    (* dont_touch = "true" *) (* async_reg = "true" *)
-    logic [STAGES-1:0] reg_q;
+   (* dont_touch = "true" *)
+   (* async_reg = "true" *)
+   logic [STAGES-1:0] reg_q;
 
     always_ff @(posedge clk_i, negedge rst_ni) begin
         if (!rst_ni) begin

@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/luigigiuffrida98/x-heep.git
-    rev: 8309743168ddc8cf8cc24642dfab66054a64ea66
+    rev: 676eb84147d359a1172a6fda38ac6a7eabae89d0
   }
 }
