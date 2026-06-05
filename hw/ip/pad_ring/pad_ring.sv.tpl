@@ -104,8 +104,4 @@ module pad_ring (
     `endif
 % endif #len(analog_signal_pads) > 0:
 
-<<<<<<< HEAD
 endmodule //pad_ring
-=======
-endmodule //pad_ring
->>>>>>> origin/main
