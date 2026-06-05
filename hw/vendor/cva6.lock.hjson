@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/openhwgroup/cva6.git
-    rev: 89986dfe867dada9752eee19a4ed4a9d274484a6
+    rev: bc510437877214793f80b996e9a143f4e2c7b4b8
   }
 }

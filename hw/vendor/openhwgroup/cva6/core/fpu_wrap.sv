@@ -34,7 +34,8 @@ module fpu_wrap
     output logic       [CVA6Cfg.TRANS_ID_BITS-1:0] fpu_trans_id_o,
     output logic       [         CVA6Cfg.FLen-1:0] result_o,
     output logic                                   fpu_valid_o,
-    output exception_t                             fpu_exception_o
+    output exception_t                             fpu_exception_o,
+    output logic                                   fpu_early_valid_o
 );
 
   // this is a workaround
@@ -553,13 +554,17 @@ module fpu_wrap
         .tag_o         (fpu_trans_id_o),
         .out_valid_o   (fpu_out_valid),
         .out_ready_i   (fpu_out_ready),
-        .busy_o        (  /* unused */)
+        .busy_o        (  /* unused */),
+        .early_valid_o (fpu_early_valid_o)
     );
 
     // Pack status flag into exception cause, tval ignored in wb, exception is always invalid
     assign fpu_exception_o.cause = {59'h0, fpu_status};
     assign fpu_exception_o.valid = 1'b0;
     assign fpu_exception_o.tval = '0;
+    assign fpu_exception_o.tval2 = '0;
+    assign fpu_exception_o.tinst = '0;
+    assign fpu_exception_o.gva = '0;
 
     // Downstream write port is dedicated to FPU and always ready
     assign fpu_out_ready = 1'b1;

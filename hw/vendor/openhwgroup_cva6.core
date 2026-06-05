@@ -9,14 +9,14 @@ filesets:
       - openhwgroup/cva6/core/include/build_config_pkg.sv 
       - openhwgroup/cva6/core/include/config_pkg.sv 
       - openhwgroup/cva6/core/include/instr_tracer_pkg.sv 
-      - openhwgroup/cva6/core/include/iti_pkg.sv 
       - openhwgroup/cva6/core/include/riscv_pkg.sv 
       - openhwgroup/cva6/core/include/std_cache_pkg.sv 
       - openhwgroup/cva6/core/include/triggers_pkg.sv 
       - openhwgroup/cva6/core/include/wt_cache_pkg.sv
-      - openhwgroup/cva6/core/include/iti_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
       - openhwgroup/cva6/core/include/cvxif_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include} 
       - openhwgroup/cva6/core/include/rvfi_types.svh : {is_include_file: true, include_path: openhwgroup/cva6/core/include}
+      - openhwgroup/cva6/core/include/dummy_l15_pkg.sv
+      - openhwgroup/cva6/core/cache_subsystem/wt_l15_adapter.sv
       - openhwgroup/cva6/common/local/util/ex_trace_item.svh 
       - openhwgroup/cva6/common/local/util/instr_trace_item.svh 
       - openhwgroup/cva6/common/local/util/instr_tracer.sv 
@@ -56,7 +56,6 @@ filesets:
       - openhwgroup/cva6/core/cache_subsystem/wt_dcache_missunit.sv 
       - openhwgroup/cva6/core/cache_subsystem/wt_dcache_wbuffer.sv 
       - openhwgroup/cva6/core/cache_subsystem/wt_dcache.sv 
-      - openhwgroup/cva6/core/cache_subsystem/wt_l15_adapter.sv
       - openhwgroup/cva6/core/acc_dispatcher.sv 
       - openhwgroup/cva6/core/aes.sv 
       - openhwgroup/cva6/core/alu_wrapper.sv 

@@ -49,6 +49,182 @@ module cva6_rvfi
 
   localparam logic [CVA6Cfg.XLEN-1:0] hart_id_i = '0;
 
+  // Function to compute AMO write value for RVFI logging
+  // This mirrors the AMO ALU behaviour so the tracer sees the value actually written
+  // back to memory. This is post-alignment data (lower bytes contain the payload) so
+  // the tracer can rotate it using the write mask and address offset.
+  function automatic logic [CVA6Cfg.XLEN-1:0] compute_amo_wdata(
+      input fu_op amo_op, input logic [CVA6Cfg.XLEN-1:0] mem_old_val,
+      input logic [CVA6Cfg.XLEN-1:0] reg_val);
+    ariane_pkg::amo_t amo_kind;
+    logic is_word_op;
+    logic [63:0] operand_a_sext, operand_b_sext;
+    logic [63:0] operand_a_zext, operand_b_zext;
+    logic [63:0] result64;
+    logic [64:0] adder_operand_a, adder_operand_b, adder_sum;
+
+    // Decode functional unit opcode into AMO class and width information
+    amo_kind   = AMO_NONE;
+    is_word_op = 1'b0;
+    unique case (amo_op)
+      AMO_LRW: begin
+        amo_kind   = AMO_LR;
+        is_word_op = 1'b1;
+      end
+      AMO_LRD: begin
+        amo_kind   = AMO_LR;
+        is_word_op = 1'b0;
+      end
+      AMO_SCW: begin
+        amo_kind   = AMO_SC;
+        is_word_op = 1'b1;
+      end
+      AMO_SCD: begin
+        amo_kind   = AMO_SC;
+        is_word_op = 1'b0;
+      end
+      AMO_SWAPW: begin
+        amo_kind   = AMO_SWAP;
+        is_word_op = 1'b1;
+      end
+      AMO_SWAPD: begin
+        amo_kind   = AMO_SWAP;
+        is_word_op = 1'b0;
+      end
+      AMO_ADDW: begin
+        amo_kind   = AMO_ADD;
+        is_word_op = 1'b1;
+      end
+      AMO_ADDD: begin
+        amo_kind   = AMO_ADD;
+        is_word_op = 1'b0;
+      end
+      AMO_ANDW: begin
+        amo_kind   = AMO_AND;
+        is_word_op = 1'b1;
+      end
+      AMO_ANDD: begin
+        amo_kind   = AMO_AND;
+        is_word_op = 1'b0;
+      end
+      AMO_ORW: begin
+        amo_kind   = AMO_OR;
+        is_word_op = 1'b1;
+      end
+      AMO_ORD: begin
+        amo_kind   = AMO_OR;
+        is_word_op = 1'b0;
+      end
+      AMO_XORW: begin
+        amo_kind   = AMO_XOR;
+        is_word_op = 1'b1;
+      end
+      AMO_XORD: begin
+        amo_kind   = AMO_XOR;
+        is_word_op = 1'b0;
+      end
+      AMO_MAXW: begin
+        amo_kind   = AMO_MAX;
+        is_word_op = 1'b1;
+      end
+      AMO_MAXD: begin
+        amo_kind   = AMO_MAX;
+        is_word_op = 1'b0;
+      end
+      AMO_MAXWU: begin
+        amo_kind   = AMO_MAXU;
+        is_word_op = 1'b1;
+      end
+      AMO_MAXDU: begin
+        amo_kind   = AMO_MAXU;
+        is_word_op = 1'b0;
+      end
+      AMO_MINW: begin
+        amo_kind   = AMO_MIN;
+        is_word_op = 1'b1;
+      end
+      AMO_MIND: begin
+        amo_kind   = AMO_MIN;
+        is_word_op = 1'b0;
+      end
+      AMO_MINWU: begin
+        amo_kind   = AMO_MINU;
+        is_word_op = 1'b1;
+      end
+      AMO_MINDU: begin
+        amo_kind   = AMO_MINU;
+        is_word_op = 1'b0;
+      end
+      default: begin
+        amo_kind   = AMO_NONE;
+        is_word_op = 1'b0;
+      end
+    endcase
+
+    // Create signed and unsigned 64-bit views of the operands (word ops use 32-bit payloads)
+    if (is_word_op) begin
+      operand_a_sext = {{32{mem_old_val[31]}}, mem_old_val[31:0]};
+      operand_b_sext = {{32{reg_val[31]}}, reg_val[31:0]};
+      operand_a_zext = {32'b0, mem_old_val[31:0]};
+      operand_b_zext = {32'b0, reg_val[31:0]};
+    end else begin
+      operand_a_sext = $signed(mem_old_val);
+      operand_b_sext = $signed(reg_val);
+      operand_a_zext = $unsigned(mem_old_val);
+      operand_b_zext = $unsigned(reg_val);
+    end
+
+    // Default to returning the register operand (SWAP/SC path)
+    result64        = operand_b_zext;
+    adder_operand_a = {operand_a_sext[63], operand_a_sext};
+    adder_operand_b = {operand_b_sext[63], operand_b_sext};
+    adder_sum       = '0;
+
+    unique case (amo_kind)
+      AMO_SC, AMO_SWAP: begin
+        result64 = operand_b_zext;
+      end
+      AMO_ADD: begin
+        adder_sum = adder_operand_a + adder_operand_b;
+        result64  = adder_sum[63:0];
+      end
+      AMO_AND: result64 = operand_a_zext & operand_b_zext;
+      AMO_OR:  result64 = operand_a_zext | operand_b_zext;
+      AMO_XOR: result64 = operand_a_zext ^ operand_b_zext;
+      AMO_MAX: begin
+        adder_operand_b = -{operand_b_sext[63], operand_b_sext};
+        adder_sum       = adder_operand_a + adder_operand_b;
+        result64        = adder_sum[64] ? operand_b_zext : operand_a_zext;
+      end
+      AMO_MIN: begin
+        adder_operand_b = -{operand_b_sext[63], operand_b_sext};
+        adder_sum       = adder_operand_a + adder_operand_b;
+        result64        = adder_sum[64] ? operand_a_zext : operand_b_zext;
+      end
+      AMO_MAXU: begin
+        adder_operand_a = {1'b0, operand_a_zext};
+        adder_operand_b = -{1'b0, operand_b_zext};
+        adder_sum       = adder_operand_a + adder_operand_b;
+        result64        = adder_sum[64] ? operand_b_zext : operand_a_zext;
+      end
+      AMO_MINU: begin
+        adder_operand_a = {1'b0, operand_a_zext};
+        adder_operand_b = -{1'b0, operand_b_zext};
+        adder_sum       = adder_operand_a + adder_operand_b;
+        result64        = adder_sum[64] ? operand_a_zext : operand_b_zext;
+      end
+      default: begin
+        result64 = operand_b_zext;
+      end
+    endcase
+
+    if (is_word_op) begin
+      return {{CVA6Cfg.XLEN - 32{1'b0}}, result64[31:0]};
+    end else begin
+      return result64[CVA6Cfg.XLEN-1:0];
+    end
+  endfunction
+
   localparam logic [63:0] SMODE_STATUS_READ_MASK = ariane_pkg::smode_status_read_mask(CVA6Cfg);
 
   logic flush;
@@ -164,7 +340,7 @@ module cva6_rvfi
   assign branch_valid_iti = instr.branch_valid;
   assign is_taken_iti = instr.is_taken;
   assign tval_iti = instr.tval;
-  assign time_iti = rvfi_probes_i.csr.cycle_q;
+  assign time_iti = csr.cycle_q;
 
   assign priv_lvl = instr.priv_lvl;
 
@@ -346,7 +522,19 @@ module cva6_rvfi
       // So far, only write paddr is reported. TODO: read paddr
       rvfi_instr_o[i].mem_paddr <= mem_paddr;
       rvfi_instr_o[i].mem_wmask <= mem_q[commit_pointer[i]].lsu_wmask;
-      rvfi_instr_o[i].mem_wdata <= mem_q[commit_pointer[i]].lsu_wdata;
+
+      // For AMO operations, compute the actual write value
+      // Note: AMO operations write a computed value to memory, not the original register value
+      if (is_amo(commit_instr_op[i])) begin
+        rvfi_instr_o[i].mem_wdata <= compute_amo_wdata(
+            commit_instr_op[i],  // AMO operation type
+            wdata[i],  // Old memory value (the value returned to rd)
+            mem_q[commit_pointer[i]].rs2_rdata  // Register operand (rs2)
+        );
+      end else begin
+        rvfi_instr_o[i].mem_wdata <= mem_q[commit_pointer[i]].lsu_wdata;
+      end
+
       rvfi_instr_o[i].mem_rmask <= mem_q[commit_pointer[i]].lsu_rmask;
       rvfi_instr_o[i].mem_rdata <= commit_instr_result[i];
       rvfi_instr_o[i].rs1_rdata <= mem_q[commit_pointer[i]].rs1_rdata;
@@ -369,113 +557,111 @@ module cva6_rvfi
   //----------------------------------------------------------------------------------------------------------
   // CSR
   //----------------------------------------------------------------------------------------------------------
-
-  `define CONNECT_RVFI_FULL(CSR_ENABLE_COND, CSR_NAME,
-                            CSR_SOURCE_NAME) \
-    always_ff @(posedge clk_i) begin \
-        if (CSR_ENABLE_COND) begin \
-            rvfi_csr_o.``CSR_NAME``.rdata <= {{CVA6Cfg.XLEN - $bits(CSR_SOURCE_NAME)}, CSR_SOURCE_NAME}; \
-        end \
-    end \
-    assign rvfi_csr_o.``CSR_NAME``.wdata = CSR_ENABLE_COND ? { {{CVA6Cfg.XLEN-$bits(CSR_SOURCE_NAME)}, CSR_SOURCE_NAME} } : 0; \
-    assign rvfi_csr_o.``CSR_NAME``.rmask = CSR_ENABLE_COND ? 1 : 0; \
-    assign rvfi_csr_o.``CSR_NAME``.wmask = (rvfi_csr_o.``CSR_NAME``.rdata != {{CVA6Cfg.XLEN - $bits(CSR_SOURCE_NAME)}, CSR_SOURCE_NAME}) && CSR_ENABLE_COND;
+  // Changing verible formating to fix vivado synthesis errors and warnings
+  // verilog_format: off
+  `define CONNECT_RVFI_FULL(CSR_ENABLE_COND, CSR_NAME, CSR_SOURCE_NAME) \
+  always_ff @(posedge clk_i) begin \
+      if (CSR_ENABLE_COND) begin \
+          rvfi_csr_o.``CSR_NAME``.rdata <= {{CVA6Cfg.XLEN - $bits(CSR_SOURCE_NAME)}, CSR_SOURCE_NAME}; \
+      end \
+  end \
+  assign rvfi_csr_o.``CSR_NAME``.wdata = CSR_ENABLE_COND ? { {{CVA6Cfg.XLEN-$bits(CSR_SOURCE_NAME)}, CSR_SOURCE_NAME} } : 0; \
+  assign rvfi_csr_o.``CSR_NAME``.rmask = CSR_ENABLE_COND ? 1 : 0; \
+  assign rvfi_csr_o.``CSR_NAME``.wmask = (rvfi_csr_o.``CSR_NAME``.rdata != {{CVA6Cfg.XLEN - $bits(CSR_SOURCE_NAME)}, CSR_SOURCE_NAME}) && CSR_ENABLE_COND;
 
   `define CONNECT_RVFI_SAME(CSR_ENABLE_COND, CSR_NAME) \
-            `CONNECT_RVFI_FULL(CSR_ENABLE_COND, CSR_NAME, csr.``CSR_NAME``_q)
+          `CONNECT_RVFI_FULL(CSR_ENABLE_COND, CSR_NAME, csr.``CSR_NAME``_q)
 
-  `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, fflags, csr.fcsr_q.fflags)
-  `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, frm, csr.fcsr_q.frm)
-  `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, fcsr, {csr.fcsr_q.frm, csr.fcsr_q.fflags})
+  if ($bits(rvfi_csr_o) != 1) begin
+    `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, fflags, csr.fcsr_q.fflags)
+    `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, frm, csr.fcsr_q.frm)
+    `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, fcsr, {csr.fcsr_q.frm, csr.fcsr_q.fflags})
 
-  `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, ftran, csr.fcsr_q.fprec)
-  `CONNECT_RVFI_SAME(CVA6Cfg.FpPresent, dcsr)
+    `CONNECT_RVFI_FULL(CVA6Cfg.FpPresent, ftran, csr.fcsr_q.fprec)
+    `CONNECT_RVFI_SAME(CVA6Cfg.FpPresent, dcsr)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.DebugEn, dpc)
+    `CONNECT_RVFI_SAME(CVA6Cfg.DebugEn, dpc)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.DebugEn, dscratch0)
-  `CONNECT_RVFI_SAME(CVA6Cfg.DebugEn, dscratch1)
+    `CONNECT_RVFI_SAME(CVA6Cfg.DebugEn, dscratch0)
+    `CONNECT_RVFI_SAME(CVA6Cfg.DebugEn, dscratch1)
 
-  `CONNECT_RVFI_FULL(CVA6Cfg.RVS, sstatus,
-                     csr.mstatus_extended & SMODE_STATUS_READ_MASK[CVA6Cfg.XLEN-1:0])
+    `CONNECT_RVFI_FULL(CVA6Cfg.RVS, sstatus, csr.mstatus_extended & SMODE_STATUS_READ_MASK[CVA6Cfg.XLEN-1:0])
 
-  `CONNECT_RVFI_FULL(CVA6Cfg.RVS, sie, csr.mie_q & csr.mideleg_q)
-  `CONNECT_RVFI_FULL(CVA6Cfg.RVS, sip, csr.mip_q & csr.mideleg_q)
+    `CONNECT_RVFI_FULL(CVA6Cfg.RVS, sie, csr.mie_q & csr.mideleg_q)
+    `CONNECT_RVFI_FULL(CVA6Cfg.RVS, sip, csr.mip_q & csr.mideleg_q)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, stvec)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, stvec)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, scounteren)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, scounteren)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, sscratch)
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, sepc)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, sscratch)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, sepc)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, scause)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, scause)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, stval)
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, satp)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, stval)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, satp)
 
-  `CONNECT_RVFI_FULL(1'b1, mstatus, csr.mstatus_extended)
+    `CONNECT_RVFI_FULL(1'b1, mstatus, csr.mstatus_extended)
 
-  bit [31:0] mstatush_q;
-  `CONNECT_RVFI_FULL(1'b1, mstatush, mstatush_q)
+    bit [31:0] mstatush_q;
+    `CONNECT_RVFI_FULL(1'b1, mstatush, mstatush_q)
 
-  `CONNECT_RVFI_FULL(1'b1, misa, IsaCode)
+    `CONNECT_RVFI_FULL(1'b1, misa, IsaCode)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, medeleg)
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVS, mideleg)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, medeleg)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVS, mideleg)
 
-  `CONNECT_RVFI_SAME(1'b1, mie)
-  `CONNECT_RVFI_SAME(1'b1, mtvec)
-  `CONNECT_RVFI_SAME(1'b1, mcounteren)
+    `CONNECT_RVFI_SAME(1'b1, mie)
+    `CONNECT_RVFI_SAME(1'b1, mtvec)
+    `CONNECT_RVFI_SAME(1'b1, mcounteren)
 
-  `CONNECT_RVFI_SAME(1'b1, mscratch)
+    `CONNECT_RVFI_SAME(1'b1, mscratch)
 
-  `CONNECT_RVFI_SAME(1'b1, mepc)
-  `CONNECT_RVFI_SAME(1'b1, mcause)
-  `CONNECT_RVFI_SAME(1'b1, mtval)
-  `CONNECT_RVFI_SAME(1'b1, mip)
+    `CONNECT_RVFI_SAME(1'b1, mepc)
+    `CONNECT_RVFI_SAME(1'b1, mcause)
+    `CONNECT_RVFI_SAME(1'b1, mtval)
+    `CONNECT_RVFI_SAME(1'b1, mip)
 
-  `CONNECT_RVFI_FULL(1'b1, menvcfg, csr.fiom_q)
+    `CONNECT_RVFI_FULL(1'b1, menvcfg, csr.fiom_q)
 
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, menvcfgh, 32'h0)
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, menvcfgh, 32'h0)
 
-  `CONNECT_RVFI_FULL(1'b1, mvendorid, OPENHWGROUP_MVENDORID)
-  `CONNECT_RVFI_FULL(1'b1, marchid, ARIANE_MARCHID)
-  `CONNECT_RVFI_FULL(1'b1, mhartid, hart_id_i)
+    `CONNECT_RVFI_FULL(1'b1, mvendorid, OPENHWGROUP_MVENDORID)
+    `CONNECT_RVFI_FULL(1'b1, marchid, ARIANE_MARCHID)
+    `CONNECT_RVFI_FULL(1'b1, mhartid, hart_id_i)
 
-  `CONNECT_RVFI_SAME(1'b1, mcountinhibit)
+    `CONNECT_RVFI_SAME(1'b1, mcountinhibit)
 
-  `CONNECT_RVFI_FULL(1'b1, mcycle, csr.cycle_q[CVA6Cfg.XLEN-1:0])
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, mcycleh, csr.cycle_q[63:32])
+    `CONNECT_RVFI_FULL(1'b1, mcycle, csr.cycle_q[CVA6Cfg.XLEN-1:0])
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, mcycleh, csr.cycle_q[63:32])
 
-  `CONNECT_RVFI_FULL(1'b1, minstret, csr.instret_q[CVA6Cfg.XLEN-1:0])
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, minstreth, csr.instret_q[63:32])
+    `CONNECT_RVFI_FULL(1'b1, minstret, csr.instret_q[CVA6Cfg.XLEN-1:0])
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, minstreth, csr.instret_q[63:32])
 
-  `CONNECT_RVFI_FULL(1'b1, cycle, csr.cycle_q[CVA6Cfg.XLEN-1:0])
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, cycleh, csr.cycle_q[63:32])
+    `CONNECT_RVFI_FULL(1'b1, cycle, csr.cycle_q[CVA6Cfg.XLEN-1:0])
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, cycleh, csr.cycle_q[63:32])
 
-  `CONNECT_RVFI_FULL(1'b1, instret, csr.instret_q[CVA6Cfg.XLEN-1:0])
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, instreth, csr.instret_q[63:32])
+    `CONNECT_RVFI_FULL(1'b1, instret, csr.instret_q[CVA6Cfg.XLEN-1:0])
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, instreth, csr.instret_q[63:32])
 
-  `CONNECT_RVFI_SAME(1'b1, dcache)
-  `CONNECT_RVFI_SAME(1'b1, icache)
+    `CONNECT_RVFI_SAME(1'b1, dcache)
+    `CONNECT_RVFI_SAME(1'b1, icache)
 
-  `CONNECT_RVFI_SAME(CVA6Cfg.EnableAccelerator, acc_cons)
-  `CONNECT_RVFI_SAME(CVA6Cfg.RVZCMT, jvt)
-  `CONNECT_RVFI_FULL(1'b1, pmpcfg0, csr.pmpcfg_q[CVA6Cfg.XLEN/8-1:0])
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, pmpcfg1, csr.pmpcfg_q[7:4])
+    `CONNECT_RVFI_SAME(CVA6Cfg.EnableAccelerator, acc_cons)
+    `CONNECT_RVFI_SAME(CVA6Cfg.RVZCMT, jvt)
+    `CONNECT_RVFI_FULL(1'b1, pmpcfg0, csr.pmpcfg_q[CVA6Cfg.XLEN/8-1:0])
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, pmpcfg1, csr.pmpcfg_q[7:4])
 
-  `CONNECT_RVFI_FULL(1'b1, pmpcfg2, csr.pmpcfg_q[8+:CVA6Cfg.XLEN/8])
-  `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, pmpcfg3, csr.pmpcfg_q[15:12])
+    `CONNECT_RVFI_FULL(1'b1, pmpcfg2, csr.pmpcfg_q[8+:CVA6Cfg.XLEN/8])
+    `CONNECT_RVFI_FULL(CVA6Cfg.XLEN == 32, pmpcfg3, csr.pmpcfg_q[15:12])
 
-  bit [CVA6Cfg.XLEN-1:0] pmpaddr_q;
-  genvar i;
-  generate
+    bit [CVA6Cfg.XLEN-1:0] pmpaddr_q;
+    genvar i;
     for (i = 0; i < 16; i++) begin
-      `CONNECT_RVFI_FULL(1'b1, pmpaddr[i], {
-                         csr.pmpaddr_q[i][CVA6Cfg.PLEN-3:1], pmpcfg_q[i].addr_mode[1]})
+      `CONNECT_RVFI_FULL(1'b1, pmpaddr[i], {csr.pmpaddr_q[i][CVA6Cfg.PLEN-3:1], pmpcfg_q[i].addr_mode[1]})
     end
-  endgenerate
-  ;
-
+    ;
+  end
+  // verilog_format: on
 endmodule
