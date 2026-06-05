@@ -17,9 +17,9 @@ filesets:
     
   rtl-fpga:
     depend:
-    - x-heep:x-alp:core-v-mini-mcu-fpga
+    - x-heep:x-alp:core-v-mcu-fpga
     files:
-    - hw/fpga/xilinx_core_v_mini_mcu_wrapper.sv
+    - hw/target/fpga/xilinx_core_v_mcu_wrapper.sv
     file_type: systemVerilogSource
 
 targets:
@@ -106,8 +106,8 @@ targets:
       vivado:
         part: xczu3eg-sfvc784-2-e
         board_part: realdigital.org:aup-zu3-8gb:part0:1.0
-        board_repo_paths: [../../../hw/fpga/board_files/vendor/aup-zu3-8gb/1.0]
-    toplevel: [xilinx_core_v_mini_mcu_wrapper]
+        board_repo_paths: [../../../hw/target/fpga/board_files/vendor/aup-zu3-8gb/1.0]
+    toplevel: [xilinx_core_v_mcu_wrapper]
   
   # Static analysis
   lint:

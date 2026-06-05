@@ -3,14 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 //
 // Top-level module for the X-ALP SoC FPGA wrapper.
-// Author: Christian Conti <christian.conti@polito.it>
+// Author: Christian Conti, Luigi Giuffrida <{christian.conti, luigi.giuffrida}@polito.it>
 //
 
 
-module xilinx_core_v_mini_mcu_wrapper
-    import obi_pkg::*;
-    import reg_pkg::*;
-#(
+module xilinx_core_v_mcu_wrapper #(
     parameter CLK_LED_COUNT_LENGTH = 27
 ) (
 
@@ -71,7 +68,7 @@ module xilinx_core_v_mini_mcu_wrapper
     //   xilinx_clk_wizard_wrapper xilinx_clk_wizard_wrapper_i (
     //       .clk_125MHz(clk_i),
     //       .clk_out1_0(clk_gen)
-    //   ); 
+    //   );
     // `elsif FPGA_YYYY
     //   xilinx_clk_wizard_wrapper xilinx_clk_wizard_wrapper_i (
     //       .CLK_IN1_D_0_clk_n(clk_200mhz_n),
@@ -101,11 +98,7 @@ module xilinx_core_v_mini_mcu_wrapper
         .exit_valid_o(exit_valid_o),
         .exit_value_o(exit_value),
 
-        .test_mode_i(1'b0),
-
-        .ext_slv_rsp_o(),
-        .ext_mst_rsp_o(),
-        .ext_reg_req_o()
+        .test_mode_i(1'b0)
     );
 
     assign exit_value_o = exit_value[0];
