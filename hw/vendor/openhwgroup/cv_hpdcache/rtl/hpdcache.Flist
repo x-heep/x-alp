@@ -1,22 +1,8 @@
 //
-//  Copyright 2023 CEA*
-//  *Commissariat a l'Energie Atomique et aux Energies Alternatives (CEA)
+//  Copyright 2023 Commissariat a l'Energie Atomique et aux Energies Alternatives (CEA)
+//  Copyright 2025 Univ. Grenoble Alpes, Inria, TIMA Laboratory
 //
 //  SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
-//
-//  Licensed under the Solderpad Hardware License v 2.1 (the “License”); you
-//  may not use this file except in compliance with the License, or, at your
-//  option, the Apache License version 2.0. You may obtain a copy of the
-//  License at
-//
-//  https://solderpad.org/licenses/SHL-2.1/
-//
-//  Unless required by applicable law or agreed to in writing, any work
-//  distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
-//  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-//  License for the specific language governing permissions and limitations
-//  under the License.
-//
 //
 //  Authors       : Cesar Fuguet
 //  Creation Date : January, 2023
@@ -38,6 +24,7 @@ ${HPDCACHE_DIR}/rtl/src/common/hpdcache_mux.sv
 ${HPDCACHE_DIR}/rtl/src/common/hpdcache_decoder.sv
 ${HPDCACHE_DIR}/rtl/src/common/hpdcache_1hot_to_binary.sv
 ${HPDCACHE_DIR}/rtl/src/common/hpdcache_prio_1hot_encoder.sv
+${HPDCACHE_DIR}/rtl/src/common/hpdcache_prio_bin_encoder.sv
 ${HPDCACHE_DIR}/rtl/src/common/hpdcache_sram.sv
 ${HPDCACHE_DIR}/rtl/src/common/hpdcache_sram_wbyteenable.sv
 ${HPDCACHE_DIR}/rtl/src/common/hpdcache_sram_wmask.sv
@@ -57,6 +44,7 @@ ${HPDCACHE_DIR}/rtl/src/hpdcache_core_arbiter.sv
 ${HPDCACHE_DIR}/rtl/src/hpdcache_ctrl.sv
 ${HPDCACHE_DIR}/rtl/src/hpdcache_ctrl_pe.sv
 ${HPDCACHE_DIR}/rtl/src/hpdcache_memctrl.sv
+${HPDCACHE_DIR}/rtl/src/hpdcache_cbuf.sv
 ${HPDCACHE_DIR}/rtl/src/hpdcache_miss_handler.sv
 ${HPDCACHE_DIR}/rtl/src/hpdcache_mshr.sv
 ${HPDCACHE_DIR}/rtl/src/hpdcache_rtab.sv

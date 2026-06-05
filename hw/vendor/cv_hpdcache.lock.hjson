@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/openhwgroup/cv-hpdcache.git
-    rev: 04de80896981527c34fbbd35d7b1ef787a082d7c
+    rev: b25a1605f5bb1719046e372b0acad3ca9cb7ff42
   }
 }
