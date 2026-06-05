@@ -131,7 +131,6 @@ conda:
 
 $(MCU_GEN_PRIMARY): $(MCU_GEN_SOURCES)
 	$(PYTHON) util/xheep_gen/mcu_gen.py --config configs/python_unsupported.hjson --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
-	@$(MAKE) format
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen
@@ -139,6 +138,7 @@ mcu-gen:
 	@rm -f $(MCU_GEN_PRIMARY)
 	@$(MAKE) $(MCU_GEN_PRIMARY)
 	@$(MAKE) reg-gen boot-rom
+	@$(MAKE) format
 
 ## @section Register Generation
 
