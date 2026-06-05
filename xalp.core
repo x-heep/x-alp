@@ -14,15 +14,22 @@ filesets:
   testbench:
     depend:
       - x-heep:x-alp:tb:0.0.1
+    
+  rtl-fpga:
+    depend:
+    - x-heep:x-alp:core-v-mini-mcu-fpga
+    files:
+    - hw/fpga/xilinx_core_v_mini_mcu_wrapper.sv
+    file_type: systemVerilogSource
 
 targets:
-  default: &default
+  default: &default_target
     filesets:
     - x-alp
     - testbench
     toplevel: x_alp
   sim:
-    <<: *default
+    <<: *default_target
     description: RTL simulation
     default_tool: verilator
     toplevel: testharness
@@ -84,10 +91,27 @@ targets:
         - '--module_net_variable_alignment=align'
         - '--indentation_spaces=4'
         - '--inplace'
+  aup-zu3:
+    <<: *default_target
+    default_tool: vivado
+    description: RD aup-zu3 Board
+    filesets_append:
+    - x-alp
+    - rtl-fpga
+    parameters:
+    - SYNTHESIS=true
+    - FPGA_SYNTHESIS=true
+    - FPGA_AUP_ZU3=true
+    tools:
+      vivado:
+        part: xczu3eg-sfvc784-2-e
+        board_part: realdigital.org:aup-zu3-8gb:part0:1.0
+        board_repo_paths: [../../../hw/fpga/board_files/vendor/aup-zu3-8gb/1.0]
+    toplevel: [xilinx_core_v_mini_mcu_wrapper]
   
   # Static analysis
   lint:
-    <<: *default
+    <<: *default_target
     description: Perform static analysis using Verible
     default_tool: veriblelint
     tools:
@@ -185,3 +209,12 @@ parameters:
     paramtype: vlogdefine
     description: |
       Can isolate code that is (or is not) meant for Verilator only
+
+  FPGA_SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+  FPGA_AUP_ZU3:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
