@@ -17,7 +17,13 @@ filesets:
     - rtl/pad_control.sv
     file_type: systemVerilogSource
 
+  verilator_waiver:
+    files:
+    - pad_control.vlt
+    file_type: vlt
+
 targets:
   default:
     filesets:
     - files_rtl
+    - tool_verilator ? (verilator_waiver)

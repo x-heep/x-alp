@@ -5,4 +5,6 @@
 `verilator_config
 
 lint_off -rule WIDTH -file "*/rtl/pad_control_reg_top.sv" -match "Operator ASSIGNW expects *"
+lint_off -rule UNUSED -file "*/rtl/pad_control_reg_top.sv" -match "Parameter is not used: 'AW'*"
+lint_off -rule DECLFILENAME -file "*/rtl/pad_control_reg_top.sv" -match "Filename * does not match MODULE name: 'pad_control_reg_top_intf'*"
 lint_off -rule UNDRIVEN -file "*/rtl/pad_control.sv" -match "Signal is not driven: 'pad_muxes_o'*"

@@ -1,5 +1,7 @@
 #include "tb_macros.hh"
 
+TbLogger logger;
+
 TbLogger::TbLogger() {
   // By default, set the log level to medium
   this->log_lvl = LOG_MEDIUM;
@@ -70,66 +72,62 @@ log_lvl_t TbLogger::getLogLvl() {
   return this->log_lvl;
 }
 
+static void print_location(const char *file, unsigned int line) {
+  char n[256];
+  strcpy(n, file);
+  printf(" \033[2m(%s:%u)\033[0m", basename(n), line);
+}
+
 void TbLogger::log(log_lvl_t lvl, const char *file, const unsigned int line, const char *fmt, ...) {
   if (lvl <= this->log_lvl) {
-    char n[256];
-    strcpy(n, file);
-    sprintf(this->str_buf, "[LOG   ] %s:%u >", basename(n), line);
-    printf("%-35s [%5lu] ", this->str_buf, this->getSimTime());
+    printf("\033[0m[ INF ] ");
     va_list arg_ptr;
     va_start(arg_ptr, fmt);
     vprintf(fmt, arg_ptr);
     va_end(arg_ptr);
+    if (this->log_lvl >= LOG_DEBUG) print_location(file, line);
     printf("\n");
   }
 }
 
 void TbLogger::success(log_lvl_t lvl, const char *file, const unsigned int line, const char *fmt, ...) {
   if (lvl <= this->log_lvl) {
-    char n[256];
-    strcpy(n, file);
-    sprintf(this->str_buf, "\033[1;32m[OK!   ] %s:%u >\033[0m", basename(n), line);
-    printf("%-46s [%5lu] ", this->str_buf, this->getSimTime());
+    printf("\033[1;32m[ OK! ]\033[0m ");
     va_list arg_ptr;
     va_start(arg_ptr, fmt);
     vprintf(fmt, arg_ptr);
     va_end(arg_ptr);
+    if (this->log_lvl >= LOG_DEBUG) print_location(file, line);
     printf("\n");
   }
 }
 
 void TbLogger::config(const char *file, const unsigned int line, const char *fmt, ...) {
-  char n[256];
-  strcpy(n, file);
-  sprintf(this->str_buf, "\033[1m[CONFIG] %s:%u >\033[0m", basename(n), line);
-  printf("%-44s", this->str_buf);
+  printf("\033[1;36m[ CFG ]\033[0m ");
   va_list arg_ptr;
   va_start(arg_ptr, fmt);
   vprintf(fmt, arg_ptr);
   va_end(arg_ptr);
+  if (this->log_lvl >= LOG_DEBUG) print_location(file, line);
   printf("\n");
 }
 
 void TbLogger::warning(const char *file, const unsigned int line, const char *fmt, ...) {
-  char n[256];
-  strcpy(n, file);
-  sprintf(this->str_buf, "\033[1;33m[WARN  ] %s:%u >\033[0m", basename(n), line);
-  fprintf(stderr, "%-46s [%5lu] ", this->str_buf, this->getSimTime());
+  fprintf(stderr, "\033[1;33m[WARN ]\033[0m ");
   va_list arg_ptr;
   va_start(arg_ptr, fmt);
   vfprintf(stderr, fmt, arg_ptr);
   va_end(arg_ptr);
+  if (this->log_lvl >= LOG_DEBUG) print_location(file, line);
   fprintf(stderr, "\n");
 }
 
 void TbLogger::error(const char *file, const unsigned int line, const char *fmt, ...) {
-  char n[256];
-  strcpy(n, file);
-  sprintf(this->str_buf, "\033[1;31m[ERR!  ] %s:%u >\033[0m", basename(n), line);
-  fprintf(stderr, "%-46s [%5lu] ", this->str_buf, this->getSimTime());
+  fprintf(stderr, "\033[1;31m[ ERR ]\033[0m ");
   va_list arg_ptr;
   va_start(arg_ptr, fmt);
   vfprintf(stderr, fmt, arg_ptr);
   va_end(arg_ptr);
+  if (this->log_lvl >= LOG_DEBUG) print_location(file, line);
   fprintf(stderr, "\n");
 }

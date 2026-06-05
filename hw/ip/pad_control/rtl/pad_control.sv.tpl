@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 
 <%!
-    from XheepGen.pads.pin import PinDigital
+    from pads.pin import PinDigital
 %>
 <%
-   attribute_bits = xalp.get_padring().attributes.get("bits")
-   attribute_resval = xalp.get_padring().attributes.get("resval")
-   any_muxed_pads = xalp.get_padring().num_muxed_pads() > 0
+    attribute_bits = xheep.get_padring().attributes.get("bits")
+    attribute_resval = xheep.get_padring().attributes.get("resval")
+    any_muxed_pads = xheep.get_padring().num_muxed_pads() > 0
 %>
 
 module pad_control #(
@@ -42,13 +42,13 @@ module pad_control #(
         output logic [NUM_PAD-1:0][${attribute_bits}] pad_attributes_o${"," if any_muxed_pads > 0 else ""}
     % endif
     % if any_muxed_pads > 0:
-        output logic [NUM_PAD-1:0][${xalp.get_padring().get_muxed_pad_select_width()-1}:0] pad_muxes_o
+        output logic [NUM_PAD-1:0][${xheep.get_padring().get_muxed_pad_select_width()-1}:0] pad_muxes_o
     % endif
 );
 
 % if any_muxed_pads or attribute_bits != None:
 
-  import core_v_mini_mcu_pkg::*;
+  import core_v_mcu_pkg::*;
 
   import pad_control_reg_pkg::*;
 
@@ -68,7 +68,7 @@ module pad_control #(
 % endif
 
 % if attribute_bits != None:
-    % for pad in xalp.get_padring().pad_list:
+    % for pad in xheep.get_padring().pad_list:
         % if pad.pins and isinstance(pad.pins[0], PinDigital):
             % if pad.attributes.get("constant_attribute"):
                 assign pad_attributes_o[PAD_${pad.name.upper()}] = ${int(attribute_resval, 16)};
@@ -79,9 +79,9 @@ module pad_control #(
     % endfor
 % endif
 
-% for pad in xalp.get_padring().pad_list:
+% for pad in xheep.get_padring().pad_list:
     % if len(pad.pins) > 1:
-        assign pad_muxes_o[PAD_${pad.name.upper()}] = $unsigned(reg2hw.pad_mux_${pad.name.lower()}.q);
+        assign pad_muxes_o[PAD_${pad.name.upper()}] = ${xheep.get_padring().get_muxed_pad_select_width()}'(reg2hw.pad_mux_${pad.name.lower()}.q);
     % endif
 % endfor
 

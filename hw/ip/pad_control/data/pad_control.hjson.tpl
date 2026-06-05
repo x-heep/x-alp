@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 <%!
-    from XheepGen.pads.pin import PinDigital
+    from pads.pin import PinDigital
 %>
 
 <%
-    attribute_bits = xalp.get_padring().attributes.get("bits")
-    attribute_resval = xalp.get_padring().attributes.get("resval")
-    any_muxed_pads = xalp.get_padring().num_muxed_pads() > 0
+    attribute_bits = xheep.get_padring().attributes.get("bits")
+    attribute_resval = xheep.get_padring().attributes.get("resval")
+    any_muxed_pads = xheep.get_padring().num_muxed_pads() > 0
 %>
 
 { name: "pad_control",
@@ -20,7 +20,7 @@
   regwidth: "32",
   registers: [
 
-% for pad in xalp.get_padring().pad_list:
+% for pad in xheep.get_padring().pad_list:
   % if len(pad.pins) > 1:
     { name:     "PAD_MUX_${pad.name.upper()}",
       desc:     "Used to mux pad ${pad.name.upper()}",
@@ -35,7 +35,7 @@
 % endfor
 
 % if attribute_bits:
-  % for pad in xalp.get_padring().pad_list:
+  % for pad in xheep.get_padring().pad_list:
     % if pad.pins and isinstance(pad.pins[0], PinDigital):
       % if pad.attributes.get("constant_attribute") != True:
     { name:     "PAD_ATTRIBUTE_${pad.name.upper()}",
@@ -50,6 +50,18 @@
       % endif
     % endif
   % endfor
+% endif
+
+% if not (any_muxed_pads or attribute_bits != None):
+    { name: "DUMMY",
+      desc: "A dummy register to avoid empty register list",
+      resval: "0x0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0:0", name: "DUMMY_FIELD", desc: "Dummy Field" }
+      ]
+    }
 % endif
    ]
 }

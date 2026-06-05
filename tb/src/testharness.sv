@@ -29,6 +29,7 @@ module testharness #(
 
     // JTAG
     // ----
+    input  logic sim_jtag_enable_i,
     input  logic jtag_tck_i,
     input  logic jtag_tms_i,
     input  logic jtag_trst_ni,
@@ -48,18 +49,13 @@ module testharness #(
     // Internal signals
     // ----------------
 
-    logic clk;
-    logic rst_n;
-    logic exit_valid;
-    logic [31:0] exit_value;
-
     // JTAG
-    logic                         sim_jtag_enable;
-    logic                         sim_jtag_tck;
-    logic                         sim_jtag_trst_n;
-    logic                         sim_jtag_tms;
-    logic                         sim_jtag_tdi;
-    logic                         sim_jtag_tdo;
+    // logic sim_jtag_enable;
+    // logic sim_jtag_tck;
+    // logic sim_jtag_trst_n;
+    // logic sim_jtag_tms;
+    // logic sim_jtag_tdi;
+    // logic sim_jtag_tdo;
 
     logic                         jtag_tck;
     logic                         jtag_trst_n;
@@ -83,9 +79,12 @@ module testharness #(
     logic                 tb_mem_we;
     logic [         63:0] tb_mem_rdata;
 
-    assign clk = clk_i;
+    // Internal signals
+    logic                 clk;
+    logic                 rst_n;
+
+    assign clk   = clk_i;
     assign rst_n = rst_ni;
-    assign exit_valid_o = exit_valid;
 
     //----
     // DUT
@@ -95,13 +94,14 @@ module testharness #(
         .rst_ni       (rst_n),
         .uart_tx_o    (uart_tx),
         .uart_rx_i    (uart_rx),
-        .exit_valid_o (exit_valid),
+        .exit_valid_o (exit_valid_o),
         .exit_value_o (exit_value_o),
         .jtag_tck_i   (jtag_tck),
         .jtag_tms_i   (jtag_tms),
         .jtag_trst_ni (jtag_trst_n),
         .jtag_tdi_i   (jtag_tdi),
         .jtag_tdo_o   (jtag_tdo),
+        .jtag_tdo_oe_o(),
         .ext_slv_req_o(ext_slv_req),
         .ext_slv_rsp_i(ext_slv_rsp),
         .ext_mst_req_i('0),
@@ -179,11 +179,28 @@ module testharness #(
         .BAUD('d256000),
         .FREQ(CLK_FREQUENCY * 1000),  //Hz
         .NAME("uart0")
-    ) i_uart0 (
+    ) u_uart0 (
         .clk_i (clk_i),
         .rst_ni(rst_ni),
         .tx_o  (uart_rx),
         .rx_i  (uart_tx)
+    );
+
+    SimJTAG #(
+        .TICK_DELAY(1),
+        .PORT      (4567)
+    ) u_sim_jtag (
+        .clock          (clk_i),
+        .reset          (~rst_ni),
+        .enable         (sim_jtag_enable_i),
+        .init_done      (rst_ni),
+        .jtag_TCK       (jtag_tck),
+        .jtag_TMS       (jtag_tms),
+        .jtag_TDI       (jtag_tdi),
+        .jtag_TRSTn     (jtag_trst_n),
+        .jtag_TDO_data  (jtag_tdo),
+        .jtag_TDO_driven(1'b1),
+        .exit           ()
     );
 
 endmodule

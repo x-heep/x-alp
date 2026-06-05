@@ -14,17 +14,17 @@ package core_v_mcu_pkg;
     //-----------
     // BUS Config
     //-----------
-    localparam int unsigned NumAxiMasters = ${xalp.bus().num_masters()};
+    localparam int unsigned NumAxiMasters = 3;
     // localparam int unsigned NumExtAxiMasters = 1;
 
     localparam int unsigned totalAxiMasters = NumAxiMasters;
 
-    localparam int unsigned NumAxiSlaves = ${xalp.bus().num_slaves()};
+    localparam int unsigned NumAxiSlaves = 4;
     // localparam int unsigned NumExtAxiSlaves = 1;
 
     localparam int unsigned totalAxiSlaves = NumAxiSlaves;
 
-    localparam int unsigned NumRegSlaves = ${len(xalp.get_peripheral_domain("Peripherals").get_peripherals())};
+    localparam int unsigned NumRegSlaves = 5;
     // localparam int unsigned NumExtRegSlaves = 1;
 
     localparam int unsigned totalRegSlaves = NumRegSlaves;
@@ -58,25 +58,33 @@ package core_v_mcu_pkg;
         addr_t end_addr;
     } rule_t;
 
-    localparam JTAG_IDCODE = 32'h10001c05;
+    localparam JTAG_IDCODE = 32'h10001C05;
 
     // Master indexes
-% for idx, a_master in enumerate(xalp.bus().get_masters()):
-    localparam int unsigned ${a_master.name.upper()}_M_BUS_IDX = ${idx};
-% endfor
+    localparam int unsigned CPU_M_BUS_IDX = 0;
+    localparam int unsigned DEBUG_MODULE_M_BUS_IDX = 1;
+    localparam int unsigned EXT_MASTER_M_BUS_IDX = 2;
 
     // Slave indexes
-% for idx, a_slave in enumerate(xalp.bus().get_slaves()):
-    localparam int unsigned ${a_slave.name.upper()}_S_BUS_IDX = ${idx};
-% endfor
-    
+    localparam int unsigned MEM_S_BUS_IDX = 0;
+    localparam int unsigned DEBUG_MODULE_S_BUS_IDX = 1;
+    localparam int unsigned PERIPHERALS_S_BUS_IDX = 2;
+    localparam int unsigned EXT_SLAVE_S_BUS_IDX = 3;
+
 
     // Slave addresses
-% for a_slave in xalp.bus().get_slaves():
-    localparam addr_t ${a_slave.name.upper()}_BUS_BASE_ADDR = 64'h${f"{a_slave.start_address:016X}"};
-    localparam addr_t ${a_slave.name.upper()}_BUS_SIZE = 64'h${f"{a_slave.length:016X}"};
-    localparam addr_t ${a_slave.name.upper()}_BUS_END_ADDR = ${a_slave.name.upper()}_BUS_BASE_ADDR + ${a_slave.name.upper()}_BUS_SIZE;
-% endfor
+    localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000000000000000;
+    localparam addr_t MEM_BUS_SIZE = 64'h0000000000010000;
+    localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
+    localparam addr_t DEBUG_MODULE_BUS_BASE_ADDR = 64'h0000000000010000;
+    localparam addr_t DEBUG_MODULE_BUS_SIZE = 64'h0000000000010000;
+    localparam addr_t DEBUG_MODULE_BUS_END_ADDR = DEBUG_MODULE_BUS_BASE_ADDR + DEBUG_MODULE_BUS_SIZE;
+    localparam addr_t PERIPHERALS_BUS_BASE_ADDR = 64'h0000000000020000;
+    localparam addr_t PERIPHERALS_BUS_SIZE = 64'h0000000010000000;
+    localparam addr_t PERIPHERALS_BUS_END_ADDR = PERIPHERALS_BUS_BASE_ADDR + PERIPHERALS_BUS_SIZE;
+    localparam addr_t EXT_SLAVE_BUS_BASE_ADDR = 64'h0000000010020000;
+    localparam addr_t EXT_SLAVE_BUS_SIZE = 64'h0000000000010000;
+    localparam addr_t EXT_SLAVE_BUS_END_ADDR = EXT_SLAVE_BUS_BASE_ADDR + EXT_SLAVE_BUS_SIZE;
 
     // Code and Data memory zones (cacheable)
     localparam addr_t CODE_ZONE_BASE_ADDR = 64'h0000_0000_0000_0000;
@@ -87,42 +95,71 @@ package core_v_mcu_pkg;
     localparam addr_t DATA_ZONE_END_ADDR = DATA_ZONE_BASE_ADDR + DATA_ZONE_SIZE;
 
     // Register indexes
-% for idx, a_peripheral in enumerate(xalp.get_peripheral_domain("Peripherals").get_peripherals()):
-    localparam int unsigned ${a_peripheral._name.upper()}_REG_IDX = ${idx};
-% endfor
+    localparam int unsigned SOC_CTRL_REG_IDX = 0;
+    localparam int unsigned BOOTROM_REG_IDX = 1;
+    localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
+    localparam int unsigned UART_REG_IDX = 3;
+    localparam int unsigned EXT_PERIPHERAL_REG_IDX = 4;
 
     // Register addresses
-% for a_peripheral in xalp.get_peripheral_domain("Peripherals").get_peripherals():
-    localparam addr_t ${a_peripheral._name.upper()}_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h${f"{a_peripheral.get_address():016X}"};
-    localparam addr_t ${a_peripheral._name.upper()}_REG_SIZE = 64'h${f"{a_peripheral.get_length():016X}"};
-    localparam addr_t ${a_peripheral._name.upper()}_REG_END_ADDR = ${a_peripheral._name.upper()}_REG_BASE_ADDR + ${a_peripheral._name.upper()}_REG_SIZE;
-% endfor
+    localparam addr_t SOC_CTRL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h0000000000000000;
+    localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000000000001000;
+    localparam addr_t SOC_CTRL_REG_END_ADDR = SOC_CTRL_REG_BASE_ADDR + SOC_CTRL_REG_SIZE;
+    localparam addr_t BOOTROM_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h0000000000010000;
+    localparam addr_t BOOTROM_REG_SIZE = 64'h0000000000010000;
+    localparam addr_t BOOTROM_REG_END_ADDR = BOOTROM_REG_BASE_ADDR + BOOTROM_REG_SIZE;
+    localparam addr_t FAST_INTR_CTRL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h0000000000020000;
+    localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000000000001000;
+    localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = FAST_INTR_CTRL_REG_BASE_ADDR + FAST_INTR_CTRL_REG_SIZE;
+    localparam addr_t UART_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR + 64'h0000000000030000;
+    localparam addr_t UART_REG_SIZE = 64'h0000000000001000;
+    localparam addr_t UART_REG_END_ADDR = UART_REG_BASE_ADDR + UART_REG_SIZE;
+    localparam addr_t EXT_PERIPHERAL_REG_BASE_ADDR = PERIPHERALS_BUS_BASE_ADDR +  64'h0000000000040000;
+    localparam addr_t EXT_PERIPHERAL_REG_SIZE = 64'h0000000000001000;
+    localparam addr_t EXT_PERIPHERAL_REG_END_ADDR = EXT_PERIPHERAL_REG_BASE_ADDR + EXT_PERIPHERAL_REG_SIZE;
 
     // Address mapping rules
     localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
-% for  idx, a_slave in enumerate(xalp.bus().get_slaves()):
+        '{idx : MEM_S_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR},
         '{
-            idx : ${a_slave.name.upper()}_S_BUS_IDX,
-            start_addr : ${a_slave.name.upper()}_BUS_BASE_ADDR,
-            end_addr : ${a_slave.name.upper()}_BUS_END_ADDR
+            idx : DEBUG_MODULE_S_BUS_IDX,
+            start_addr : DEBUG_MODULE_BUS_BASE_ADDR,
+            end_addr : DEBUG_MODULE_BUS_END_ADDR
+        },
+        '{
+            idx : PERIPHERALS_S_BUS_IDX,
+            start_addr : PERIPHERALS_BUS_BASE_ADDR,
+            end_addr : PERIPHERALS_BUS_END_ADDR
+        },
+        '{
+            idx : EXT_SLAVE_S_BUS_IDX,
+            start_addr : EXT_SLAVE_BUS_BASE_ADDR,
+            end_addr : EXT_SLAVE_BUS_END_ADDR
         }
-% if (idx != len(xalp.bus().get_slaves()) - 1):
-             , 
-% endif
-% endfor
     };
 
     localparam rule_t [totalRegSlaves-1:0] RegMap = '{
-% for  idx, a_peripheral in enumerate(xalp.get_peripheral_domain("Peripherals").get_peripherals()):
         '{
-            idx : ${a_peripheral._name.upper()}_REG_IDX,
-            start_addr : ${a_peripheral._name.upper()}_REG_BASE_ADDR,
-            end_addr : ${a_peripheral._name.upper()}_REG_END_ADDR
+            idx : SOC_CTRL_REG_IDX,
+            start_addr : SOC_CTRL_REG_BASE_ADDR,
+            end_addr : SOC_CTRL_REG_END_ADDR
+        },
+        '{
+            idx : BOOTROM_REG_IDX,
+            start_addr : BOOTROM_REG_BASE_ADDR,
+            end_addr : BOOTROM_REG_END_ADDR
+        },
+        '{
+            idx : FAST_INTR_CTRL_REG_IDX,
+            start_addr : FAST_INTR_CTRL_REG_BASE_ADDR,
+            end_addr : FAST_INTR_CTRL_REG_END_ADDR
+        },
+        '{idx : UART_REG_IDX, start_addr : UART_REG_BASE_ADDR, end_addr : UART_REG_END_ADDR},
+        '{
+            idx : EXT_PERIPHERAL_REG_IDX,
+            start_addr : EXT_PERIPHERAL_REG_BASE_ADDR,
+            end_addr : EXT_PERIPHERAL_REG_END_ADDR
         }
-% if (idx != len(xalp.get_peripheral_domain("Peripherals").get_peripherals()) - 1):
-             ,
-% endif
-% endfor
     };
 
 
@@ -148,12 +185,28 @@ package core_v_mcu_pkg;
     //----------
     // PAD Ring
     //----------
-% for pad in xalp.get_padring().pad_list:
+    localparam PAD_CLK = 0;
+    localparam PAD_RST = 1;
+    localparam PAD_JTAG_TCK = 2;
+    localparam PAD_JTAG_TMS = 3;
+    localparam PAD_JTAG_TRST = 4;
+    localparam PAD_JTAG_TDI = 5;
+    localparam PAD_JTAG_TDO = 6;
+    localparam PAD_UART_RX = 7;
+    localparam PAD_UART_TX = 8;
+    localparam PAD_EXIT_VALID = 9;
+
+    localparam NUM_PAD = 10;
+
+    % for pad in xheep.get_padring().pad_list:
   % if pad.global_index is not None:
-    localparam PAD_${pad.name.upper()} = ${pad.global_index};
+  localparam PAD_${pad.name.upper()} = ${pad.global_index};
   % endif
 % endfor
 
-    localparam NUM_PAD = ${len(xalp.get_padring().pad_list)};
+  localparam NUM_PAD = ${len(xheep.get_padring().pad_list)};
+
+  localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
+
 
 endpackage : core_v_mcu_pkg

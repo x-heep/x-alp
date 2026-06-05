@@ -1,0 +1,1 @@
+../hw/vendor/x-heep/util/check-vendor.py
