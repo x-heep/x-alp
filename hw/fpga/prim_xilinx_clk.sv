@@ -9,12 +9,12 @@ module xilinx_clk_gating (
     output logic clk_o
 );
 
-  // In Zynq7000, just bypass the clock gating because there are not enough BUFGs that can be 
-  // cascaded with the BUFG of the MMCM.
-  // In the Zynq UltraScale+, it can be implemented as BUFGCE without trouble, since there
-  // are > 500 BUFGCEs and the rules for cascading are more relaxed.
-  // NOTE: This **cannot** be substituted by a latch+and
-  assign clk_o = clk_i;
+    // In Zynq7000, just bypass the clock gating because there are not enough BUFGs that can be 
+    // cascaded with the BUFG of the MMCM.
+    // In the Zynq UltraScale+, it can be implemented as BUFGCE without trouble, since there
+    // are > 500 BUFGCEs and the rules for cascading are more relaxed.
+    // NOTE: This **cannot** be substituted by a latch+and
+    assign clk_o = clk_i;
 
 endmodule
 
@@ -23,7 +23,7 @@ module xilinx_clk_inverter (
     output logic clk_o
 );
 
-  assign clk_o = ~clk_i;
+    assign clk_o = ~clk_i;
 
 endmodule
 
@@ -35,12 +35,12 @@ module xilinx_clk_mux2 (
     output logic clk_o
 );
 
-  BUFGMUX i_BUFGMUX (
-      .S (clk_sel_i),
-      .I0(clk0_i),
-      .I1(clk1_i),
-      .O (clk_o)
-  );
+    BUFGMUX i_BUFGMUX (
+        .S (clk_sel_i),
+        .I0(clk0_i),
+        .I1(clk1_i),
+        .O (clk_o)
+    );
 
 endmodule
 
@@ -49,7 +49,7 @@ module cluster_clock_inverter (
     output logic clk_o
 );
 
-  xilinx_clk_inverter clk_inv_i (.*);
+    xilinx_clk_inverter clk_inv_i (.*);
 
 endmodule
 
@@ -60,7 +60,7 @@ module pulp_clock_mux2 (
     output logic clk_o
 );
 
-  xilinx_clk_mux2 clk_mux2_i (.*);
+    xilinx_clk_mux2 clk_mux2_i (.*);
 
 endmodule
 
@@ -69,7 +69,7 @@ module pulp_clock_inverter (
     output logic clk_o
 );
 
-  xilinx_clk_inverter clk_inv_i (.*);
+    xilinx_clk_inverter clk_inv_i (.*);
 
 endmodule
 
@@ -80,12 +80,12 @@ module cv32e40p_clock_gate (
     output logic clk_o
 );
 
-  xilinx_clk_gating clk_gate_i (
-      .clk_i,
-      .en_i,
-      .test_en_i(scan_cg_en_i),
-      .clk_o
-  );
+    xilinx_clk_gating clk_gate_i (
+        .clk_i,
+        .en_i,
+        .test_en_i(scan_cg_en_i),
+        .clk_o
+    );
 
 endmodule
 
@@ -98,12 +98,12 @@ module cv32e40x_clock_gate #(
     output logic clk_o
 );
 
-  xilinx_clk_gating clk_gate_i (
-      .clk_i,
-      .en_i,
-      .test_en_i(scan_cg_en_i),
-      .clk_o
-  );
+    xilinx_clk_gating clk_gate_i (
+        .clk_i,
+        .en_i,
+        .test_en_i(scan_cg_en_i),
+        .clk_o
+    );
 
 endmodule
 
@@ -121,12 +121,12 @@ module tc_clk_gating #(
     output logic clk_o
 );
 
-  xilinx_clk_gating clk_gate_i (
-      .clk_i,
-      .en_i,
-      .test_en_i,
-      .clk_o
-  );
+    xilinx_clk_gating clk_gate_i (
+        .clk_i,
+        .en_i,
+        .test_en_i,
+        .clk_o
+    );
 
 endmodule
 
@@ -137,12 +137,12 @@ module tc_clk_mux2 (
     output logic clk_o
 );
 
-  xilinx_clk_mux2 xilinx_i_clk_mux2_i (
-      .clk0_i,
-      .clk1_i,
-      .clk_sel_i,
-      .clk_o
-  );
+    xilinx_clk_mux2 xilinx_i_clk_mux2_i (
+        .clk0_i,
+        .clk1_i,
+        .clk_sel_i,
+        .clk_o
+    );
 
 endmodule
 
@@ -152,7 +152,7 @@ module tc_clk_xor2 (
     output logic clk_o
 );
 
-  assign clk_o = clk0_i ^ clk1_i;
+    assign clk_o = clk0_i ^ clk1_i;
 
 endmodule
 
@@ -161,6 +161,6 @@ module tc_clk_inverter (
     output logic clk_o
 );
 
-  xilinx_clk_inverter clk_inv_i (.*);
+    xilinx_clk_inverter clk_inv_i (.*);
 
 endmodule

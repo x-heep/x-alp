@@ -131,18 +131,14 @@ conda:
 
 $(MCU_GEN_PRIMARY): $(MCU_GEN_SOURCES)
 	$(PYTHON) util/xheep_gen/mcu_gen.py --config configs/python_unsupported.hjson --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
-	@$(MAKE) format
-
-# Side-effect outputs share the same recipe; depend on primary so Make can find them.
-$(filter-out $(MCU_GEN_PRIMARY),$(MCU_GEN_OUTPUTS)): $(MCU_GEN_PRIMARY)
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen
 mcu-gen:
 	@rm -f $(MCU_GEN_PRIMARY)
 	@$(MAKE) $(MCU_GEN_PRIMARY)
-	@$(MAKE) reg-gen 
-	@$(MAKE) boot-rom
+	@$(MAKE) reg-gen boot-rom
+	@$(MAKE) format
 
 ## @section Register Generation
 
@@ -276,7 +272,7 @@ app-list:
 
 ## Verilator simulation build
 .PHONY: verilator-build
-verilator-build: $(MCU_GEN_PRIMARY) $(REG_GEN_OUTPUTS) hw/ip/bootrom/bootrom.sv
+verilator-build: $(MCU_GEN_PRIMARY) $(REG_GEN_OUTPUTS) hw/ip/bootrom/bootrom.sv format
 	@$(FUSESOC) --cores-root . run --no-export --target sim --tool verilator --build $(XALP) $(FUSESOC_ARGS) 2>&1 | tee buildsim.log
 
 ## Verilator simulation run
@@ -339,8 +335,20 @@ vivado-fpga-pgm:
 
 ## Format
 PHONY: format
-format: .check-fusesoc
-	@$(FUSESOC) $(FUSESOC_FLAGS) run --no-export --target format $(XALP)
+format:
+	git ls-files -z -- '*.sv' '*.svh' ':(exclude)**/vendor/**' | xargs -0 verible-verilog-format \
+		--assignment_statement_alignment=align \
+		--case_items_alignment=align \
+		--formal_parameters_indentation=indent \
+		--named_parameter_alignment=align \
+		--named_parameter_indentation=indent \
+		--named_port_alignment=align \
+		--named_port_indentation=indent \
+		--port_declarations_alignment=align \
+		--port_declarations_indentation=indent \
+		--module_net_variable_alignment=align \
+		--indentation_spaces=4 \
+		--inplace
 	git ls-files -z -- '*.c' '*.h' '*.cpp' '*.hpp' ':(exclude)build/**' ':(exclude)**/vendor/**' | xargs -0 clang-format -i -style=file:util/.clang-format
 
 ## Lint
