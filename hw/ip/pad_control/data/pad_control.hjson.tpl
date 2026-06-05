@@ -51,5 +51,17 @@
     % endif
   % endfor
 % endif
+
+% if not (any_muxed_pads or attribute_bits != None):
+    { name: "DUMMY",
+      desc: "A dummy register to avoid empty register list",
+      resval: "0x0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0:0", name: "DUMMY_FIELD", desc: "Dummy Field" }
+      ]
+    }
+% endif
    ]
 }
