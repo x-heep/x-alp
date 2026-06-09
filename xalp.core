@@ -17,7 +17,7 @@ filesets:
     
   rtl-fpga:
     depend:
-    - x-heep:x-alp:core-v-mcu-fpga
+    - x-heep:x-heep:x-heep-fpga-support
     files:
     - hw/target/fpga/xilinx_core_v_mcu_wrapper.sv
     file_type: systemVerilogSource
