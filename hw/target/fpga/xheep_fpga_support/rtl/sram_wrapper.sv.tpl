@@ -38,7 +38,7 @@ assign pwrgate_ack_no = pwrgate_ni;
     xilinx_mem_gen_${num_words} tc_ram_i (
         .clka (clk_i),
         .ena  (req_i),
-        .wea  ({4{req_i & we_i}} & be_i),
+        .wea  ({(DataWidth / 8) {req_i & we_i}} & be_i),
         .addra(addr_i),
         .dina (wdata_i),
         // output ports

@@ -18,17 +18,17 @@ set_property -dict [list CONFIG.Enable_32bit_Address {false} \\
 
                         CONFIG.Primitive {2kx9}  \\
 
-                        CONFIG.Write_Width_A {32}  \\
+                        CONFIG.Write_Width_A {64}  \\
 
                         CONFIG.Write_Depth_A {${num_words}}  \\
 
-                        CONFIG.Read_Width_A {32}  \\
+                        CONFIG.Read_Width_A {64}  \\
 
                         CONFIG.Enable_A {Use_ENA_Pin}  \\
 
-                        CONFIG.Write_Width_B {32}  \\
+                        CONFIG.Write_Width_B {64}  \\
 
-                        CONFIG.Read_Width_B {32}  \\
+                        CONFIG.Read_Width_B {64}  \\
 
                         CONFIG.Register_PortA_Output_of_Memory_Primitives {false}  \\
 
