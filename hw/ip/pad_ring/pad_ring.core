@@ -1,0 +1,14 @@
+CAPI=2:
+
+name: x-heep:ip:pad_ring
+filesets:
+
+  rtl:
+    file_type: systemVerilogSource
+    files:
+      - pad_ring.sv
+
+targets:
+  default:
+    filesets:
+    - rtl

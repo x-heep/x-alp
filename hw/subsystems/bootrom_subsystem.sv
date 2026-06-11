@@ -24,7 +24,7 @@ module bootrom_subsystem #(
         .clk_i ('0),
         .rst_ni(1'b1),
         .req_i (reg_req_i.valid),
-        .addr_i(32'(reg_req_i.addr) - 32'(BOOT_ROM_REG_START_ADDR)),
+        .addr_i(32'(reg_req_i.addr) - 32'(BOOTROM_REG_BASE_ADDR)),
         .data_o(reg_rsp_o.rdata)
     );
 

@@ -130,7 +130,7 @@ conda:
 ## @section MCU Code Generation
 
 $(MCU_GEN_PRIMARY): $(MCU_GEN_SOURCES)
-	$(PYTHON) util/xheep_gen/mcu_gen.py --config configs/python_unsupported.hjson --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
+	$(PYTHON) util/xheep_gen/mcu_gen.py --system xalp --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen

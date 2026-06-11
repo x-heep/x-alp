@@ -1,28 +1,25 @@
 # Address Map
 
-${"##"} Bus Slaves
+${"##"} AXI Masters
 
-| Name | Base Address | Size | End Address |
-|------|-------------|------|-------------|
-% for a_slave in xalp.bus().get_slaves():
-| ${a_slave.name} | `0x${f"{a_slave.start_address:016x}"}` | `0x${f"{a_slave.length:016x}"}` | `0x${f"{a_slave.end_address:016x}"}` |
+| Index | Name |
+|-------|------|
+% for m in xalp.bus().get_axi_masters():
+| ${m["idx"]} | ${m["macro"]} |
 % endfor
 
-<%
-    periph_domain = xalp.get_peripheral_domain("Peripherals")
-    periph_slaves = xalp.bus().get_slaves()
-    periph_base = [s for s in periph_slaves if s.name.upper() == "PERIPHERALS"][0].start_address
-%>\
-${"##"} Peripherals
+${"##"} AXI Slaves
 
-| Name | Base Address | Size | End Address |
-|------|-------------|------|-------------|
-% for a_peripheral in periph_domain.get_peripherals():
-<%
-    offset = a_peripheral.get_address()
-    size = a_peripheral.get_length()
-    abs_base = periph_base + offset
-    abs_end = abs_base + size
-%>\
-| ${a_peripheral._name} | `0x${f"{abs_base:016x}"}` | `0x${f"{size:016x}"}` | `0x${f"{abs_end:016x}"}` |
+| Index | Name | Base Address | Size | End Address |
+|-------|------|-------------|------|-------------|
+% for s in xalp.bus().get_axi_slaves():
+| ${s["idx"]} | ${s["macro"]} | `0x${f'{s["base"]:016x}'}` | `0x${f'{s["size"]:016x}'}` | `0x${f'{s["end"]:016x}'}` |
+% endfor
+
+${"##"} Register Slaves
+
+| Index | Name | Base Address | Size | End Address |
+|-------|------|-------------|------|-------------|
+% for r in xalp.bus().get_reg_slaves():
+| ${r["idx"]} | ${r["macro"]} | `0x${f'{r["base"]:016x}'}` | `0x${f'{r["size"]:016x}'}` | `0x${f'{r["end"]:016x}'}` |
 % endfor
