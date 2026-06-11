@@ -7,7 +7,7 @@ from abc import (
 )  # Used to define abstract classes that cannot be instantiated, only well defined subclasses can be instantiated.
 from enum import Enum
 from copy import deepcopy
-from typing import List
+from typing import List, Optional
 
 
 class Peripheral(ABC):
@@ -22,12 +22,28 @@ class Peripheral(ABC):
     _name: str
     _address: int = None
 
-    def __init__(self, offset=None, length=None):
+    def __init__(
+        self,
+        offset=None,
+        length=None,
+        has_master_ports: bool = False,
+        num_master_ports: Optional[int] = None,
+        has_slave_ports: bool = False,
+        num_slave_ports: Optional[int] = None,
+        has_reg_if_ports: bool = True,
+        num_reg_if_ports: Optional[int] = None,
+    ):
         """
         Initialize the peripheral with a given address.
 
         :param int offset: The virtual (in peripheral domain) memory address of the peripheral. If None, the offset will be automatically compute during build function.
         :param int length: The size taken in memory by the peripheral. If None, the length will be automatically set to 64KB.
+        :param bool has_master_ports: True if the peripheral has master ports.
+        :param int num_master_ports: Number of master ports. If None, defaults to 1 when enabled and 0 when disabled.
+        :param bool has_slave_ports: True if the peripheral has slave ports.
+        :param int num_slave_ports: Number of slave ports. If None, defaults to 1 when enabled and 0 when disabled.
+        :param bool has_reg_if_ports: True if the peripheral has register interface ports.
+        :param int num_reg_if_ports: Number of register interface ports. If None, defaults to 1 when enabled and 0 when disabled.
         """
         if type(offset) == int and offset >= 0x00000000:
             self._address = offset
@@ -36,6 +52,36 @@ class Peripheral(ABC):
 
         if length is not None:
             self._length = length
+
+        self._has_master_ports, self._num_master_ports = self._normalize_ports(
+            "master", has_master_ports, num_master_ports
+        )
+        self._has_slave_ports, self._num_slave_ports = self._normalize_ports(
+            "slave", has_slave_ports, num_slave_ports
+        )
+        self._has_reg_if_ports, self._num_reg_if_ports = self._normalize_ports(
+            "register interface", has_reg_if_ports, num_reg_if_ports
+        )
+
+    @staticmethod
+    def _normalize_ports(port_name: str, enabled: bool, count: Optional[int]):
+        if type(enabled) is not bool:
+            raise TypeError(f"{port_name} ports enabled flag should be of type bool")
+        if count is None:
+            count = 1 if enabled else 0
+        if type(count) is not int:
+            raise TypeError(f"Number of {port_name} ports should be of type int")
+        if count < 0:
+            raise ValueError(f"Number of {port_name} ports should be positive")
+        if enabled and count == 0:
+            raise ValueError(
+                f"Number of {port_name} ports should be greater than zero when enabled"
+            )
+        if not enabled and count != 0:
+            raise ValueError(
+                f"Number of {port_name} ports should be zero when disabled"
+            )
+        return enabled, count
 
     def get_address(self):
         """
@@ -48,11 +94,49 @@ class Peripheral(ABC):
         """
         Set the virtual (in peripheral domain) memory address of the peripheral.
         """
+        if address is None:
+            self._address = None
+            return
+        if type(address) is not int or address < 0:
+            raise ValueError("Peripheral address should be a positive integer")
         self._address = address
+
+    def get_start_address(self):
+        """
+        :return: The manually configured start address, or None if automatic placement is enabled.
+        :rtype: int
+        """
+        return self.get_address()
+
+    def set_start_address(self, address: int):
+        """
+        Set the peripheral start address by hand.
+        """
+        self.set_address(address)
+
+    def use_auto_start_address(self):
+        """
+        Let the bus or domain assign the peripheral start address automatically.
+        """
+        self.set_address(None)
+
+    def has_auto_start_address(self) -> bool:
+        """
+        :return: True if the peripheral address should be automatically assigned.
+        :rtype: bool
+        """
+        return self.get_address() is None
 
     def get_length(self):
         """
         :return: The length of the peripheral.
+        :rtype: int
+        """
+        return self._length
+
+    def get_size_bytes(self):
+        """
+        :return: The size of the peripheral in bytes.
         :rtype: int
         """
         return self._length
@@ -63,6 +147,62 @@ class Peripheral(ABC):
         :rtype: str
         """
         return self._name
+
+    def has_master_ports(self) -> bool:
+        """
+        :return: True if the peripheral has master ports.
+        :rtype: bool
+        """
+        return self._has_master_ports
+
+    def get_num_master_ports(self):
+        """
+        :return: Number of master ports.
+        :rtype: int
+        """
+        return self._num_master_ports
+
+    def has_slave_ports(self) -> bool:
+        """
+        :return: True if the peripheral has slave ports.
+        :rtype: bool
+        """
+        return self._has_slave_ports
+
+    def get_num_slave_ports(self):
+        """
+        :return: Number of slave ports.
+        :rtype: int
+        """
+        return self._num_slave_ports
+
+    def has_reg_if_ports(self) -> bool:
+        """
+        :return: True if the peripheral has register interface ports.
+        :rtype: bool
+        """
+        return self._has_reg_if_ports
+
+    def has_register_interface_ports(self) -> bool:
+        """
+        :return: True if the peripheral has register interface ports.
+        :rtype: bool
+        """
+        return self.has_reg_if_ports()
+
+    def get_num_reg_if_ports(self):
+        """
+        :return: Number of register interface ports.
+        :rtype: int
+        """
+        return self._num_reg_if_ports
+
+    def get_num_register_interface_ports(self):
+        """
+        :return: Number of register interface ports.
+        :rtype: int
+        """
+        return self.get_num_reg_if_ports()
 
 
 class BasePeripheral(Peripheral, ABC):
@@ -95,18 +235,30 @@ class PeripheralDomain(ABC):
     ]  # type has to be precised for filtering in validation
 
     @abstractmethod
-    def __init__(self, name: str, start_address: int, length: int):
+    def __init__(
+        self,
+        name: str,
+        start_address: int,
+        length: int,
+        peripherals: Optional[List[Peripheral]] = None,
+    ):
         """
         Initialize the peripheral domain. Is abstract because each peripheral domain has its own way of initializing without letting the user define start address and length.
 
         :param str name: The name of the peripheral domain. Convention : starts with a capital letter and is in singular form (no "peripheral domain" at the end)
         :param int start_address: The start address of the peripheral domain.
         :param int length: The length of the peripheral domain.
+        :param list[Peripheral] peripherals: Optional initial list of peripherals.
         """
         self._name = f"{name} Peripheral Domain"
         self._start_address = start_address
         self._length = length
         self._peripherals = []
+        if peripherals is not None:
+            if type(peripherals) is not list:
+                raise TypeError("peripherals should be of type list")
+            for peripheral in peripherals:
+                self.add_peripheral(peripheral)
 
     @abstractmethod
     def add_peripheral(self, peripheral: Peripheral):
@@ -218,7 +370,7 @@ class PeripheralDomain(ABC):
                     )
                 else:
                     raise ValueError(
-                        f"Peripheral {current_peripheral.get_name()} has an address that starts in {peripherals_with_address[i-1].get_name()} domain ({current_peripheral.get_name()} starts at {hex(current_peripheral.get_address())} but {peripherals_with_address[i-1].get_name()} ends at {hex(last_free_space[0])}"
+                        f"Peripheral {current_peripheral.get_name()} has an address that starts in {peripherals_with_address[i-1][1].get_name()} domain ({current_peripheral.get_name()} starts at {hex(current_peripheral.get_address())} but {peripherals_with_address[i-1][1].get_name()} ends at {hex(last_free_space[0])}"
                     )
 
             if (
@@ -229,7 +381,7 @@ class PeripheralDomain(ABC):
                 )
 
             # If the peripheral starts after the last free space, add it to the free space before the peripheral
-            if last_free_space[0] > current_peripheral.get_address():
+            if last_free_space[0] < current_peripheral.get_address():
                 free_space.append(
                     [last_free_space[0], current_peripheral.get_address()]
                 )

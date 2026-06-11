@@ -1,6 +1,8 @@
 # Base Peripherals (mandatory peripherals)
-from .abstractions import BasePeripheral, PeripheralDomain
+from .abstractions import BasePeripheral
+from .peripheral_subsystem import PeripheralSubsystem
 from copy import deepcopy
+from typing import List, Optional
 
 from .base_peripherals import (
     SOC_ctrl,
@@ -20,9 +22,9 @@ from .base_peripherals import (
 # Base Peripherals Classes
 
 
-class BasePeripheralDomain(PeripheralDomain):
+class BasePeripheralDomain(PeripheralSubsystem):
     """
-    Domain for base peripherals. All base peripherals must be added.
+    Subsystem for base peripherals (always-on domain). All base peripherals must be added.
 
     Start address : 0x20000000
     Length :       0x00100000
@@ -41,18 +43,28 @@ class BasePeripheralDomain(PeripheralDomain):
         Ext_peripheral(),
     ]
 
-    def __init__(self, start_address: int = 0x20000000, length: int = 0x00100000):
+    def __init__(
+        self,
+        start_address: int = 0x20000000,
+        length: int = 0x00100000,
+        peripherals: Optional[List[BasePeripheral]] = None,
+    ):
         """
         Initialize the base peripheral domain.
         Start address : 0x20000000
         Length :       0x00100000
 
         At the beginning, there is no base peripheral. All non-added peripherals will be added during build().
+
+        The base peripheral domain is always-on: it belongs to no switchable power domain and is not clock gated.
         """
         super().__init__(
             name="Base",
             start_address=start_address,
             length=length,
+            power_domain=None,
+            clock_gating=False,
+            peripherals=peripherals,
         )
 
     def add_peripheral(self, peripheral: BasePeripheral):
@@ -75,6 +87,7 @@ class BasePeripheralDomain(PeripheralDomain):
             print(
                 f"Warning : Peripheral {peripheral.get_name()} is not in the domain {self._name}"
             )
+            return
         self._peripherals.remove(peripheral)
 
     def add_missing_peripherals(self):

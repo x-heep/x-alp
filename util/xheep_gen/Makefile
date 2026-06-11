@@ -14,3 +14,10 @@ endif
 # Runs black formating for python files
 format-python:
 	$(PYTHON) -m black .
+
+# Runs the python test suite
+test:
+	$(PYTHON) -m coverage run -m pytest
+	$(PYTHON) -m coverage report -m
+
+.PHONY: format-python test

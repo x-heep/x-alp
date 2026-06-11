@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/luigigiuffrida98/xheep_gen.git",
-    rev: "main",
+    rev: "xalp-gen",
   },
 
   exclude_from_upstream: [
