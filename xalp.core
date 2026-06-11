@@ -26,10 +26,11 @@ targets:
   default: &default_target
     filesets:
     - x-alp
-    - testbench
     toplevel: x_alp
   sim:
     <<: *default_target
+    filesets_append:
+    - testbench
     description: RTL simulation
     default_tool: verilator
     toplevel: testharness
@@ -106,7 +107,7 @@ targets:
       vivado:
         part: xczu3eg-sfvc784-2-e
         board_part: realdigital.org:aup-zu3-8gb:part0:1.0
-        board_repo_paths: [../../../hw/target/fpga/xheep_fpga_support/board_files/vendor/aup-zu3-8gb/1.0]
+        board_repo_paths: [../../../hw/target/fpga/xheep_fpga_support/board_files/aup-zu3-8gb/1.0]
     toplevel: [xilinx_core_v_mcu_wrapper]
   
   # Static analysis

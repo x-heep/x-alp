@@ -15,11 +15,11 @@ module cv32e40px_clock_gate (
     output logic clk_o
 );
 
-  xilinx_clk_gating clk_gate_i (
-      .clk_i,
-      .en_i,
-      .test_en_i(scan_cg_en_i),
-      .clk_o
-  );
+    xilinx_clk_gating clk_gate_i (
+        .clk_i,
+        .en_i,
+        .test_en_i(scan_cg_en_i),
+        .clk_o
+    );
 
 endmodule  // cv32e40p_clock_gate
