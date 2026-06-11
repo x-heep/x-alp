@@ -1,6 +1,6 @@
 # Base Peripherals (mandatory peripherals)
 from .abstractions import BasePeripheral
-from .peripheral_subsystem import PeripheralSubsystem
+from .abstractions import PeripheralDomain
 from copy import deepcopy
 from typing import List, Optional
 
@@ -22,7 +22,7 @@ from .base_peripherals import (
 # Base Peripherals Classes
 
 
-class BasePeripheralDomain(PeripheralSubsystem):
+class BasePeripheralDomain(PeripheralDomain):
     """
     Subsystem for base peripherals (always-on domain). All base peripherals must be added.
 

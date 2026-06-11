@@ -15,7 +15,7 @@ from pads.floorplan import FloorplanDimensions, Side
 from pads.pad_ring import PadRing
 from pads.pin import Input
 from peripherals.base_peripherals_domain import BasePeripheralDomain
-from peripherals.peripheral_subsystem import PeripheralSubsystem
+from peripherals.abstractions import PeripheralDomain
 from peripherals.user_peripherals import UART
 from peripherals.user_peripherals_domain import UserPeripheralDomain
 from system import System
@@ -40,7 +40,7 @@ def make_padring():
 
 
 def make_subsystem(name="Test", start=0x40000000, length=0x00100000):
-    subsystem = PeripheralSubsystem(name, start, length)
+    subsystem = PeripheralDomain(name, start, length)
     subsystem.add_peripheral(UART())
     return subsystem
 
@@ -158,7 +158,7 @@ class TestTypeChecks:
 class TestBuildAndValidate:
     def test_build_builds_memory_and_subsystems(self):
         system = make_system()
-        subsystem = PeripheralSubsystem("Test", 0x40000000, 0x00100000)
+        subsystem = PeripheralDomain("Test", 0x40000000, 0x00100000)
         subsystem.add_peripheral(UART())
         system.add_peripheral_subsystem(subsystem)
         system.build()
@@ -267,7 +267,7 @@ class TestFlavorConstants:
 
     def test_unsupported_peripheral_rejected(self):
         system = self.make_flavor()
-        subsystem = PeripheralSubsystem("Test", 0x40000000, 0x00100000)
+        subsystem = PeripheralDomain("Test", 0x40000000, 0x00100000)
         from peripherals.user_peripherals import I2C
 
         subsystem.add_peripheral(I2C())

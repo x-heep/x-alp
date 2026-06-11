@@ -1,6 +1,6 @@
 # User Peripherals
 from .abstractions import UserPeripheral
-from .peripheral_subsystem import PeripheralSubsystem
+from .abstractions import PeripheralDomain
 from typing import List, Optional
 
 from .user_peripherals import PDM2PCM
@@ -9,7 +9,7 @@ from .user_peripherals import PDM2PCM
 
 
 # Domain Class
-class UserPeripheralDomain(PeripheralSubsystem):
+class UserPeripheralDomain(PeripheralDomain):
     """
     Subsystem for user peripherals (switchable domain). All user peripherals must be added.
 

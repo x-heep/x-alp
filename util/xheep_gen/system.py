@@ -5,7 +5,7 @@ from bus_type import BusType
 from cpu.cpu import CPU
 from cv_x_if import CvXIf
 from memory_ss.memory_ss import MemorySS
-from peripherals.peripheral_subsystem import PeripheralSubsystem
+from peripherals.abstractions import PeripheralDomain
 from peripherals.base_peripherals_domain import BasePeripheralDomain
 from peripherals.user_peripherals_domain import UserPeripheralDomain
 from pads.pad_ring import PadRing
@@ -22,7 +22,7 @@ class System:
     their specific components and configuration style.
 
     Peripherals are organized in peripheral subsystems (see
-    :class:`PeripheralSubsystem`): each subsystem is an independent group of
+    :class:`PeripheralDomain`): each subsystem is an independent group of
     peripherals with its own address range. Any number of subsystems can be
     added to the system.
 
@@ -61,7 +61,7 @@ class System:
 
         self._memory_ss = None
 
-        self._peripheral_subsystems: List[PeripheralSubsystem] = []
+        self._peripheral_subsystems: List[PeripheralDomain] = []
 
         self._padring: PadRing = None
 
@@ -175,19 +175,19 @@ class System:
     # Peripheral Subsystems
     # ------------------------------------------------------------
 
-    def add_peripheral_subsystem(self, subsystem: PeripheralSubsystem):
+    def add_peripheral_subsystem(self, subsystem: PeripheralDomain):
         """
         Add a peripheral subsystem to the system. The subsystem should
         already contain all peripherals well configured. When adding a
         subsystem, a deepcopy is made to avoid side effects.
 
-        :param PeripheralSubsystem subsystem: The subsystem to add.
+        :param PeripheralDomain subsystem: The subsystem to add.
         :raise TypeError: when subsystem is of incorrect type.
         :raise ValueError: when a subsystem with the same name is already present.
         """
-        if not isinstance(subsystem, PeripheralSubsystem):
+        if not isinstance(subsystem, PeripheralDomain):
             raise TypeError(
-                f"{type(self).__name__} peripheral subsystems should be of type PeripheralSubsystem not {type(subsystem)}"
+                f"{type(self).__name__} peripheral subsystems should be of type PeripheralDomain not {type(subsystem)}"
             )
         if any(
             ss.get_name() == subsystem.get_name() for ss in self._peripheral_subsystems
@@ -223,7 +223,7 @@ class System:
 
         :param str name: The full name of the subsystem.
         :return: The peripheral subsystem, `None` if not found.
-        :rtype: PeripheralSubsystem
+        :rtype: PeripheralDomain
         """
         for ss in self._peripheral_subsystems:
             if ss.get_name() == name:
@@ -235,7 +235,7 @@ class System:
         Returns a deepcopy of the list of all peripheral subsystems.
 
         :return: The peripheral subsystems.
-        :rtype: list[PeripheralSubsystem]
+        :rtype: list[PeripheralDomain]
         """
         return [deepcopy(ss) for ss in self._peripheral_subsystems]
 

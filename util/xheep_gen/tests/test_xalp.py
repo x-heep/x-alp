@@ -10,10 +10,11 @@ from bus import Bus
 from bus_type import BusType
 from cpu.cv32e20 import cv32e20
 from cpu.cv32e40x import cv32e40x
+from cpu.cva6 import cva6
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import UserPeripheral
 from peripherals.base_peripherals import SOC_ctrl
-from peripherals.peripheral_subsystem import PeripheralSubsystem
+from peripherals.abstractions import PeripheralDomain
 from xalp import XAlp
 from xheep import XHeep
 
@@ -31,7 +32,7 @@ def make_valid_memory() -> MemorySS:
 
 def make_xalp() -> XAlp:
     system = XAlp(Bus(BusType.NtoM))
-    system.set_cpu(cv32e40x())
+    system.set_cpu(cva6())
     system.set_memory_ss(make_valid_memory())
     return system
 
@@ -47,7 +48,7 @@ class TestConfigurationPlumbing:
             XAlp(BusType.NtoM)
 
     def test_available_cpus_are_system_specific(self):
-        assert XAlp(Bus(BusType.NtoM)).get_available_cpus() == ["cv32e40x"]
+        assert XAlp(Bus(BusType.NtoM)).get_available_cpus() == ["cva6"]
         assert (
             XAlp(Bus(BusType.NtoM)).get_available_cpus()
             != XHeep(BusType.NtoM).get_available_cpus()
@@ -70,7 +71,7 @@ class TestValidate:
 
     def test_bus_peripherals_satisfy_minimum_peripherals(self):
         system = XAlp(Bus(BusType.NtoM, [SOC_ctrl()]))
-        system.set_cpu(cv32e40x())
+        system.set_cpu(cva6())
         system.set_memory_ss(make_valid_memory())
 
         system.build()
@@ -81,7 +82,7 @@ class TestValidate:
     def test_unsupported_peripheral_is_rejected(self):
         system = make_xalp()
         system.connect_peripheral_subsystem(
-            PeripheralSubsystem(
+            PeripheralDomain(
                 "Unsupported",
                 0x20000000,
                 0x10000,
@@ -105,7 +106,7 @@ class TestBusConnectionAliases:
     def test_disconnect_peripheral_subsystem(self):
         system = make_xalp()
         system.connect_peripheral_subsystem(
-            PeripheralSubsystem("Test", 0x20000000, 0x10000)
+            PeripheralDomain("Test", 0x20000000, 0x10000)
         )
         system.disconnect_peripheral_subsystem("Test Peripheral Domain")
         assert system.get_peripheral_subsystems() == []
@@ -115,15 +116,15 @@ class TestPowerDomainGrouping:
     def make_system_with_domains(self):
         system = make_xalp()
         system.connect_peripheral_subsystem(
-            PeripheralSubsystem("AlwaysOn", 0x20000000, 0x10000)
+            PeripheralDomain("AlwaysOn", 0x20000000, 0x10000)
         )
         system.connect_peripheral_subsystem(
-            PeripheralSubsystem(
+            PeripheralDomain(
                 "GatedA", 0x20010000, 0x10000, power_domain="island", clock_gating=True
             )
         )
         system.connect_peripheral_subsystem(
-            PeripheralSubsystem("GatedB", 0x20020000, 0x10000, power_domain="island")
+            PeripheralDomain("GatedB", 0x20020000, 0x10000, power_domain="island")
         )
         return system
 

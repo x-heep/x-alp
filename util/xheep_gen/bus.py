@@ -157,7 +157,9 @@ class Bus:
         if not isinstance(peripheral, Peripheral):
             raise TypeError("Bus peripheral should be of type Peripheral")
         if self._domains:
-            raise ValueError("Cannot add a flat peripheral to a bus configured with domains")
+            raise ValueError(
+                "Cannot add a flat peripheral to a bus configured with domains"
+            )
         self._peripherals.append(deepcopy(peripheral))
 
     def get_peripherals(self):

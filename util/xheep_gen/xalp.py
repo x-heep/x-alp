@@ -3,7 +3,7 @@ from copy import deepcopy
 from bus import Bus
 from cpu.cpu import CPU
 from memory_ss.memory_ss import MemorySS
-from peripherals.peripheral_subsystem import PeripheralSubsystem
+from peripherals.abstractions import PeripheralDomain
 from system import System
 
 
@@ -19,7 +19,7 @@ class XAlp(System):
     memory subsystem, peripheral subsystems) is connected to it
     independently. Each peripheral subsystem is an independent bus node and
     can be grouped with others in power and clock-gating domains (see
-    :class:`PeripheralSubsystem`).
+    :class:`PeripheralDomain`).
 
     :param Bus bus: The bus of the system.
     :raise TypeError: when parameters are of incorrect type.
@@ -86,7 +86,9 @@ class XAlp(System):
         :rtype: list[str]
         """
         names = super().get_configured_peripheral_names()
-        names.extend(peripheral.get_name() for peripheral in self._bus.get_all_peripherals())
+        names.extend(
+            peripheral.get_name() for peripheral in self._bus.get_all_peripherals()
+        )
         return names
 
     # ------------------------------------------------------------
@@ -111,7 +113,7 @@ class XAlp(System):
         """
         self.set_memory_ss(memory_ss)
 
-    def connect_peripheral_subsystem(self, subsystem: PeripheralSubsystem):
+    def connect_peripheral_subsystem(self, subsystem: PeripheralDomain):
         """
         Connects a peripheral subsystem to the bus. The subsystem should
         already contain all peripherals well configured. When connecting a
@@ -121,7 +123,7 @@ class XAlp(System):
         bus node and can be grouped with others in power / clock-gating
         domains.
 
-        :param PeripheralSubsystem subsystem: The subsystem to connect.
+        :param PeripheralDomain subsystem: The subsystem to connect.
         :raise TypeError: when subsystem is of incorrect type.
         :raise ValueError: when a subsystem with the same name is already connected.
         """
@@ -148,7 +150,7 @@ class XAlp(System):
         Groups the connected peripheral subsystems by power domain.
 
         :return: A dictionary mapping each power domain name to the list of subsystems belonging to it. Always-on subsystems (no power domain) are not included.
-        :rtype: dict[str, list[PeripheralSubsystem]]
+        :rtype: dict[str, list[PeripheralDomain]]
         """
         domains = {}
         for ss in self._peripheral_subsystems:
@@ -159,14 +161,14 @@ class XAlp(System):
     def get_always_on_subsystems(self):
         """
         :return: A deepcopy of the list of always-on peripheral subsystems (no switchable power domain).
-        :rtype: list[PeripheralSubsystem]
+        :rtype: list[PeripheralDomain]
         """
         return [deepcopy(ss) for ss in self._peripheral_subsystems if ss.is_always_on()]
 
     def get_clock_gated_subsystems(self):
         """
         :return: A deepcopy of the list of peripheral subsystems that support clock gating.
-        :rtype: list[PeripheralSubsystem]
+        :rtype: list[PeripheralDomain]
         """
         return [
             deepcopy(ss) for ss in self._peripheral_subsystems if ss.has_clock_gating()
