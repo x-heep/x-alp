@@ -109,7 +109,7 @@ module hpdcache_fifo_reg_initialized
 
     //  FIFO buffer memory management
     //  {{{
-    always_ff @(posedge clk_i)
+    always_ff @(posedge clk_i or negedge rst_ni)
     begin
         if (!rst_ni) begin
             fifo_mem_q <= initial_value_i;
@@ -138,7 +138,7 @@ module hpdcache_fifo_reg_initialized
     //  Assertions
     //  {{{
 `ifndef HPDCACHE_ASSERT_OFF
-    rptr_ahead_wptr_assert: assert property (@(posedge clk_i) disable iff (~rst_ni)
+    rptr_ahead_wptr_assert: assert property (@(posedge clk_i) disable iff (rst_ni !== 1'b1)
             ((rptr_q <= wptr_q) && !crossover_q) || ((rptr_q >= wptr_q) && crossover_q)) else
             $error("fifo: read pointer is ahead of the write pointer");
 `endif

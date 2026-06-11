@@ -5,7 +5,7 @@
   cv_hpdcache: {
     upstream: {
       url: "https://github.com/openhwgroup/cv-hpdcache.git",
-      rev: "04de80896981527c34fbbd35d7b1ef787a082d7c",
+      rev: "b25a1605f5bb1719046e372b0acad3ca9cb7ff42",
     },
 
     exclude_from_upstream: [
@@ -23,7 +23,7 @@
   cvfpu: {
     upstream: {
       url: "https://github.com/openhwgroup/cvfpu.git",
-      rev: "58ca3c376beb914b2b80b811d4b270c063d4e6f7",
+      rev: "a74d99a32bd11ce0b05a82b0d6d26f98df3bba65",
     },
 
     exclude_from_upstream: [
@@ -47,7 +47,7 @@
   cva6: {
     upstream: {
       url: "https://github.com/openhwgroup/cva6.git",
-      rev: "89986dfe867dada9752eee19a4ed4a9d274484a6",
+      rev: "bc510437877214793f80b996e9a143f4e2c7b4b8",
     },
 
     exclude_from_upstream: [

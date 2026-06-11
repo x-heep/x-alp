@@ -307,6 +307,30 @@ verilator-waves: .check-gtkwave
 	@gtkwave build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/waveform.fst util/wave.gtkw
 
 # ============================================================================
+# FPGA Build and Run
+# ============================================================================
+
+## @section Vivado
+
+## Builds (synthesis and implementation) the bitstream for the FPGA version using Vivado
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+## @param FUSESOC_FLAGS=--flag=<flagname>
+.PHONY: vivado-fpga
+vivado-fpga:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+.PHONY: vivado-fpga-nobuild
+vivado-fpga-nobuild:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --setup x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+## Loads the generated bitstream into the FPGA
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+.PHONY: vivado-fpga-pgm
+vivado-fpga-pgm:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --run x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee programfpga.log
+
+
+# ============================================================================
 # Code Quality
 # ============================================================================
 

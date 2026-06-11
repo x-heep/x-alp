@@ -3,8 +3,10 @@ name : openhwgroup.org::cv-hpdcache
 
 filesets:
   rtl:
+    depend:
+      - pulp-platform.org::axi
     files:
-      - openhwgroup/cv_hpdcache/rtl/include/include/hpdcache_typedef.svh: {is_include_file: true, include_path: openhwgroup/cv_hpdcache/rtl/include}
+      - openhwgroup/cv_hpdcache/rtl/include/hpdcache_typedef.svh: {is_include_file: true, include_path: openhwgroup/cv_hpdcache/rtl/include}
       - openhwgroup/cv_hpdcache/rtl/src/hpdcache_pkg.sv
       - openhwgroup/cv_hpdcache/rtl/src/utils/hpdcache_l15_req_arbiter.sv 
       - openhwgroup/cv_hpdcache/rtl/src/utils/hpdcache_l15_resp_demux.sv 

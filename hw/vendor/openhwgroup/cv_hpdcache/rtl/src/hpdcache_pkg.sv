@@ -1,26 +1,13 @@
 /*
- *  Copyright 2023 CEA*
- *  *Commissariat a l'Energie Atomique et aux Energies Alternatives (CEA)
+ *  Copyright 2023 Commissariat a l'Energie Atomique et aux Energies Alternatives (CEA)
+ *  Copyright 2025 Univ. Grenoble Alpes, Inria, TIMA Laboratory
  *
  *  SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
- *
- *  Licensed under the Solderpad Hardware License v 2.1 (the “License”); you
- *  may not use this file except in compliance with the License, or, at your
- *  option, the Apache License version 2.0. You may obtain a copy of the
- *  License at
- *
- *  https://solderpad.org/licenses/SHL-2.1/
- *
- *  Unless required by applicable law or agreed to in writing, any work
- *  distributed under the License is distributed on an “AS IS” BASIS, WITHOUT
- *  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- *  License for the specific language governing permissions and limitations
- *  under the License.
  */
 /*
  *  Authors       : Cesar Fuguet
  *  Creation Date : April, 2021
- *  Description   : Write-Through (WT), High-Throughput (HTPUT) HPDcache Package
+ *  Description   : HPDcache Definitions Package
  *  History       :
  */
 package hpdcache_pkg;
@@ -372,6 +359,7 @@ package hpdcache_pkg;
         logic dir_fetch;
         logic flush_hit;
         logic flush_not_ready;
+        logic pend_trans;
     } hpdcache_rtab_deps_t;
     //  }}}
 
@@ -388,7 +376,7 @@ package hpdcache_pkg;
         int unsigned sets;
         //  Number of ways
         int unsigned ways;
-        //  Cache-Line width (bits)
+        //  Cache-Line width (words)
         int unsigned clWords;
         //  Number of words in the request data channels (request and response)
         int unsigned reqWords;
@@ -425,6 +413,8 @@ package hpdcache_pkg;
         bit mshrRamByteEnable;
         //  MSHR uses whether FFs or SRAM
         bit mshrUseRegbank;
+        //  Store and refill coalesce buffer entries
+        int unsigned cbufEntries;
         //  Use feedthrough FIFOs from the refill handler to the core
         bit refillCoreRspFeedthrough;
         //  Depth of the refill FIFO
@@ -453,6 +443,13 @@ package hpdcache_pkg;
         bit wtEn;
         //  Enable support for the write-back policy
         bit wbEn;
+        //  Enable fast loads.
+        //  Perform loads in 1 cycle at the cost of structural hazard for stores
+        bit lowLatency;
+        //  Enable ECC in cache SRAMs
+        bit eccEn;
+        //  Enable error correction scrubber
+        bit eccScrubberEn;
     } hpdcache_user_cfg_t;
 
     typedef struct packed {
@@ -474,10 +471,12 @@ package hpdcache_pkg;
         int unsigned reqDataBytes;
         int unsigned mshrSetWidth;
         int unsigned mshrWayWidth;
+        int unsigned cbufEntryWidth;
         int unsigned wbufDataWidth;
         int unsigned wbufDirPtrWidth;
         int unsigned wbufDataPtrWidth;
         int unsigned accessWidth;
+        int unsigned accessBytes;
     } hpdcache_cfg_t;
 
     function automatic hpdcache_cfg_t hpdcacheBuildConfig(input hpdcache_user_cfg_t p);
@@ -501,13 +500,17 @@ package hpdcache_pkg;
         ret.mshrSetWidth = (p.mshrSets > 1) ? $clog2(p.mshrSets) : 1;
         ret.mshrWayWidth = (p.mshrWays > 1) ? $clog2(p.mshrWays) : 1;
 
+        ret.cbufEntryWidth = (p.cbufEntries > 1) ? $clog2(p.cbufEntries) : 1;
+
         ret.wbufDataWidth = ret.reqDataWidth*p.wbufWords;
         ret.wbufDirPtrWidth = $clog2(p.wbufDirEntries);
         ret.wbufDataPtrWidth = $clog2(p.wbufDataEntries);
 
         ret.accessWidth = p.accessWords * p.wordWidth;
+        ret.accessBytes = ret.accessWidth/8;
 
         return ret;
     endfunction
     //  }}}
 endpackage
+// vim: ts=4 : sts=4 : sw=4 : et : tw=100 : spell : spelllang=en
