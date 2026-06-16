@@ -1,3 +1,5 @@
+import warnings
+
 from bus_type import BusType
 from copy import deepcopy
 from typing import List, Optional
@@ -52,12 +54,12 @@ class BusSlave:
     :param int size: The size of the window in bytes.
     """
 
-    def __init__(self, name: str, base: int, size: int):
+    def __init__(self, name: str, base = None, size = None):
         if type(name) is not str or name == "":
             raise ValueError("BusSlave name should be a non-empty string")
-        if type(base) is not int or base < 0:
+        if base is not None and type(base) is not int:
             raise ValueError("BusSlave base should be a positive integer")
-        if type(size) is not int or size <= 0:
+        if size is not None and type(size) is not int:
             raise ValueError("BusSlave size should be a strictly positive integer")
         self._name = name
         self._start_address = base
@@ -74,6 +76,18 @@ class BusSlave:
     def get_length(self) -> int:
         """:return: the size of the slave window in bytes."""
         return self._length
+
+    def set_start_address(self, base: int):
+        """:param int base: The start address of the window."""
+        self._start_address = base
+
+    def set_length(self, size: int):
+        """:param int size: The size of the window in bytes."""
+        self._length = size
+
+
+#: Default window size used when an AXI slave is added without an explicit size.
+DEFAULT_SLAVE_SIZE = 0x1000
 
 
 class Bus:
@@ -249,26 +263,51 @@ class Bus:
             raise TypeError(
                 "Bus slave should be a BusSlave or a PeripheralDomain (peripheral subsystem)"
             )
+        if slave.get_length() is None:
+            warnings.warn(
+                f"The length of {slave.get_name()} is not set, a default value of "
+                f"{hex(DEFAULT_SLAVE_SIZE)} will be used."
+            )
         self._slaves.append(slave)
 
     def get_slaves(self):
         """:return: The ordered list of AXI slave nodes."""
         return list(self._slaves)
 
-    def build_address_map(self):
+    def build_address_map(self, start_address: int = 0):
         """
         Build the AXI slave windows and their nested register sub-buses, then
         validate that the AXI slave windows do not overlap.
 
-        Each AXI slave must have an explicit base address. Peripheral subsystem
-        slaves are built so their register-interface peripherals get offsets
-        assigned.
+        Slaves are placed in the order they were added. A slave with no explicit
+        size gets :data:`DEFAULT_SLAVE_SIZE`. A slave with no explicit base is
+        placed at the next free address after the previous slave (starting from
+        ``start_address``); a slave with an explicit base must not start before
+        that next free address. Peripheral subsystem slaves are then built so
+        their register-interface peripherals get offsets assigned.
+
+        :param int start_address: First address used for auto-placed slaves.
         """
+        if type(start_address) is not int or start_address < 0:
+            raise ValueError("start_address should be a positive integer")
+
+        next_address = start_address
         for slave in self._slaves:
-            if slave.get_start_address() is None:
+            if slave.get_length() is None:
+                slave.set_length(DEFAULT_SLAVE_SIZE)
+
+            base = slave.get_start_address()
+            if base is None:
+                base = next_address
+                slave.set_start_address(base)
+            elif base < next_address:
                 raise ValueError(
-                    f"AXI slave {slave.get_name()} must have an explicit base address"
+                    f"AXI slave {slave.get_name()} starts at {hex(base)}, before "
+                    f"the next free bus address {hex(next_address)}"
                 )
+
+            next_address = base + slave.get_length()
+
             if isinstance(slave, PeripheralDomain):
                 slave.build()
         self._validate_axi_slaves()

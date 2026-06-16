@@ -30,33 +30,18 @@ class XAlp(System):
 
     AVAILABLE_PERIPHERALS = [
         "bootrom",
-        "dma",
         "ext_peripheral",
         "fast_intr_ctrl",
-        "gpio",
-        "gpio_ao",
-        "i2c",
-        "i2s",
         "pad_control",
-        "pdm2pcm",
-        "power_manager",
-        "rv_plic",
-        "rv_timer",
-        "rv_timer_ao",
-        "serial_link_receiver_fifo",
-        "serial_link_reg",
-        "serial_link_wrapper_reg",
         "soc_ctrl",
-        "spi2",
-        "spi_flash",
-        "spi_host",
-        "spi_memio",
         "uart",
-        "w25q128jw_controller",
     ]
     """Constant list of peripheral names available for X-ALP."""
 
-    MINIMUM_PERIPHERALS = ["soc_ctrl"]
+    MINIMUM_PERIPHERALS = [
+        "soc_ctrl",
+        "bootrom",
+    ]
     """Constant list of peripheral names that must be present in X-ALP."""
 
     def __init__(self, bus: Bus):

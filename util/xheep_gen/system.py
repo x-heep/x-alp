@@ -63,6 +63,8 @@ class System:
 
         self._peripheral_subsystems: List[PeripheralDomain] = []
 
+        self._peripherals: List = []
+
         self._padring: PadRing = None
 
         self._extensions = {}
@@ -175,6 +177,13 @@ class System:
     # Peripheral Subsystems
     # ------------------------------------------------------------
 
+    def get_peripherals(self):
+        """
+        :return: List of all peripherals configured in the system.
+        :rtype: list[Peripheral]
+        """
+        return [deepcopy(peripheral) for peripheral in self._peripherals]
+
     def add_peripheral_subsystem(self, subsystem: PeripheralDomain):
         """
         Add a peripheral subsystem to the system. The subsystem should
@@ -196,6 +205,8 @@ class System:
                 f"A peripheral subsystem named {subsystem.get_name()} is already present in the system"
             )
         self._peripheral_subsystems.append(deepcopy(subsystem))
+        for peripheral in subsystem.get_peripherals():
+            self._peripherals.append(deepcopy(peripheral))
 
     def remove_peripheral_subsystem(self, name: str):
         """

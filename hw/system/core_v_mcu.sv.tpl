@@ -5,7 +5,11 @@
 // Top-level module for the Core-V MCU design.
 // Author: Luigi Giuffrida <luigi.giuffrida@polito.it>
 //
+<%
 
+    peripherals = [peripheral.get_name() for peripheral in xalp.get_peripherals()]
+    masters = [master.get_name() for master in xalp.bus().get_masters()]
+%>
 module core_v_mcu (
 
     input logic clk_i,
@@ -193,6 +197,7 @@ module core_v_mcu (
     //                                       ░░░░░                                                           
     // 
 
+% if "soc_ctrl" in peripherals:
     soc_ctrl #(
         .reg_req_t(core_v_mcu_pkg::reg_req_t),
         .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
@@ -205,7 +210,9 @@ module core_v_mcu (
         .exit_valid_o (exit_valid_o),
         .exit_value_o (exit_value_o)
     );
+% endif
 
+% if "bootrom" in peripherals:
     bootrom_subsystem #(
         .reg_req_t(core_v_mcu_pkg::reg_req_t),
         .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
@@ -213,9 +220,11 @@ module core_v_mcu (
         .reg_req_i(reg_req_sig[BOOTROM_REG_IDX]),
         .reg_rsp_o(reg_rsp_sig[BOOTROM_REG_IDX])
     );
+% endif
 
     assign fast_intr = '0;  // No external fast interrupts for now
 
+% if "fast_intr_ctrl" in peripherals:
     fast_intr_ctrl #(
         .reg_req_t(core_v_mcu_pkg::reg_req_t),
         .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
@@ -230,7 +239,9 @@ module core_v_mcu (
         .fast_intr_i(fast_intr),
         .fast_intr_o(fast_irq)
     );
+% endif
 
+% if "uart" in peripherals:
     uart_subsystem u_uart_subsystem (
         .clk_i                    (clk_i),
         .rst_ni                   (rst_ni),
@@ -247,7 +258,9 @@ module core_v_mcu (
         .uart_intr_rx_timeout_o   (),
         .uart_intr_rx_parity_err_o()
     );
+% endif
 
+% if "debug_module" in masters :
     debug_subsystem u_debug_subsystem (
         .clk_i (clk_i),
         .rst_ni(rst_ni),
@@ -273,5 +286,6 @@ module core_v_mcu (
         .dbg_req_o    (debug_req),
         .ndmreset_o   (ndmreset)
     );
+% endif
 
 endmodule

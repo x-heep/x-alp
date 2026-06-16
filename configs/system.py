@@ -45,7 +45,7 @@ def config():
     # Memory subsystem
     # ------------------------------------------------------------
     memory = MemorySS()
-    memory.add_ram_banks([64])
+    memory.add_ram_banks([64] * 2)
     memory.add_linker_section(LinkerSection.by_size("code", 0, 0x00008000))
     memory.add_linker_section(LinkerSection("data", 0x00008000, None))
 
@@ -55,8 +55,8 @@ def config():
     # A slave with an AXI slave port becomes a direct crossbar slave window.
     # ------------------------------------------------------------
     bus.add_slave(BusSlave("mem", 0x00000000, memory.ram_size_address()))
-    bus.add_slave(BusSlave("debug_module", 0x00010000, 0x00010000))
-    bus.add_slave(BusSlave("ext_slave", 0x10020000, 0x00010000))
+    bus.add_slave(BusSlave("debug_module"))
+    bus.add_slave(BusSlave("ext_slave"))
 
     # ------------------------------------------------------------
     # System
@@ -86,13 +86,8 @@ def config():
         peripherals=[
             SOC_ctrl(),
             Bootrom(),
-            SPI_flash(),
-            SPI_memio(),
-            DMA(),
-            Power_manager(),
-            RV_timer_ao(),
-            Fast_intr_ctrl(),
             Ext_peripheral(),
+            Fast_intr_ctrl(),
             UART(),
         ],
     )

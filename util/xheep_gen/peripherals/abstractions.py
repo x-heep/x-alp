@@ -385,6 +385,18 @@ class PeripheralDomain:
         """
         return self._length
 
+    def set_start_address(self, start_address: int):
+        """
+        :param int start_address: The start address of the peripheral domain.
+        """
+        self._start_address = start_address
+
+    def set_length(self, length: int):
+        """
+        :param int length: The length of the peripheral domain in bytes.
+        """
+        self._length = length
+
     def get_peripherals(self):
         """
         :return: A copy of the list of peripherals in the domain.

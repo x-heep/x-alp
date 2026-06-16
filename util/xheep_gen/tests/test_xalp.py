@@ -14,6 +14,7 @@ from cpu.cva6 import cva6
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import UserPeripheral
 from peripherals.base_peripherals import SOC_ctrl
+from peripherals.base_peripherals import Bootrom
 from peripherals.abstractions import PeripheralDomain
 from xalp import XAlp
 from xheep import XHeep
@@ -70,7 +71,7 @@ class TestValidate:
             system.validate()
 
     def test_bus_peripherals_satisfy_minimum_peripherals(self):
-        system = XAlp(Bus(BusType.NtoM, [SOC_ctrl()]))
+        system = XAlp(Bus(BusType.NtoM, [SOC_ctrl(), Bootrom()]))
         system.set_cpu(cva6())
         system.set_memory_ss(make_valid_memory())
 
