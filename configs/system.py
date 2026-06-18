@@ -21,6 +21,7 @@ from peripherals.base_peripherals import (
     RV_timer_ao,
     Fast_intr_ctrl,
     Ext_peripheral,
+    LLC
 )
 from peripherals.user_peripherals import (
     UART,
@@ -42,21 +43,18 @@ def config():
     bus.add_master(AxiMaster("ext_master"))
 
     # ------------------------------------------------------------
-    # Memory subsystem
-    # ------------------------------------------------------------
-    memory = MemorySS()
-    memory.add_ram_banks([64] * 2)
-    memory.add_linker_section(LinkerSection.by_size("code", 0, 0x00008000))
-    memory.add_linker_section(LinkerSection("data", 0x00008000, None))
-
-    # ------------------------------------------------------------
     # AXI slaves
     #
     # A slave with an AXI slave port becomes a direct crossbar slave window.
     # ------------------------------------------------------------
-    bus.add_slave(BusSlave("mem", 0x00000000, memory.ram_size_address()))
     bus.add_slave(BusSlave("debug_module"))
     bus.add_slave(BusSlave("ext_slave"))
+
+    # ------------------------------------------------------------
+    # Memory section
+    # ------------------------------------------------------------
+    
+    llc = LLC(size=0x10000)
 
     # ------------------------------------------------------------
     # System
@@ -64,7 +62,7 @@ def config():
     system = XAlp(bus)
 
     system.set_cpu(cva6())
-    system.set_memory_ss(memory)
+    system.set_cache(llc)
 
     # ------------------------------------------------------------
     # Peripheral subsystem
@@ -88,7 +86,9 @@ def config():
             Bootrom(),
             Ext_peripheral(),
             Fast_intr_ctrl(),
-            UART(),
+            UART("UART0"),
+            UART("UART1"),
+            llc,
         ],
     )
     system.connect_peripheral_subsystem(peripherals)

@@ -1,9 +1,10 @@
 from copy import deepcopy
 
-from bus import Bus
+from bus import Bus, BusSlave
 from cpu.cpu import CPU
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import PeripheralDomain
+from peripherals.base_peripherals.llc import LLC
 from system import System
 
 
@@ -35,6 +36,7 @@ class XAlp(System):
         "pad_control",
         "soc_ctrl",
         "uart",
+        "axi_llc",
     ]
     """Constant list of peripheral names available for X-ALP."""
 
@@ -158,3 +160,9 @@ class XAlp(System):
         return [
             deepcopy(ss) for ss in self._peripheral_subsystems if ss.has_clock_gating()
         ]
+
+    def set_cache(self, cache: LLC):
+        self._bus.add_slave(BusSlave("llc", cache.get_start_address(), cache.get_length()))
+
+    def validate(self):
+        pass

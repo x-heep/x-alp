@@ -108,7 +108,9 @@ module testharness #(
         .ext_mst_rsp_o(),
         .ext_reg_req_o(),
         .ext_reg_rsp_i('0),
-        .test_mode_i  (1'b0)
+        .test_mode_i  (1'b0),
+        .ext_llc_req_o(),
+        .ext_llc_rsp_i()
     );
 
     // --------

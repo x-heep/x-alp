@@ -33,6 +33,10 @@ module core_v_mcu (
     // Test mode
     input logic test_mode_i,
 
+    // LLC External Interface
+    output core_v_mcu_pkg::axi_mst_req_t ext_llc_req_o,
+    input  core_v_mcu_pkg::axi_mst_rsp_t ext_llc_rsp_i,  
+
     // External Peripheral Interface
     output core_v_mcu_pkg::axi_slv_req_t ext_slv_req_o,
     input  core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp_i,
@@ -106,7 +110,7 @@ module core_v_mcu (
     cpu_subsystem u_cpu_subsystem (
         .clk_i      (clk_i),
         .rst_ni     (cpu_rst_n),
-        .boot_addr_i(core_v_mcu_pkg::BOOT_ADDR),
+        .boot_addr_i(BOOT_ADDR),
 
         // .cvxif_resp_o (),
         // .cvxif_req_i('0),
@@ -133,11 +137,35 @@ module core_v_mcu (
     //                                                               ░░░░░░    
     // 
 
-    memory_subsystem u_memory_subsystem (
-        .clk_i    (clk_i),
-        .rst_ni   (rst_ni),
-        .bus_req_i(axi_slave_req_sig[MEM_S_BUS_IDX]),
-        .bus_rsp_o(axi_slave_rsp_sig[MEM_S_BUS_IDX])
+    axi_llc_reg_wrap #(
+        .SetAssociativity(32'd16),
+        .NumLines(32'd256),
+        .NumBlocks(32'd8),
+        .AxiIdWidth(AxiSlvIdWidth),
+        .AxiAddrWidth(AxiAddrWidth),
+        .AxiDataWidth(AxiDataWidth),
+        .AxiUserWidth(AxiUserWidth),
+        .reg_req_t(reg_req_t),
+        .reg_resp_t(reg_rsp_t),
+        .slv_req_t(axi_slv_req_t),
+        .slv_resp_t(axi_slv_rsp_t),
+        .mst_req_t(axi_mst_req_t),
+        .mst_resp_t(axi_mst_rsp_t),
+        .rule_full_t(rule_t)
+    ) u_axi_llc (
+        .clk_i(clk_i),
+        .rst_ni(rst_ni),
+        .test_i('0),
+        .slv_req_i(axi_slave_req_sig[LLC_S_BUS_IDX]),
+        .slv_resp_o(axi_slave_rsp_sig[LLC_S_BUS_IDX]),
+        .mst_req_o(ext_llc_req_o),
+        .mst_resp_i(ext_llc_rsp_i),
+        .conf_req_i(reg_req_sig[AXI_LLC_REG_IDX]),
+        .conf_resp_o(reg_rsp_sig[AXI_LLC_REG_IDX]),
+        .cached_start_addr_i(64'h0_8000_0000),
+        .cached_end_addr_i(64'h1_0000_0000),
+        .spm_start_addr_i('0),
+        .axi_llc_events_o()
     );
 
     //
@@ -199,8 +227,8 @@ module core_v_mcu (
 
 % if "soc_ctrl" in peripherals:
     soc_ctrl #(
-        .reg_req_t(core_v_mcu_pkg::reg_req_t),
-        .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
+        .reg_req_t(reg_req_t),
+        .reg_rsp_t(reg_rsp_t)
     ) u_soc_ctrl (
         .clk_i        (clk_i),
         .rst_ni       (rst_ni),
@@ -214,8 +242,8 @@ module core_v_mcu (
 
 % if "bootrom" in peripherals:
     bootrom_subsystem #(
-        .reg_req_t(core_v_mcu_pkg::reg_req_t),
-        .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
+        .reg_req_t(reg_req_t),
+        .reg_rsp_t(reg_rsp_t)
     ) u_bootrom_subsystem (
         .reg_req_i(reg_req_sig[BOOTROM_REG_IDX]),
         .reg_rsp_o(reg_rsp_sig[BOOTROM_REG_IDX])
@@ -226,8 +254,8 @@ module core_v_mcu (
 
 % if "fast_intr_ctrl" in peripherals:
     fast_intr_ctrl #(
-        .reg_req_t(core_v_mcu_pkg::reg_req_t),
-        .reg_rsp_t(core_v_mcu_pkg::reg_rsp_t)
+        .reg_req_t(reg_req_t),
+        .reg_rsp_t(reg_rsp_t)
     ) u_fast_intr_ctrl (
         .clk_i (clk_i),
         .rst_ni(rst_ni),

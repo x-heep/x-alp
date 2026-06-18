@@ -203,7 +203,6 @@ def generate_xalp(args):
     # accessors such as get_padring()) render unchanged for both systems.
     kwargs = {
         "xalp": xalp,
-        "xheep": xalp,
     }
 
     return kwargs

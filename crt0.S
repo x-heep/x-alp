@@ -112,17 +112,17 @@ _fp_init:
     // Set FS state to "Clean"
     csrrc x0, mstatus, t1
 
-    // Call initialization function
-    call cvm_init
+    // Call initialization function for cheshire
+    call cheshire_init
 
     // Full fence, then jump to main
     fence
     call main
 
-// If main returns, we end up here. This is a local label (not the libc _exit,
-// which lives in syscalls.c) used solely to hand control back to the boot context.
+// If main returns, we end up here
+.global _exit
 .align 4
-_crt_return:
+_exit:
     // Restore the original context registers (sp last)
     ld ra, 16(sp)
     ld gp, 8(sp)
@@ -130,7 +130,7 @@ _crt_return:
     // Save the return value to scratch register 2 and wait forever.
     slli t0, a0, 1
     ori  t0, t0, 1
-    la t1, __base_soc_ctrl
+    la t1, __base_regs
     sw t0, 8(t1)     // regs.SCRATCH[2]
     // Hand over to whatever called us, passing return
     ret

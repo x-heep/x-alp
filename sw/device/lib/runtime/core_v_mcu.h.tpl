@@ -30,6 +30,22 @@ extern "C" {
 #define ${r["macro"]}_END_ADDRESS (${r["macro"]}_BASE_ADDRESS + ${r["macro"]}_SIZE)
 
 % endfor
+<%
+    base_axi = [s for s in xalp.bus().get_axi_slaves() if "Peripheral" not in s["name"] and "llc" not in s["name"]]
+    base_reg = xalp.bus().get_reg_slaves()
+%>
+// Linker-defined base address symbols (from common.ldh). The *address* of each
+// symbol is the corresponding base address; use as &__base_<name>.
+#ifndef __ASSEMBLER__
+% for s in base_axi:
+extern char __base_${s["name"]};
+% endfor
+% for r in base_reg:
+extern char __base_${r["name"]};
+% endfor
+extern char __base_spm;
+extern char __base_dram;
+#endif // __ASSEMBLER__
 
 #ifdef __cplusplus
 } // extern "C"

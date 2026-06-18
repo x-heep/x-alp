@@ -1,0 +1,44 @@
+/* Copyright 2022 ETH Zurich and University of Bologna. */
+/* Copyright 2026 Politecnico di Torino. */
+/* Licensed under the Apache License, Version 2.0, see LICENSE for details. */
+/* SPDX-License-Identifier: Apache-2.0 */
+
+/* Author: Luigi Giuffrida <luigi.giuffrida@polito.it> */
+
+/* This header defines symbols and rules universal to bare-metal execution */
+
+
+
+ENTRY(_start)
+
+MEMORY {
+  bootrom (rx)  : ORIGIN = 0x20010000, LENGTH = 16K
+  /* We assume at least 64 KiB SPM, same minus stack for ROMs. */
+  /* If more SPM is available, CRT0 repoints the stack. */
+  extrom (rx)   : ORIGIN = 0x00000000, LENGTH = 48K
+  spm (rwx)     : ORIGIN = 0x00002000, LENGTH = 64K
+  /* We  assume at least 8 MiB of DRAM (minimum for Linux). */
+  dram (rwx)    : ORIGIN = 0x80000000, LENGTH = 1024M
+}
+
+SECTIONS {
+  /* Keep binaries lean */
+  /DISCARD/ : { *(.riscv.attributes) *(.comment) }
+
+  /* Global and stack pointer */
+  /* By default, keep the calling context (boot ROM) stack pointer */
+  __global_pointer$ = ADDR(.misc) + SIZEOF(.misc) / 2;
+  __stack_pointer$  = 0;
+
+  /* Further addresses */
+  __base_debug_module   = 0x00000000;
+  __base_ext_slave      = 0x00001000;
+  __base_soc_ctrl       = 0x20000000;
+  __base_bootrom        = 0x20010000;
+  __base_ext_peripheral = 0x20020000;
+  __base_fast_intr_ctrl = 0x20030000;
+  __base_uart           = 0x20040000;
+  __base_axi_llc        = 0x20050000;
+  __base_spm            = ORIGIN(spm);
+  __base_dram           = ORIGIN(dram);
+}

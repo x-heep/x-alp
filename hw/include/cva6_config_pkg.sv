@@ -197,8 +197,8 @@ package cva6_config_pkg;
         }
         ),
         NrCachedRegionRules: unsigned'(1),
-        CachedRegionAddrBase: 1024'({core_v_mcu_pkg::MEM_BUS_BASE_ADDR}),
-        CachedRegionLength: 1024'({core_v_mcu_pkg::MEM_BUS_SIZE}),
+        CachedRegionAddrBase: 1024'({core_v_mcu_pkg::LLC_BUS_BASE_ADDR}),
+        CachedRegionLength: 1024'({core_v_mcu_pkg::LLC_BUS_SIZE}),
         MaxOutstandingStores: unsigned'(7),
         DebugEn: bit'(1),
         SDTRIG: bit'(0),

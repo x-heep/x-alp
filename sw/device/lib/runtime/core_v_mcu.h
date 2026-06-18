@@ -13,20 +13,20 @@ extern "C" {
 
 // AXI slave windows. Primary macro is <NAME>_START_ADDRESS; <NAME>_BASE_ADDRESS
 // is provided as an alias so firmware can use either name.
-#define MEM_START_ADDRESS 0x0000000000000000
-#define MEM_BASE_ADDRESS MEM_START_ADDRESS
-#define MEM_SIZE 0x0000000000020000
-#define MEM_END_ADDRESS (MEM_START_ADDRESS + MEM_SIZE)
-
-#define DEBUG_MODULE_START_ADDRESS 0x0000000000020000
+#define DEBUG_MODULE_START_ADDRESS 0x0000000000000000
 #define DEBUG_MODULE_BASE_ADDRESS DEBUG_MODULE_START_ADDRESS
 #define DEBUG_MODULE_SIZE 0x0000000000001000
 #define DEBUG_MODULE_END_ADDRESS (DEBUG_MODULE_START_ADDRESS + DEBUG_MODULE_SIZE)
 
-#define EXT_SLAVE_START_ADDRESS 0x0000000000021000
+#define EXT_SLAVE_START_ADDRESS 0x0000000000001000
 #define EXT_SLAVE_BASE_ADDRESS EXT_SLAVE_START_ADDRESS
 #define EXT_SLAVE_SIZE 0x0000000000001000
 #define EXT_SLAVE_END_ADDRESS (EXT_SLAVE_START_ADDRESS + EXT_SLAVE_SIZE)
+
+#define LLC_START_ADDRESS 0x0000000000002000
+#define LLC_BASE_ADDRESS LLC_START_ADDRESS
+#define LLC_SIZE 0x0000000000010000
+#define LLC_END_ADDRESS (LLC_START_ADDRESS + LLC_SIZE)
 
 #define PERIPHERALS_START_ADDRESS 0x0000000020000000
 #define PERIPHERALS_BASE_ADDRESS PERIPHERALS_START_ADDRESS
@@ -59,6 +59,26 @@ extern "C" {
 #define UART_START_ADDRESS UART_BASE_ADDRESS
 #define UART_SIZE 0x0000000000010000
 #define UART_END_ADDRESS (UART_BASE_ADDRESS + UART_SIZE)
+
+#define AXI_LLC_BASE_ADDRESS 0x0000000020050000
+#define AXI_LLC_START_ADDRESS AXI_LLC_BASE_ADDRESS
+#define AXI_LLC_SIZE 0x0000000000010000
+#define AXI_LLC_END_ADDRESS (AXI_LLC_BASE_ADDRESS + AXI_LLC_SIZE)
+
+// Linker-defined base address symbols (from common.ldh). The *address* of each
+// symbol is the corresponding base address; use as &__base_<name>.
+#ifndef __ASSEMBLER__
+extern char __base_debug_module;
+extern char __base_ext_slave;
+extern char __base_soc_ctrl;
+extern char __base_bootrom;
+extern char __base_ext_peripheral;
+extern char __base_fast_intr_ctrl;
+extern char __base_uart;
+extern char __base_axi_llc;
+extern char __base_spm;
+extern char __base_dram;
+#endif // __ASSEMBLER__
 
 #ifdef __cplusplus
 } // extern "C"

@@ -268,21 +268,22 @@ endif()
 #      SET CRT AND LINKER TYPE
 #######################################################################
 
-# Get the correct path for the crt files and linker file
-if (${LINKER} STREQUAL "on_chip")
-  #SET(LIB_CRT_P "${SOURCE_PATH}device/lib/crt/")
-  SET(CRT_TYPE "ON_CHIP")
-  SET(LINK_FILE "link.ld")
-elseif(${LINKER} STREQUAL "flash_load")
-  #SET(LIB_CRT_P "${SOURCE_PATH}device/lib/crt_flash_load/")
-  SET(CRT_TYPE "FLASH_LOAD")
-  SET(LINK_FILE "link_flash_load.ld")
-elseif(${LINKER} STREQUAL "flash_exec")
-  #SET(LIB_CRT_P	"${SOURCE_PATH}device/lib/crt_flash_exec/")
-  SET(CRT_TYPE "FLASH_EXEC")
-  SET(LINK_FILE "link_flash_exec.ld")
+# Get the correct path for the crt files and linker file.
+# LINKER selects the target memory the program is linked into:
+#   spm  -> on-chip scratchpad (spm.ld)
+#   dram -> external DRAM behind the LLC (dram.ld)
+#   rom  -> execute-in-place from ext ROM, data in SPM (rom.ld)
+if (${LINKER} STREQUAL "spm")
+  SET(CRT_TYPE "SPM")
+  SET(LINK_FILE "spm.ld")
+elseif (${LINKER} STREQUAL "dram")
+  SET(CRT_TYPE "DRAM")
+  SET(LINK_FILE "dram.ld")
+elseif (${LINKER} STREQUAL "rom")
+  SET(CRT_TYPE "ROM")
+  SET(LINK_FILE "rom.ld")
 else()
-  message( FATAL_ERROR "Linker specification is not correct" )
+  message( FATAL_ERROR "Linker specification is not correct: '${LINKER}' (use spm, dram or rom)" )
 endif()
 
 if (${VERBOSE} MATCHES "true")
@@ -448,6 +449,7 @@ if (${COMPILER} MATCHES "clang" AND NOT CLANG_LINKER_USE_LD)
                               -Wl,-Map=${MAINFILE}.map \
                               -Wl,--gc-sections \
                               -Wl,--allow-multiple-definition \
+                              -L ${LINK_FOLDER} \
                               -L ${RISCV_XALP}/${COMPILER_PREFIX}elf/lib \
                               -lc -lm -lgcc -flto \
                               -fpermissive -fno-rtti -fno-exceptions -fno-threadsafe-statics \
@@ -464,6 +466,7 @@ else()
                               -static \
                               -Wl,-Map=${MAINFILE}.map \
                               -Wl,--gc-sections \
+                              -L ${LINK_FOLDER} \
                               -lm -lgcc -flto \
                               -fpermissive -fno-rtti -fno-exceptions -fno-threadsafe-statics \
                               -ffunction-sections -fdata-sections")
@@ -514,18 +517,12 @@ add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
         COMMENT "Invoking: Disassemble (${CMAKE_OBJDUMP})")
 
 # Post processing command to create a hex file
-if((${LINKER} STREQUAL "flash_load") OR (${LINKER} STREQUAL "flash_exec"))
-    add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
-            COMMAND ${CMAKE_OBJCOPY} -O verilog --adjust-vma=-0x40000000 ${MAINFILE}.elf ${MAINFILE}.hex
-            COMMENT "Invoking: Hexdump")
-else()
-    add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
-            COMMAND ${CMAKE_OBJCOPY} -O verilog  ${MAINFILE}.elf ${MAINFILE}.hex
-            COMMENT "Invoking: Hexdump")
-    add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
-            COMMAND ${CMAKE_OBJCOPY} --srec-forceS3 --srec-len 1 -O srec ${MAINFILE}.elf ${MAINFILE}.hex.srec
-            COMMENT "Invoking: SREC Hexdump")
-endif()
+add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O verilog  ${MAINFILE}.elf ${MAINFILE}.hex
+        COMMENT "Invoking: Hexdump")
+add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} --srec-forceS3 --srec-len 1 -O srec ${MAINFILE}.elf ${MAINFILE}.hex.srec
+        COMMENT "Invoking: SREC Hexdump")
 
 add_custom_command(TARGET ${MAINFILE}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O binary  ${MAINFILE}.elf  ${MAINFILE}.bin
