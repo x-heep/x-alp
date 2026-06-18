@@ -135,14 +135,14 @@ package core_v_mcu_pkg;
     //----------
 
 % for pad in xheep.get_padring().pad_list:
-    % if pad.global_index is not None:
-        localparam PAD_${pad.name.upper()} = ${pad.global_index};
-    % endif
+  % if pad.global_index is not None:
+    localparam PAD_${pad.name.upper()} = ${pad.global_index};
+  % endif
 % endfor
 
-  localparam NUM_PAD = ${len(xheep.get_padring().pad_list)};
+    localparam NUM_PAD = ${len(xalp.get_padring().pad_list)};
 
-  localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
+    localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
 
 
 endpackage : core_v_mcu_pkg
