@@ -162,7 +162,27 @@ class XAlp(System):
         ]
 
     def set_cache(self, cache: LLC):
-        self._bus.add_slave(BusSlave("llc", cache.get_start_address(), cache.get_length()))
+        """
+        Connect the last-level cache to the bus.
+
+        The LLC is a single crossbar port answering two disjoint windows: its
+        scratchpad ("llc") and the cached region ("dram") it backs with the
+        memory on its master port. Both are registered here so the decoder
+        routes them to the same port.
+
+        :param LLC cache: The cache to connect.
+        """
+        self._cache = cache
+        llc = BusSlave("llc", cache.get_spm_start(), cache.get_spm_size())
+        llc.add_window("dram", cache.get_cached_start(), cache.get_cached_size())
+        self._bus.add_slave(llc)
+
+    def get_cache(self) -> LLC:
+        """
+        :return: the last-level cache connected to the bus, or `None`.
+        :rtype: LLC
+        """
+        return getattr(self, "_cache", None)
 
     def validate(self):
         pass

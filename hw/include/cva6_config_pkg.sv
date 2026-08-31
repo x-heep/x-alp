@@ -179,13 +179,14 @@ package cva6_config_pkg;
             core_v_mcu_pkg::EXT_PERIPHERAL_REG_SIZE
         }
         ),
-        NrExecuteRegionRules: unsigned'(3),
+        NrExecuteRegionRules: unsigned'(4),
         ExecuteRegionAddrBase:
         1024'(
         {
             core_v_mcu_pkg::DEBUG_MODULE_BUS_BASE_ADDR,
             core_v_mcu_pkg::BOOTROM_REG_BASE_ADDR,
-            core_v_mcu_pkg::CODE_ZONE_BASE_ADDR
+            core_v_mcu_pkg::LLC_BUS_BASE_ADDR,
+            core_v_mcu_pkg::DRAM_BUS_BASE_ADDR
         }
         ),
         ExecuteRegionLength:
@@ -193,12 +194,16 @@ package cva6_config_pkg;
         {
             core_v_mcu_pkg::DEBUG_MODULE_BUS_SIZE,
             core_v_mcu_pkg::BOOTROM_REG_SIZE,
-            core_v_mcu_pkg::CODE_ZONE_SIZE
+            core_v_mcu_pkg::LLC_BUS_SIZE,
+            core_v_mcu_pkg::DRAM_BUS_SIZE
         }
         ),
-        NrCachedRegionRules: unsigned'(1),
-        CachedRegionAddrBase: 1024'({core_v_mcu_pkg::LLC_BUS_BASE_ADDR}),
-        CachedRegionLength: 1024'({core_v_mcu_pkg::LLC_BUS_SIZE}),
+        NrCachedRegionRules: unsigned'(2),
+        CachedRegionAddrBase:
+        1024'(
+        {core_v_mcu_pkg::LLC_BUS_BASE_ADDR, core_v_mcu_pkg::DRAM_BUS_BASE_ADDR}
+        ),
+        CachedRegionLength: 1024'({core_v_mcu_pkg::LLC_BUS_SIZE, core_v_mcu_pkg::DRAM_BUS_SIZE}),
         MaxOutstandingStores: unsigned'(7),
         DebugEn: bit'(1),
         SDTRIG: bit'(0),

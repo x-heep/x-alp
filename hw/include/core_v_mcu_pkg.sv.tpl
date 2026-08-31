@@ -70,8 +70,10 @@ package core_v_mcu_pkg;
     localparam int unsigned ${s["macro"]}_S_BUS_IDX = ${s["idx"]};
 % endfor
 
-    // Slave addresses
-% for s in xalp.bus().get_axi_slaves():
+    // Slave addresses (one entry per decoded window; a slave owning several
+    // windows, such as the LLC with its SPM and cached regions, appears once
+    // per window but always decodes to the same port index)
+% for s in xalp.bus().get_axi_addr_rules():
     localparam addr_t ${s["macro"]}_BUS_BASE_ADDR = 64'h${f'{s["base"]:016X}'};
     localparam addr_t ${s["macro"]}_BUS_SIZE = 64'h${f'{s["size"]:016X}'};
     localparam addr_t ${s["macro"]}_BUS_END_ADDR = ${s["macro"]}_BUS_BASE_ADDR + ${s["macro"]}_BUS_SIZE;
@@ -97,10 +99,20 @@ package core_v_mcu_pkg;
     localparam addr_t ${r["macro"]}_REG_END_ADDR = ${r["macro"]}_REG_BASE_ADDR + ${r["macro"]}_REG_SIZE;
 % endfor
 
+    // LLC geometry (the SPM window above is exactly this much storage)
+<%
+    llc = xalp.get_cache()
+%>\
+    localparam int unsigned LLC_SET_ASSOC = ${llc.get_set_assoc()};
+    localparam int unsigned LLC_NUM_LINES = ${llc.get_num_lines()};
+    localparam int unsigned LLC_NUM_BLOCKS = ${llc.get_num_blocks()};
+
     // Address mapping rules
-    localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
-% for s in xalp.bus().get_axi_slaves():
-        '{idx : ${s["macro"]}_S_BUS_IDX, start_addr : ${s["macro"]}_BUS_BASE_ADDR, end_addr : ${s["macro"]}_BUS_END_ADDR}${"" if loop.last else ","}
+    localparam int unsigned NumAddrRules = ${len(xalp.bus().get_axi_addr_rules())};
+
+    localparam rule_t [NumAddrRules-1:0] addr_rules = '{
+% for s in xalp.bus().get_axi_addr_rules():
+        '{idx : ${s["port"]}_S_BUS_IDX, start_addr : ${s["macro"]}_BUS_BASE_ADDR, end_addr : ${s["macro"]}_BUS_END_ADDR}${"" if loop.last else ","}
 % endfor
     };
 
@@ -124,7 +136,7 @@ package core_v_mcu_pkg;
         UniqueIds         : 1'b1,
         AxiAddrWidth     : AxiAddrWidth,
         AxiDataWidth     : AxiDataWidth,
-        NoAddrRules      : totalAxiSlaves
+        NoAddrRules      : NumAddrRules
     };
 
     // Boot address

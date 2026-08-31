@@ -8,21 +8,25 @@
 /* This header defines symbols and rules universal to bare-metal execution */
 
 <%
-    axi = [s for s in xalp.bus().get_axi_slaves() if "Peripheral" not in s["name"] and "llc" not in s["name"]]
+    rules = xalp.bus().get_axi_addr_rules()
+    # "spm" and "dram" get their own MEMORY regions below, so they are dropped
+    # from the flat __base_* list to avoid defining the same symbol twice.
+    axi = [s for s in rules if "Peripheral" not in s["name"] and s["name"] not in ("llc", "dram")]
     reg = xalp.bus().get_reg_slaves()
+    spm = next(s for s in rules if s["name"] == "llc")
+    dram = next(s for s in rules if s["name"] == "dram")
+    bootrom = next(r for r in reg if r["name"] == "bootrom")
     max_len = max(len(s["name"]) for s in axi + reg)
 %>
 
 ENTRY(_start)
 
 MEMORY {
-  bootrom (rx)  : ORIGIN = 0x${f'{next(item for item in xalp.bus().get_reg_slaves() if item["name"] == "bootrom")["base"]:08x}'}, LENGTH = 16K
-  /* We assume at least 64 KiB SPM, same minus stack for ROMs. */
+  bootrom (rx)  : ORIGIN = 0x${f'{bootrom["base"]:08x}'}, LENGTH = 16K
   /* If more SPM is available, CRT0 repoints the stack. */
   extrom (rx)   : ORIGIN = 0x00000000, LENGTH = 48K
-  spm (rwx)     : ORIGIN = 0x${f'{next(item for item in xalp.bus().get_slaves() if item.get_name() == "llc").get_start_address():08x}'}, LENGTH = 64K
-  /* We  assume at least 8 MiB of DRAM (minimum for Linux). */
-  dram (rwx)    : ORIGIN = 0x80000000, LENGTH = 1024M
+  spm (rwx)     : ORIGIN = 0x${f'{spm["base"]:08x}'}, LENGTH = ${spm["size"] // 1024}K
+  dram (rwx)    : ORIGIN = 0x${f'{dram["base"]:08x}'}, LENGTH = ${dram["size"] // 1024}K
 }
 
 SECTIONS {

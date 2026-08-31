@@ -13,7 +13,7 @@ extern "C" {
 
 // AXI slave windows. Primary macro is <NAME>_START_ADDRESS; <NAME>_BASE_ADDRESS
 // is provided as an alias so firmware can use either name.
-% for s in xalp.bus().get_axi_slaves():
+% for s in xalp.bus().get_axi_addr_rules():
 #define ${s["macro"]}_START_ADDRESS 0x${f'{s["base"]:016X}'}
 #define ${s["macro"]}_BASE_ADDRESS ${s["macro"]}_START_ADDRESS
 #define ${s["macro"]}_SIZE 0x${f'{s["size"]:016X}'}
@@ -31,7 +31,7 @@ extern "C" {
 
 % endfor
 <%
-    base_axi = [s for s in xalp.bus().get_axi_slaves() if "Peripheral" not in s["name"] and "llc" not in s["name"]]
+    base_axi = [s for s in xalp.bus().get_axi_addr_rules() if "Peripheral" not in s["name"] and s["name"] not in ("llc", "dram")]
     base_reg = xalp.bus().get_reg_slaves()
 %>
 // Linker-defined base address symbols (from common.ldh). The *address* of each

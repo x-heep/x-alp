@@ -11,15 +11,15 @@
 
 #pragma once
 
-#include "core_v_mcu.h"
 #include "axi_llc_regs.h"
+#include "core_v_mcu.h"
 #include "printf.h"
 #include "util.h"
 
 typedef enum {
-    CVM_COMMON_ENOERR,
-    CVM_COMMON_ERR_UART,
-    CVM_COMMON_ERR_INT,
+  CVM_COMMON_ENOERR,
+  CVM_COMMON_ERR_UART,
+  CVM_COMMON_ERR_INT,
 } cvm_common_err_t;
 
 /**
@@ -29,5 +29,4 @@ typedef enum {
  *   It takes no arguments and returns an error indicating which of the sw
  *   modules failed.
  */
-cvm_common_err_t
-cvm_init(void);
+cvm_common_err_t cvm_init(void);

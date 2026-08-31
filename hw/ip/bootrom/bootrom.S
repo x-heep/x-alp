@@ -10,6 +10,7 @@
 
 #include "core_v_mcu.h"
 #include "soc_ctrl_regs.h"
+#include "axi_llc_regs.h"
 
 #define SOC_CTRL_START_ADDRESS_20bit (SOC_CTRL_BASE_ADDRESS >> 12)
 
@@ -64,7 +65,43 @@ _boot_wait_loop:
     j _boot_wait_loop
 _boot_continue:
     fence
-    lw a0, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET(a1)
+    // lwu, not lw: this is RV64 and a boot address with bit 31 set (e.g. DRAM
+    // at 0x80000000) would sign-extend into 0xFFFFFFFF80000000.
+    lwu a0, SOC_CTRL_BOOT_ADDRESS_REG_OFFSET(a1)
+
+    // Booting out of the LLC scratchpad? Then every way has to be locked as SPM
+    // before the first fetch: the LLC answers an SPM access to a way still
+    // configured as cache with SLVERR, and out of reset no way is locked. This
+    // has to happen here, in the boot ROM, because the payload cannot configure
+    // the memory it is itself being fetched from.
+    li   t1, LLC_START_ADDRESS
+    bltu a0, t1, _boot_jump
+    li   t2, LLC_END_ADDRESS
+    bgeu a0, t2, _boot_jump
+    li   t1, AXI_LLC_BASE_ADDRESS
+    // Out of reset the LLC runs a BIST over its tag storage and writes the
+    // result into CFG_SPM when it finishes. Configuring before that point is
+    // silently undone, so wait for the done flag first.
+_boot_wait_bist:
+    lw   t2, AXI_LLC_BIST_STATUS_REG_OFFSET(t1)
+    andi t2, t2, (1 << AXI_LLC_BIST_STATUS_DONE_BIT)
+    beqz t2, _boot_wait_bist
+
+    li   t2, -1
+    sw   t2, AXI_LLC_CFG_SPM_LOW_REG_OFFSET(t1)
+    sw   t2, AXI_LLC_CFG_SPM_HIGH_REG_OFFSET(t1)
+    li   t2, 1
+    sw   t2, AXI_LLC_COMMIT_CFG_REG_OFFSET(t1)
+    // Wait for the commit to land before fetching from the SPM: while the LLC
+    // applies a new configuration it isolates its slave port, so a fetch issued
+    // now would race the flush. Read CFG_SPM back rather than comparing against
+    // all-ones: only SetAssociativity bits of it are implemented.
+    lw   t0, AXI_LLC_CFG_SPM_LOW_REG_OFFSET(t1)
+_boot_wait_spm:
+    lw   t2, AXI_LLC_FLUSHED_LOW_REG_OFFSET(t1)
+    bne  t2, t0, _boot_wait_spm
+
+_boot_jump:
     fence.i
     jalr 0(a0)
     
@@ -74,12 +111,13 @@ _boot_continue:
 .global _exit
 .align 4
 _exit:
-    // Save the return value to scratch register 2, try `ebreak`, then wait forever
-    slli a0, a0, 1
-    ori  a0, a0, 1
+    // Publish the return value, raise the exit flag, then wait forever. The
+    // testbench polls EXIT_VALID; soc_ctrl keeps value and flag in separate
+    // registers, so both have to be written (value first).
     lui  a1, SOC_CTRL_START_ADDRESS_20bit
     sw   a0, SOC_CTRL_EXIT_VALUE_REG_OFFSET(a1)
-    ebreak
+    li   a0, 1
+    sw   a0, SOC_CTRL_EXIT_VALID_REG_OFFSET(a1)
 1:  wfi
     j 1b
 

@@ -52,9 +52,18 @@ def config():
 
     # ------------------------------------------------------------
     # Memory section
+    #
+    # The LLC is one crossbar port with two windows: its scratchpad
+    # (set_assoc * num_lines * num_blocks * 64/8 = 256 KiB, placed at
+    # 0x10000000) and the cached DRAM region it fronts at 0x80000000.
     # ------------------------------------------------------------
-    
-    llc = LLC(size=0x10000)
+
+    llc = LLC(
+        size=0x10000,
+        spm_start=0x10000000,
+        cached_start=0x80000000,
+        cached_size=0x10000000,
+    )
 
     # ------------------------------------------------------------
     # System
@@ -87,7 +96,6 @@ def config():
             Ext_peripheral(),
             Fast_intr_ctrl(),
             UART("UART0"),
-            UART("UART1"),
             llc,
         ],
     )

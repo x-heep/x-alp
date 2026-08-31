@@ -49,6 +49,13 @@ class BusSlave:
     Exposes the same name/address accessors as peripherals and peripheral
     subsystems so the address generator can treat every AXI slave uniformly.
 
+    A slave may own more than one disjoint address window while still being a
+    single crossbar port: the LLC, for instance, answers both its SPM window
+    and the cached (DRAM) window. The first window is the primary one used for
+    automatic placement and for the ``<MACRO>_BUS_*`` parameters; any window
+    added with :meth:`add_window` only contributes an extra decoder rule
+    pointing at the same port index.
+
     :param str name: The name of the slave window.
     :param int base: The start address of the window.
     :param int size: The size of the window in bytes.
@@ -64,6 +71,27 @@ class BusSlave:
         self._name = name
         self._start_address = base
         self._length = size
+        self._extra_windows = []
+
+    def add_window(self, name: str, base: int, size: int):
+        """
+        Add a secondary address window decoded to this same crossbar port.
+
+        :param str name: Name of the window (used for its address parameters).
+        :param int base: The start address of the window.
+        :param int size: The size of the window in bytes.
+        """
+        if type(name) is not str or name == "":
+            raise ValueError("BusSlave window name should be a non-empty string")
+        if type(base) is not int or base < 0:
+            raise ValueError("BusSlave window base should be a positive integer")
+        if type(size) is not int or size <= 0:
+            raise ValueError("BusSlave window size should be a strictly positive integer")
+        self._extra_windows.append({"name": name, "base": base, "size": size})
+
+    def get_extra_windows(self):
+        """:return: the secondary windows decoded to this slave, as ``{name, base, size}``."""
+        return list(self._extra_windows)
 
     def get_name(self) -> str:
         """:return: the name of the slave window."""
@@ -313,13 +341,15 @@ class Bus:
         self._validate_axi_slaves()
 
     def _validate_axi_slaves(self):
-        slaves = sorted(self._slaves, key=lambda s: s.get_start_address())
-        for current, nxt in zip(slaves, slaves[1:]):
-            current_end = current.get_start_address() + current.get_length()
-            if current_end > nxt.get_start_address():
+        # Validated per window, not per slave: a slave may own several disjoint
+        # windows (e.g. the LLC's SPM and cached regions), and every one of them
+        # becomes its own decoder rule that must not overlap any other.
+        windows = sorted(self.get_axi_addr_rules(), key=lambda w: w["base"])
+        for current, nxt in zip(windows, windows[1:]):
+            if current["end"] > nxt["base"]:
                 raise ValueError(
-                    f"AXI slave {current.get_name()} (ends at {hex(current_end)}) "
-                    f"overlaps {nxt.get_name()} (starts at {hex(nxt.get_start_address())})"
+                    f"AXI window {current['name']} (ends at {hex(current['end'])}) "
+                    f"overlaps {nxt['name']} (starts at {hex(nxt['base'])})"
                 )
 
     def get_axi_masters(self):
@@ -352,6 +382,33 @@ class Bus:
                 }
             )
         return result
+
+    def get_axi_addr_rules(self):
+        """
+        :return: One decoder rule per AXI address window, as
+            ``{name, macro, port, idx, base, size, end}``. ``macro`` names the
+            window itself while ``port`` names the slave owning the crossbar
+            port, so a slave with secondary windows (see
+            :meth:`BusSlave.add_window`) contributes one rule per window, all
+            pointing at the same port index.
+        :rtype: list[dict]
+        """
+        rules = []
+        for entry, slave in zip(self.get_axi_slaves(), self._slaves):
+            rules.append(dict(entry, port=entry["macro"]))
+            for window in getattr(slave, "get_extra_windows", list)():
+                rules.append(
+                    {
+                        "name": window["name"],
+                        "macro": _macro_name(window["name"]),
+                        "port": entry["macro"],
+                        "idx": entry["idx"],
+                        "base": window["base"],
+                        "size": window["size"],
+                        "end": window["base"] + window["size"],
+                    }
+                )
+        return rules
 
     def get_reg_slaves(self):
         """

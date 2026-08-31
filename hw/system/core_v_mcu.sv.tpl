@@ -137,10 +137,13 @@ module core_v_mcu (
     //                                                               ░░░░░░    
     // 
 
+<%
+    llc = xalp.get_cache()
+%>\
     axi_llc_reg_wrap #(
-        .SetAssociativity(32'd16),
-        .NumLines(32'd256),
-        .NumBlocks(32'd8),
+        .SetAssociativity(32'd${llc.get_set_assoc()}),
+        .NumLines(32'd${llc.get_num_lines()}),
+        .NumBlocks(32'd${llc.get_num_blocks()}),
         .AxiIdWidth(AxiSlvIdWidth),
         .AxiAddrWidth(AxiAddrWidth),
         .AxiDataWidth(AxiDataWidth),
@@ -162,9 +165,11 @@ module core_v_mcu (
         .mst_resp_i(ext_llc_rsp_i),
         .conf_req_i(reg_req_sig[AXI_LLC_REG_IDX]),
         .conf_resp_o(reg_rsp_sig[AXI_LLC_REG_IDX]),
-        .cached_start_addr_i(64'h0_8000_0000),
-        .cached_end_addr_i(64'h1_0000_0000),
-        .spm_start_addr_i('0),
+        // The LLC re-decodes what the crossbar already routed to it, so these
+        // must be the very same windows the decoder uses for this port.
+        .cached_start_addr_i(DRAM_BUS_BASE_ADDR),
+        .cached_end_addr_i(DRAM_BUS_END_ADDR),
+        .spm_start_addr_i(LLC_BUS_BASE_ADDR),
         .axi_llc_events_o()
     );
 

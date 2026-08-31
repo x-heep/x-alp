@@ -4,7 +4,7 @@
 // Copyright 2018-2021 ETH Zurich and University of Bologna.
 
 // Licensing information found in source file:
-// 
+//
 // SPDX-License-Identifier: SHL-0.51
 
 #ifndef _AXI_LLC_REG_DEFS_
@@ -73,7 +73,7 @@ extern "C" {
 #define AXI_LLC_BIST_STATUS_DONE_BIT 0
 
 #ifdef __cplusplus
-}  // extern "C"
+} // extern "C"
 #endif
-#endif  // _AXI_LLC_REG_DEFS_
-// End generated register defines for axi_llc
+#endif // _AXI_LLC_REG_DEFS_
+       // End generated register defines for axi_llc

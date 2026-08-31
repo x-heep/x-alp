@@ -9,6 +9,9 @@
 INCLUDE common.ldh
 
 SECTIONS {
+  /* Data lives in the SPM, so the stack goes at the top of it. */
+  __stack_pointer$  = ORIGIN(spm) + LENGTH(spm) - 8;
+
   /* Put all LOAD sections in one contiguous output section */
   .misc : {
     *(.text._start)

@@ -50,7 +50,7 @@
       desc:     "Boot Address Value - Used in the boot rom or power-on-reset functions"
       resval:   "0x00000300"
       swaccess: "rw"
-      hwaccess: "hro"
+      hwaccess: "hrw"
       fields: [
         { bits: "31:0", name: "BOOT_ADDRESS", desc: "Boot Address Reg" }
       ]

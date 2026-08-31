@@ -127,11 +127,12 @@ _crt_return:
     ld ra, 16(sp)
     ld gp, 8(sp)
     ld sp, 0(sp)
-    // Save the return value to scratch register 2 and wait forever.
-    slli t0, a0, 1
-    ori  t0, t0, 1
+    // Publish the return value and raise the exit flag (value first): the
+    // caller may be the boot ROM, or nobody at all under JTAG.
     la t1, __base_soc_ctrl
-    sw t0, 8(t1)     // regs.SCRATCH[2]
+    sw a0, 4(t1)     // SOC_CTRL.EXIT_VALUE
+    li t0, 1
+    sw t0, 0(t1)     // SOC_CTRL.EXIT_VALID
     // Hand over to whatever called us, passing return
     ret
 

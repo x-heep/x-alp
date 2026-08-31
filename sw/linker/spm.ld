@@ -9,6 +9,11 @@
 INCLUDE common.ldh
 
 SECTIONS {
+  /* The boot ROM hands over without a stack of its own, so CRT0 has to be
+     given one; without this sp keeps its reset value and the first push
+     faults. */
+  __stack_pointer$  = ORIGIN(spm) + LENGTH(spm) - 8;
+
   .text : {
     *(.text._start)
     *(.text)
