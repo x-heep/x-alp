@@ -14,20 +14,20 @@ package core_v_mcu_pkg;
     //-----------
     // BUS Config
     //-----------
-    localparam int unsigned NumAxiMasters = 2;
-    localparam int unsigned NumExtAxiMasters = 1;
+    localparam int unsigned NumAxiMasters = ${len(xalp.bus().get_axi_masters())};
+    // localparam int unsigned NumExtAxiMasters = 1;
 
-    localparam int unsigned totalAxiMasters = NumAxiMasters + NumExtAxiMasters;
+    localparam int unsigned totalAxiMasters = NumAxiMasters;
 
-    localparam int unsigned NumAxiSlaves = 3;
-    localparam int unsigned NumExtAxiSlaves = 1;
+    localparam int unsigned NumAxiSlaves = ${len(xalp.bus().get_axi_slaves())};
+    // localparam int unsigned NumExtAxiSlaves = 1;
 
-    localparam int unsigned totalAxiSlaves = NumAxiSlaves + NumExtAxiSlaves;
+    localparam int unsigned totalAxiSlaves = NumAxiSlaves;
 
-    localparam int unsigned NumRegSlaves = 4;
-    localparam int unsigned NumExtRegSlaves = 1;
+    localparam int unsigned NumRegSlaves = ${len(xalp.bus().get_reg_slaves())};
+    // localparam int unsigned NumExtRegSlaves = 1;
 
-    localparam int unsigned totalRegSlaves = NumRegSlaves + NumExtRegSlaves;
+    localparam int unsigned totalRegSlaves = NumRegSlaves;
 
     // AXI configuration parameters
     localparam int unsigned AxiMstIdWidth = 4;
@@ -61,29 +61,23 @@ package core_v_mcu_pkg;
     localparam JTAG_IDCODE = 32'h10001C05;
 
     // Master indexes
-    localparam int unsigned CPU_BUS_IDX = 0;
-    localparam int unsigned DEBUG_M_BUS_IDX = 1;
-    localparam int unsigned EXT_M_BUS_IDX = 2;
+% for m in xalp.bus().get_axi_masters():
+    localparam int unsigned ${m["macro"]}_M_BUS_IDX = ${m["idx"]};
+% endfor
 
     // Slave indexes
-    localparam int unsigned MEM_BUS_IDX = 0;
-    localparam int unsigned DEBUG_S_BUS_IDX = 1;
-    localparam int unsigned PERIPH_BUS_IDX = 2;
-    localparam int unsigned EXT_S_BUS_IDX = 3;
+% for s in xalp.bus().get_axi_slaves():
+    localparam int unsigned ${s["macro"]}_S_BUS_IDX = ${s["idx"]};
+% endfor
 
-    // Slave addresses
-    localparam addr_t MEM_BUS_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t MEM_BUS_SIZE = 64'h0000_0000_0001_0000;
-    localparam addr_t MEM_BUS_END_ADDR = MEM_BUS_BASE_ADDR + MEM_BUS_SIZE;
-    localparam addr_t DEBUG_S_BUS_BASE_ADDR = MEM_BUS_END_ADDR;
-    localparam addr_t DEBUG_S_BUS_SIZE = 64'h0000_0000_0001_0000;
-    localparam addr_t DEBUG_S_BUS_END_ADDR = DEBUG_S_BUS_BASE_ADDR + DEBUG_S_BUS_SIZE;
-    localparam addr_t PERIPH_BUS_BASE_ADDR = DEBUG_S_BUS_END_ADDR;
-    localparam addr_t PERIPH_BUS_SIZE = 64'h0000_0000_1000_0000;
-    localparam addr_t PERIPH_BUS_END_ADDR = PERIPH_BUS_BASE_ADDR + PERIPH_BUS_SIZE;
-    localparam addr_t EXT_S_BUS_BASE_ADDR = PERIPH_BUS_END_ADDR;
-    localparam addr_t EXT_S_BUS_SIZE = 64'h0000_0000_0001_0000;
-    localparam addr_t EXT_S_BUS_END_ADDR = EXT_S_BUS_BASE_ADDR + EXT_S_BUS_SIZE;
+    // Slave addresses (one entry per decoded window; a slave owning several
+    // windows, such as the LLC with its SPM and cached regions, appears once
+    // per window but always decodes to the same port index)
+% for s in xalp.bus().get_axi_addr_rules():
+    localparam addr_t ${s["macro"]}_BUS_BASE_ADDR = 64'h${f'{s["base"]:016X}'};
+    localparam addr_t ${s["macro"]}_BUS_SIZE = 64'h${f'{s["size"]:016X}'};
+    localparam addr_t ${s["macro"]}_BUS_END_ADDR = ${s["macro"]}_BUS_BASE_ADDR + ${s["macro"]}_BUS_SIZE;
+% endfor
 
     // Code and Data memory zones (cacheable)
     localparam addr_t CODE_ZONE_BASE_ADDR = 64'h0000_0000_0000_0000;
@@ -94,59 +88,38 @@ package core_v_mcu_pkg;
     localparam addr_t DATA_ZONE_END_ADDR = DATA_ZONE_BASE_ADDR + DATA_ZONE_SIZE;
 
     // Register indexes
-    localparam int unsigned SOC_CTRL_REG_IDX = 0;
-    localparam int unsigned BOOT_ROM_REG_IDX = 1;
-    localparam int unsigned FAST_INTR_CTRL_REG_IDX = 2;
-    localparam int unsigned UART_REG_IDX = 3;
-    localparam int unsigned EXT_REG_IDX = 4;
+% for r in xalp.bus().get_reg_slaves():
+    localparam int unsigned ${r["macro"]}_REG_IDX = ${r["idx"]};
+% endfor
 
     // Register addresses
-    localparam addr_t SOC_CTRL_REG_START_ADDR = PERIPH_BUS_BASE_ADDR + 64'h0000_0000_0000_0000;
-    localparam addr_t SOC_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;
-    localparam addr_t SOC_CTRL_REG_END_ADDR = SOC_CTRL_REG_START_ADDR + SOC_CTRL_REG_SIZE;
-    localparam addr_t BOOT_ROM_REG_START_ADDR = SOC_CTRL_REG_END_ADDR;
-    localparam addr_t BOOT_ROM_REG_SIZE = 64'h0000_0000_0000_1000;
-    localparam addr_t BOOT_ROM_REG_END_ADDR = BOOT_ROM_REG_START_ADDR + BOOT_ROM_REG_SIZE;
-    localparam addr_t FAST_INTR_CTRL_REG_START_ADDR = BOOT_ROM_REG_END_ADDR;
-    localparam addr_t FAST_INTR_CTRL_REG_SIZE = 64'h0000_0000_0000_1000;
-    localparam addr_t FAST_INTR_CTRL_REG_END_ADDR = FAST_INTR_CTRL_REG_START_ADDR + FAST_INTR_CTRL_REG_SIZE;
-    localparam addr_t UART_REG_START_ADDR = FAST_INTR_CTRL_REG_END_ADDR;
-    localparam addr_t UART_REG_SIZE = 64'h0000_0000_0000_1000;
-    localparam addr_t UART_REG_END_ADDR = UART_REG_START_ADDR + UART_REG_SIZE;
-    localparam addr_t EXT_REG_START_ADDR = UART_REG_END_ADDR;
-    localparam addr_t EXT_REG_SIZE = 64'h0000_0000_0000_1000;
-    localparam addr_t EXT_REG_END_ADDR = EXT_REG_START_ADDR + EXT_REG_SIZE;
+% for r in xalp.bus().get_reg_slaves():
+    localparam addr_t ${r["macro"]}_REG_BASE_ADDR = 64'h${f'{r["base"]:016X}'};
+    localparam addr_t ${r["macro"]}_REG_SIZE = 64'h${f'{r["size"]:016X}'};
+    localparam addr_t ${r["macro"]}_REG_END_ADDR = ${r["macro"]}_REG_BASE_ADDR + ${r["macro"]}_REG_SIZE;
+% endfor
+
+    // LLC geometry (the SPM window above is exactly this much storage)
+<%
+    llc = xalp.get_cache()
+%>\
+    localparam int unsigned LLC_SET_ASSOC = ${llc.get_set_assoc()};
+    localparam int unsigned LLC_NUM_LINES = ${llc.get_num_lines()};
+    localparam int unsigned LLC_NUM_BLOCKS = ${llc.get_num_blocks()};
 
     // Address mapping rules
-    localparam rule_t [totalAxiSlaves-1:0] addr_rules = '{
-        '{idx : MEM_BUS_IDX, start_addr : MEM_BUS_BASE_ADDR, end_addr : MEM_BUS_END_ADDR},
-        '{
-            idx : DEBUG_S_BUS_IDX,
-            start_addr : DEBUG_S_BUS_BASE_ADDR,
-            end_addr : DEBUG_S_BUS_END_ADDR
-        },
-        '{idx : PERIPH_BUS_IDX, start_addr : PERIPH_BUS_BASE_ADDR, end_addr : PERIPH_BUS_END_ADDR},
-        '{idx : EXT_S_BUS_IDX, start_addr : EXT_S_BUS_BASE_ADDR, end_addr : EXT_S_BUS_END_ADDR}
+    localparam int unsigned NumAddrRules = ${len(xalp.bus().get_axi_addr_rules())};
+
+    localparam rule_t [NumAddrRules-1:0] addr_rules = '{
+% for s in xalp.bus().get_axi_addr_rules():
+        '{idx : ${s["port"]}_S_BUS_IDX, start_addr : ${s["macro"]}_BUS_BASE_ADDR, end_addr : ${s["macro"]}_BUS_END_ADDR}${"" if loop.last else ","}
+% endfor
     };
 
     localparam rule_t [totalRegSlaves-1:0] RegMap = '{
-        '{
-            idx : SOC_CTRL_REG_IDX,
-            start_addr : SOC_CTRL_REG_START_ADDR,
-            end_addr : SOC_CTRL_REG_END_ADDR
-        },
-        '{
-            idx : BOOT_ROM_REG_IDX,
-            start_addr : BOOT_ROM_REG_START_ADDR,
-            end_addr : BOOT_ROM_REG_END_ADDR
-        },
-        '{
-            idx : FAST_INTR_CTRL_REG_IDX,
-            start_addr : FAST_INTR_CTRL_REG_START_ADDR,
-            end_addr : FAST_INTR_CTRL_REG_END_ADDR
-        },
-        '{idx : UART_REG_IDX, start_addr : UART_REG_START_ADDR, end_addr : UART_REG_END_ADDR},
-        '{idx : EXT_REG_IDX, start_addr : EXT_REG_START_ADDR, end_addr : EXT_REG_END_ADDR}
+% for r in xalp.bus().get_reg_slaves():
+        '{idx : ${r["macro"]}_REG_IDX, start_addr : ${r["macro"]}_REG_BASE_ADDR, end_addr : ${r["macro"]}_REG_END_ADDR}${"" if loop.last else ","}
+% endfor
     };
 
 
@@ -163,16 +136,20 @@ package core_v_mcu_pkg;
         UniqueIds         : 1'b1,
         AxiAddrWidth     : AxiAddrWidth,
         AxiDataWidth     : AxiDataWidth,
-        NoAddrRules      : totalAxiSlaves
+        NoAddrRules      : NumAddrRules
     };
 
     // Boot address
-    localparam addr_t BOOT_ADDR = BOOT_ROM_REG_START_ADDR;
+    localparam addr_t BOOT_ADDR = BOOTROM_REG_BASE_ADDR;
 
-    % for pad in xheep.get_padring().pad_list:
-  % if pad.global_index is not None:
-  localparam PAD_${pad.name.upper()} = ${pad.global_index};
-  % endif
+    //----------
+    // PAD Ring
+    //----------
+
+% for pad in xheep.get_padring().pad_list:
+    % if pad.global_index is not None:
+        localparam PAD_${pad.name.upper()} = ${pad.global_index};
+    % endif
 % endfor
 
   localparam NUM_PAD = ${len(xheep.get_padring().pad_list)};

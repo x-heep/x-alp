@@ -102,7 +102,7 @@ int _execve(const char *name, char *const argv[], char *const env[]) {
 
 void _exit(int exit_status) {
   soc_ctrl_t soc_ctrl;
-  soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_START_ADDRESS);
+  soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_BASE_ADDRESS);
   soc_ctrl_set_exit_value(&soc_ctrl, exit_status);
   soc_ctrl_set_valid(&soc_ctrl, (uint8_t)1);
 
@@ -223,10 +223,10 @@ int _write(int file, const void *ptr, int len) {
   }
 
   soc_ctrl_t soc_ctrl;
-  soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_START_ADDRESS);
+  soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_BASE_ADDRESS);
 
   uart_t uart;
-  uart.base_addr = mmio_region_from_addr((uintptr_t)UART_START_ADDRESS);
+  uart.base_addr = mmio_region_from_addr((uintptr_t)UART_BASE_ADDRESS);
   uart.baudrate = UART_BAUDRATE;
   uart.clk_freq_hz = soc_ctrl_get_frequency(&soc_ctrl);
 #ifdef UART_NCO
@@ -258,9 +258,9 @@ void _writestr(const void *ptr) {
 void _putchar(char character) {
   if (!g_uart_initialized) {
     soc_ctrl_t soc_ctrl;
-    soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_START_ADDRESS);
+    soc_ctrl.base_addr = mmio_region_from_addr((uintptr_t)SOC_CTRL_BASE_ADDRESS);
 
-    g_uart.base_addr = mmio_region_from_addr((uintptr_t)UART_START_ADDRESS);
+    g_uart.base_addr = mmio_region_from_addr((uintptr_t)UART_BASE_ADDRESS);
     g_uart.baudrate = UART_BAUDRATE;
     g_uart.clk_freq_hz = soc_ctrl_get_frequency(&soc_ctrl);
 #ifdef UART_NCO

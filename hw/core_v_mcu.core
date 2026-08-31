@@ -24,6 +24,7 @@ filesets:
     depend:
       - pulp-platform.org::axi:0.39.8
       - pulp-platform.org::axi_riscv_atomics
+      - pulp-platform.org::axi_llc
       - pulp-platform.org::riscv_dbg
       - pulp-platform.org::register_interface
       - pulp-platform.org::reg_to_axi
@@ -35,6 +36,7 @@ filesets:
       - x-alp:ip:boot_rom
       - x-heep:ip:soc_ctrl
       - x-heep:ip:fast_intr_ctrl
+      - x-heep:ip:pad_ring
       - x-heep:ip:pad_control
 
   simulation_rtl:
@@ -54,6 +56,7 @@ filesets:
       - misc/vendor/hpdcache-waivers.vlt
       - misc/vendor/tech_cells-waivers.vlt
       - misc/vendor/axi_riscv_atomics-waivers.vlt
+      - misc/vendor/axi_llc-waivers.vlt
       - misc/simulation.vlt
       
 targets:

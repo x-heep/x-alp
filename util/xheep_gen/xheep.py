@@ -23,13 +23,16 @@ class XHeep:
     IL_COMPATIBLE_BUS_TYPES = [BusType.NtoM]
     """Constant set of bus types that support interleaved memory banks"""
 
+    AVAILABLE_CPUS = ["cv32e20", "cv32e40p", "cv32e40px", "cv32e40x"]
+    """Constant list of CPU names available for X-HEEP."""
+
     def __init__(
         self,
         bus_type: BusType,
     ):
         if not type(bus_type) is BusType:
             raise TypeError(
-                f"XHeep.bus_type should be of type BusType not {type(self._bus_type)}"
+                f"XHeep.bus_type should be of type BusType not {type(bus_type)}"
             )
 
         self._cpu = None
@@ -67,6 +70,13 @@ class XHeep:
         :rtype: CPU
         """
         return self._cpu
+
+    def get_available_cpus(self):
+        """
+        :return: CPU names available for X-HEEP.
+        :rtype: list[str]
+        """
+        return list(self.AVAILABLE_CPUS)
 
     # ------------------------------------------------------------
     # CORE-V eXtension Interface (CV-X-IF)
@@ -277,6 +287,10 @@ class XHeep:
         """
         if not self.cpu():
             raise RuntimeError("[MCU-GEN] ERROR: A CPU must be configured")
+        if self.cpu().get_name() not in self.get_available_cpus():
+            raise RuntimeError(
+                f"[MCU-GEN] ERROR: CPU {self.cpu().get_name()} is not available for XHeep. Available CPUs: {', '.join(self.get_available_cpus())}"
+            )
 
         if not self.memory_ss():
             raise RuntimeError("[MCU-GEN] ERROR: A memory subsystem must be configured")
@@ -298,6 +312,7 @@ class XHeep:
         # Check that peripherals domains do not overlap
         if (
             self.are_base_peripherals_configured()
+            and self.are_user_peripherals_configured()
             and self._base_peripheral_domain.get_start_address()
             < self._user_peripheral_domain.get_start_address()
             and self._base_peripheral_domain.get_start_address()
@@ -310,6 +325,7 @@ class XHeep:
 
         if (
             self.are_user_peripherals_configured()
+            and self.are_base_peripherals_configured()
             and self._user_peripheral_domain.get_start_address()
             < self._base_peripheral_domain.get_start_address()
             and self._user_peripheral_domain.get_start_address()

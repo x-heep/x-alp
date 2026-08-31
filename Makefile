@@ -52,7 +52,7 @@ BUILD_STAMP := build/.verilator-build-stamp
 # Application build parameters
 PROJECT ?= hello_world
 TARGET ?= sim
-LINKER ?= on_chip
+LINKER ?= spm
 LINK_FOLDER := $(mkfile_path)/sw/linker
 COMPILER ?= gcc
 COMPILER_PREFIX ?= riscv32-corev-
@@ -130,7 +130,7 @@ conda:
 ## @section MCU Code Generation
 
 $(MCU_GEN_PRIMARY): $(MCU_GEN_SOURCES)
-	$(PYTHON) util/xheep_gen/mcu_gen.py --config configs/python_unsupported.hjson --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
+	$(PYTHON) util/xheep_gen/mcu_gen.py --system xalp --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen
@@ -204,6 +204,24 @@ $(foreach p,$(REG_GEN_PERIPHERALS),$(eval $(call PERIPH_GEN_FULL,$(p))))
 $(foreach p,$(REG_GEN_PERIPHERALS_BASIC),$(eval $(call PERIPH_GEN_BASIC,$(p))))
 $(foreach p,$(REG_GEN_PERIPHERALS_MCU_BASIC),$(eval $(call PERIPH_GEN_BASIC,$(p),$(MCU_GEN_PRIMARY))))
 
+# axi_llc registers: hjson and RTL reg_top ship with the vendored IP, so only the
+# SW header and docs are generated here (do NOT regenerate the vendored RTL).
+AXI_LLC_HJSON := hw/vendor/pulp_platform/axi_llc/data/axi_llc_regs.hjson
+
+sw/device/lib/drivers/axi_llc/axi_llc_regs.h: $(AXI_LLC_HJSON)
+	@mkdir -p sw/device/lib/drivers/axi_llc
+	@printf -- "Generating axi_llc SW header..."; \
+	 $(PYTHON) $(REGTOOL) --cdefines -o $@ $< && printf " OK\n"
+
+sw/device/lib/drivers/axi_llc/axi_llc_regs.md: $(AXI_LLC_HJSON)
+	@mkdir -p sw/device/lib/drivers/axi_llc
+	@printf -- "Generating axi_llc docs..."; \
+	 $(PYTHON) $(REGTOOL) -d $< > $@ && printf " OK\n"
+
+REG_GEN_OUTPUTS += \
+	sw/device/lib/drivers/axi_llc/axi_llc_regs.h \
+	sw/device/lib/drivers/axi_llc/axi_llc_regs.md
+
 ## Regenerate registers for all peripherals (incremental: only stale hjson)
 .PHONY: reg-gen
 reg-gen: $(REG_GEN_OUTPUTS)
@@ -231,7 +249,7 @@ boot-rom:
 ## Generates the build folder in sw using CMake to build (compile and linking)
 ## @param PROJECT=<folder_name_of_the_project_to_be_built>
 ## @param TARGET=sim(default),systemc,pynq-z2,nexys-a7-100t,zcu104,zcu102
-## @param LINKER=on_chip(default),flash_load,flash_exec
+## @param LINKER=spm(default),dram,rom
 ## @param COMPILER=gcc(default),clang
 ## @param COMPILER_PREFIX=riscv32-corev-(default),riscv32-unknown-
 ## @param ARCH=rv32imc(default),<any_RISC-V_ISA_string_supported_by_the_CPU>

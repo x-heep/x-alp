@@ -18,6 +18,7 @@
 
 import subprocess
 import re
+import os
 
 
 def is_readelf_available():
@@ -105,7 +106,56 @@ def get_banks_and_sizes(mcu_header_path):
     return num_banks, num_il_banks, sizes_B
 
 
-def get_memory_sections(ld_path):
+def _parse_ld_number(text):
+    """
+    Parse a linker-script numeric literal: hex (0x...), decimal, optionally with a
+    K/M/G size suffix (e.g. "16K", "1024M"). Returns an int or None.
+    """
+    text = text.strip().rstrip("\r\n;")
+    mult = 1
+    if text and text[-1] in "kKmMgG":
+        mult = {"k": 1024, "m": 1024**2, "g": 1024**3}[text[-1].lower()]
+        text = text[:-1]
+    try:
+        return int(text, 0) * mult
+    except ValueError:
+        return None
+
+
+def _iter_ld_lines(ld_path, search_dirs=None, _seen=None):
+    """
+    Yield the lines of a linker script, transparently following `INCLUDE <file>`
+    directives. Included files are searched in the directory of the including
+    file first, then in search_dirs. Guards against include cycles.
+    """
+    if _seen is None:
+        _seen = set()
+    ld_path = os.path.abspath(ld_path)
+    if ld_path in _seen:
+        return
+    _seen.add(ld_path)
+
+    dirs = [os.path.dirname(ld_path)] + list(search_dirs or [])
+    try:
+        f = open(ld_path, "r")
+    except FileNotFoundError:
+        print(f"File not found: {ld_path}")
+        return
+    with f:
+        for line in f:
+            inc = re.match(r'\s*INCLUDE\s+"?([^"\s]+)"?', line)
+            if inc:
+                name = inc.group(1)
+                for d in dirs:
+                    cand = os.path.join(d, name)
+                    if os.path.exists(cand):
+                        yield from _iter_ld_lines(cand, search_dirs, _seen)
+                        break
+                continue
+            yield line
+
+
+def get_memory_sections(ld_path, search_dirs=None):
     """
     Parse the linker script MEMORY block and return all declared regions.
     Works with entries such as:
@@ -116,25 +166,22 @@ def get_memory_sections(ld_path):
         r"(\w+)\s*\([^)]*\)\s*:\s*ORIGIN\s*=\s*([^,]+),\s*LENGTH\s*=\s*([^\s/]+)"
     )
 
-    try:
-        with open(ld_path, "r") as file:
-            collect = False
-            for line in file:
-                if line.strip().startswith("MEMORY"):
-                    collect = True
-                    continue
-                if collect:
-                    if line.strip().startswith("}"):
-                        break
-                    match = mem_regex.search(line)
-                    if match:
-                        name = match.group(1)
-                        origin = int(match.group(2), 16)
-                        raw_len = match.group(3).split()[0]
-                        length = int(raw_len, 16)
-                        sections[name] = {"origin": origin, "length": length}
-    except FileNotFoundError:
-        print("File not found. Please check the path and try again.")
+    collect = False
+    for line in _iter_ld_lines(ld_path, search_dirs):
+        if line.strip().startswith("MEMORY"):
+            collect = True
+            continue
+        if collect:
+            if line.strip().startswith("}"):
+                collect = False
+                continue
+            match = mem_regex.search(line)
+            if match:
+                name = match.group(1)
+                origin = _parse_ld_number(match.group(2))
+                length = _parse_ld_number(match.group(3).split()[0])
+                if origin is not None and length is not None:
+                    sections[name] = {"origin": origin, "length": length}
     return sections
 
 
@@ -414,44 +461,47 @@ for i in range(num_banks):
     }
     banks.append(bank)
 
-# GET THE MEMORY REGIONS FOR CODE AND DATA, TRANSLATE ramx to code, data, IL
-# If there are no IL banks, create an entry with length 0
-sections = get_memory_sections("sw/build/main.ld")
-if {"ram0", "ram1"}.issubset(sections.keys()):
-    sections["code"] = sections.pop("ram0")
-    sections["data"] = sections.pop("ram1")
-    sections["ildt"] = (
-        sections.pop("ram2")
-        if num_il_banks
-        else {
-            "origin": sections["data"]["origin"] + sections["data"]["length"],
-            "length": 0,
-        }
-    )
-elif "RAM" in sections:
-    sections = {
-        "code": sections["RAM"],
-        "data": sections["RAM"],
-        "ildt": {
-            "origin": sections["RAM"]["origin"] + sections["RAM"]["length"],
-            "length": 0,
-        },
-    }
-elif sections:
-    first_key = next(iter(sections.keys()))
-    sections = {
-        "code": sections[first_key],
-        "data": sections[first_key],
-        "ildt": {
-            "origin": sections[first_key]["origin"] + sections[first_key]["length"],
-            "length": 0,
-        },
-    }
-else:
+# GET THE MEMORY REGIONS FOR CODE AND DATA.
+# The linker script lives in sw/build/main.ld and pulls in the MEMORY block via
+# `INCLUDE common.ldh`, so the parser is told where to find included files.
+sections = get_memory_sections("sw/build/main.ld", ["sw/linker"])
+if not sections:
     print(
         "Memory distribution analysis not available: no MEMORY regions found in linker script."
     )
     quit()
+
+# The program may be linked into any region (e.g. spm or dram). Pick the region
+# that contains the program's start address so the report follows LINKER=spm/dram.
+# Regions can overlap numerically (e.g. extrom 0x0+48K vs spm 0x2000+64K), so prefer
+# an exact base-address match, then the smallest region that still contains the program.
+prog_start = min((r["start_add"] for r in regions), default=0)
+containing = [
+    s for s in sections.values() if s["origin"] <= prog_start < s["origin"] + s["length"]
+]
+exact = [s for s in containing if s["origin"] == prog_start]
+if exact:
+    target = exact[0]
+elif containing:
+    target = min(containing, key=lambda s: s["length"])
+else:
+    # Fall back to the largest region if nothing contains the program start.
+    target = max(sections.values(), key=lambda s: s["length"])
+
+# Code and data share the single target region; no interleaved banks on this platform.
+sections = {
+    "code": target,
+    "data": target,
+    "ildt": {"origin": target["origin"] + target["length"], "length": 0},
+}
+
+# If the SRAM bank sizes could not be read from the MCU header, fall back to the
+# selected linker region so the utilization bar can still be rendered.
+if not bank_sizes_B:
+    bank_sizes_B = [target["length"]]
+    num_banks = 1
+    num_il_banks = 0
+    banks = [{"type": "Cont", "size": target["length"]}]
 
 # Compute the total space used for code and data
 total_space_used_code = sum(
@@ -515,8 +565,13 @@ if num_il_banks:
 # The granularity stands for how many Bytes each character represents
 char = "."
 address = 0
-granularity_B = 32 * 1024 / 100  # To show 100 divisions per bank
+# Each character represents 1 kB, but cap the bar width so large regions (e.g. a
+# 1 GiB DRAM) do not produce a multi-million-character line. Round up to a kB multiple.
+MAX_BAR_CHARS = 128
+largest_bank_B = max(bank_sizes_B) if bank_sizes_B else 1024
 granularity_B = 1024  # To show each division having a value of 1kB
+if largest_bank_B / granularity_B > MAX_BAR_CHARS:
+    granularity_B = -(-largest_bank_B // MAX_BAR_CHARS // 1024) * 1024
 start_IL_B = (
     sum(bank_sizes_B[: max(len(bank_sizes_B) - num_il_banks, 0)])
     if num_il_banks
@@ -524,7 +579,8 @@ start_IL_B = (
 )
 
 print("")
-address = 0
+# Start the bar at the target region origin so absolute ELF addresses line up.
+address = sections["code"]["origin"]
 for bank_idx, bank in enumerate(banks):
     bank["use"] = ["-"] * int((bank["size"] / granularity_B))
     utilization = 0
