@@ -1,25 +1,29 @@
-# Peripheral abstract classes
+# Copyright 2026 EPFL
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author(s): Pacsort17, David Mallasén
+# Description: Peripheral abstract classes.
 
-import os.path as path
 from abc import (
     ABC,
 )  # Used to define abstract classes that cannot be instantiated, only well defined subclasses can be instantiated.
-from enum import Enum
 from copy import deepcopy
 from typing import List, Optional
 
 
 class Peripheral(ABC):
     """
-    Basic description of a peripheral. These peripherals are not linked to a hjson file, they only have a memory range. This class cannot be instantiated.
+    Basic description of a peripheral. This class cannot be instantiated.
 
-    :param int address: The virtual (in peripheral domain) memory address of the peripheral, the start address should be known by the creator of the class.
+    :param str name: The name of the peripheral.
+    :param int address: The virtual (in peripheral domain) memory address of the peripheral.
     :param int length: The size taken in memory by the peripheral
     """
 
-    _length: int = int("0x00010000", 16)  # default length of 64KB
     _name: str
-    _address: int = None
+    _address_offset: int = None
+    _length: int = int("0x00010000", 16)  # default length of 64KB
 
     def __init__(
         self,
@@ -45,9 +49,9 @@ class Peripheral(ABC):
         :param int num_reg_if_ports: Number of register interface ports. If None, defaults to 1 when enabled and 0 when disabled.
         """
         if type(offset) == int and offset >= 0x00000000:
-            self._address = offset
+            self._address_offset = offset
         else:
-            self._address = None
+            self._address_offset = None
 
         if length is not None:
             self._length = length
@@ -87,18 +91,18 @@ class Peripheral(ABC):
         :return: The virtual (in peripheral domain) memory address of the peripheral. If not set, return None.
         :rtype: int
         """
-        return self._address
+        return self._address_offset
 
     def set_address(self, address):
         """
         Set the virtual (in peripheral domain) memory address of the peripheral.
         """
         if address is None:
-            self._address = None
+            self._address_offset = None
             return
         if type(address) is not int or address < 0:
             raise ValueError("Peripheral address should be a positive integer")
-        self._address = address
+        self._address_offset = address
 
     def get_start_address(self):
         """
@@ -232,8 +236,8 @@ class PeripheralDomain:
     """
 
     _name: str
-    _start_address: int
-    _length: int
+    _start_address: Optional[int]
+    _length: Optional[int]
     _power_domain: Optional[str]
     _clock_gating: bool
     _peripherals: List[
@@ -243,8 +247,8 @@ class PeripheralDomain:
     def __init__(
         self,
         name: str,
-        start_address: int,
-        length: int,
+        start_address: Optional[int] = None,
+        length: Optional[int] = None,
         power_domain: Optional[str] = None,
         clock_gating: bool = False,
         peripherals: Optional[List[Peripheral]] = None,
@@ -253,8 +257,8 @@ class PeripheralDomain:
         Initialize the peripheral domain.
 
         :param str name: The name of the peripheral domain. Convention : starts with a capital letter and is in singular form (no "peripheral domain" at the end)
-        :param int start_address: The start address of the peripheral domain.
-        :param int length: The length of the peripheral domain.
+        :param int start_address: The start address of the peripheral domain. `None` when the domain address is taken from the system address map.
+        :param int length: The length of the peripheral domain. `None` when the domain length is taken from the system address map.
         :param str power_domain: The name of the power domain the domain belongs to. `None` means always-on.
         :param bool clock_gating: `True` if the domain supports clock gating.
         :param list[Peripheral] peripherals: Optional initial list of peripherals.
@@ -373,14 +377,14 @@ class PeripheralDomain:
 
     def get_start_address(self):
         """
-        :return: The start address of the peripheral domain.
+        :return: The start address of the peripheral domain, `None` when it is taken from the system address map.
         :rtype: int
         """
         return self._start_address
 
     def get_length(self):
         """
-        :return: The length of the peripheral domain.
+        :return: The length of the peripheral domain, `None` when it is taken from the system address map.
         :rtype: int
         """
         return self._length
@@ -418,12 +422,34 @@ class PeripheralDomain:
         """
         return any(p.get_name() == peripheral_name for p in self._peripherals)
 
-    # Build function
+    def _resolve_address_length(self, address_length: Optional[int]) -> int:
+        """
+        Return the address space length to use: the one given by the caller
+        (X-HEEP takes it from the system address map) or, when omitted, the
+        one given at construction (X-ALP subsystems are independent bus nodes
+        that carry their own window).
 
-    def build(self):
+        :param int address_length: The length given by the caller, or `None`.
+        :return: The length of the address space of the peripheral domain.
+        :rtype: int
+        :raise RuntimeError: when no length is available.
+        """
+        if address_length is None:
+            address_length = self._length
+        if address_length is None:
+            raise RuntimeError(
+                f"[MCU-GEN - PeripheralDomain] ERROR: No address space length available for {self._name}"
+            )
+        return address_length
+
+    def build(self, address_length: Optional[int] = None):
         """
         Build the peripheral domain. This function will compute the offset of the peripherals that have no offset.
+
+        :param int address_length: The length of the address space of the peripheral domain. If `None`, the length given at construction is used.
         """
+        address_length = self._resolve_address_length(address_length)
+
         # Setup
 
         # List of peripherals without address, sorted by length in descending order. Original index is kept to update the peripheral with the offset after placement.
@@ -443,7 +469,7 @@ class PeripheralDomain:
         peripherals_with_address.sort(key=lambda tuple: tuple[1].get_address())
 
         # List of free spaces of intervals of free memory space in the domain. In the beggining, there is only one free space, the whole domain.
-        free_space = [[0, self._length]]
+        free_space = [[0, address_length]]
 
         # Number of peripherals with address
         num_peripherals_with_address = (
@@ -543,12 +569,16 @@ class PeripheralDomain:
         for idx, _ in peripherals_without_address:
             self._peripherals[idx].set_address(offsets[idx])
 
-    def validate(self):
+    def validate(self, address_length: Optional[int] = None):
         """
         Validate the peripheral domain.
 
         Checks if the peripherals do not overlap and if the peripheral domain is within the bounds.
+
+        :param int address_length: The length of the address space of the peripheral domain. If `None`, the length given at construction is used.
+        :raise RuntimeError: when peripherals overlap or are out of the domain.
         """
+        address_length = self._resolve_address_length(address_length)
 
         # Check if the peripherals do not overlap
         if self._peripherals is None or len(self._peripherals) == 0:
@@ -577,26 +607,20 @@ class PeripheralDomain:
                 raise RuntimeError(
                     f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[i].get_name()} overflows over the domain (starts at {peripherals_sorted[i].get_address():#08X} and ends at {peripherals_sorted[i].get_address() + peripherals_sorted[i].get_length():#08X}, peripheral {peripherals_sorted[i+1].get_name()} starts at {peripherals_sorted[i+1].get_address():#08X})."
                 )
-            if peripherals_sorted[i].get_address() >= self._length:
+            if peripherals_sorted[i].get_address() >= address_length:
                 raise RuntimeError(
-                    f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[i].get_name()} is out of the domain (starts at {peripherals_sorted[i].get_address():#08X}, domain ends at {self._length:#08X})."
+                    f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[i].get_name()} is out of the domain (starts at {peripherals_sorted[i].get_address():#08X}, domain ends at {address_length:#08X})."
                 )
 
         # Check if the last peripheral is out of the domain
         if (
             peripherals_sorted[-1].get_address() + peripherals_sorted[-1].get_length()
-            > self._length
+            > address_length
         ):
             raise RuntimeError(
-                f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[-1].get_name()} is out of the domain (starts at {peripherals_sorted[-1].get_address():#08X}, domain ends at {self._length:#08X})."
+                f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[-1].get_name()} is out of the domain (starts at {peripherals_sorted[-1].get_address():#08X}, domain ends at {address_length:#08X})."
             )
-        if peripherals_sorted[-1].get_address() >= self._length:
+        if peripherals_sorted[-1].get_address() >= address_length:
             raise RuntimeError(
-                f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[-1].get_name()} is out of the domain (starts at {peripherals_sorted[-1].get_address():#08X}, domain ends at {self._length:#08X})."
-            )
-
-        # Check if the peripheral domain is within the bounds it can use (being above 0x10000)
-        if self.get_start_address() < int("10000", 16):
-            raise RuntimeError(
-                f"[MCU-GEN - PeripheralDomain] ERROR: Peripheral domain {self._name} start address must be greater than 0x10000"
+                f"[MCU-GEN - PeripheralDomain] ERROR: The peripheral {peripherals_sorted[-1].get_name()} is out of the domain (starts at {peripherals_sorted[-1].get_address():#08X}, domain ends at {address_length:#08X})."
             )

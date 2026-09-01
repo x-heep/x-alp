@@ -54,7 +54,7 @@ class BusSlave:
     :param int size: The size of the window in bytes.
     """
 
-    def __init__(self, name: str, base = None, size = None):
+    def __init__(self, name: str, base=None, size=None):
         if type(name) is not str or name == "":
             raise ValueError("BusSlave name should be a non-empty string")
         if base is not None and type(base) is not int:

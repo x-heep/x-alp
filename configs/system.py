@@ -14,11 +14,6 @@ from peripherals.abstractions import PeripheralDomain
 from peripherals.base_peripherals import (
     SOC_ctrl,
     Bootrom,
-    SPI_flash,
-    SPI_memio,
-    DMA,
-    Power_manager,
-    RV_timer_ao,
     Fast_intr_ctrl,
     Ext_peripheral,
 )
