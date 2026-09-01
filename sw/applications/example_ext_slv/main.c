@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 
   /* write something to the external slave interface */
 
-  volatile int64_t *external_slave_address = (int64_t *)EXT_S_BUS_BASE_ADDR;
+  volatile int64_t *external_slave_address = (int64_t *)EXT_SLAVE_START_ADDRESS;
 
   for (int i = 0; i < 16; i += 2) { external_slave_address[i / 2] = ((int64_t)A[i] << 32) | (int64_t)A[i + 1]; }
 

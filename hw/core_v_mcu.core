@@ -35,6 +35,7 @@ filesets:
       - x-alp:ip:boot_rom
       - x-heep:ip:soc_ctrl
       - x-heep:ip:fast_intr_ctrl
+      - x-heep:ip:pad_ring
       - x-heep:ip:pad_control
 
   simulation_rtl:

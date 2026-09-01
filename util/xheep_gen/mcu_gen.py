@@ -1,18 +1,17 @@
-#!/usr/bin/env python3
-
 # Copyright 2020 ETH Zurich and University of Bologna.
+# Copyright 2026 EPFL
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
-
-# Simplified version of occamygen.py https://github.com/pulp-platform/snitch/blob/master/util/occamygen.py
+#
+# Author(s): David Mallasén, Luigi Giuffrida, Davide Schiavone
+# Description: Configures the X-HEEP system and generates the output files from the templates.
+#
+# Originated from a simplified version of occamygen.py https://github.com/pulp-platform/snitch/blob/master/util/occamygen.py
 
 import argparse
-import hjson
 import pathlib
-import sys
 import re
 import logging
-from jsonref import JsonRef
 from mako.template import Template
 import load_config
 from xheep import BusType
@@ -63,33 +62,13 @@ def generate_xheep(args):
         logging.basicConfig(level=logging.DEBUG)
 
     # Load general configuration file.
-    # This can be either the Python or HJSON config file.
-    # If using the Python config file, the HJSON parameters that are supported by Python will be ignored
-    # except for the peripherals. Any peripheral not configured in Python will be added from the HJSON config.
-    if args.python_config != None and args.python_config != "":
-        xheep = load_config.load_cfg_file(pathlib.PurePath(str(args.python_config)))
-    else:
-        xheep = load_config.load_cfg_file(pathlib.PurePath(str(args.config)))
+    xheep = load_config.load_cfg_file(pathlib.PurePath(str(args.config)))
 
-    # We still need to load from the HJSON config the configuration options that are not yet supported in the Python model of X-HEEP
-    with open(args.config, "r") as file:
-        try:
-            srcfull = file.read()
-            config = hjson.loads(srcfull, use_decimal=True)
-            config = JsonRef.replace_refs(config)
-        except ValueError:
-            raise SystemExit(sys.exc_info()[1])
-
-    # Load pads HJSON configuration file
+    # Load pads configuration file
     pad_ring = load_config.load_pad_cfg(pathlib.PurePath(str(args.pads_cfg)), xheep)
     if pad_ring is None:
         exit(f"Error loading pads configuration file: {args.pads_cfg}")
     xheep.set_padring(pad_ring)
-
-    try:
-        has_spi_slave = 1 if config["debug"]["has_spi_slave"] == "yes" else 0
-    except KeyError:
-        has_spi_slave = 0
 
     if args.bus != None and args.bus != "":
         xheep.set_bus_type(BusType(args.bus))
@@ -104,29 +83,6 @@ def generate_xheep(args):
     if args.cpu != None and args.cpu != "":
         xheep.set_cpu(CPU(args.cpu))
 
-    debug_start_address = string2int(config["debug"]["address"])
-    if int(debug_start_address, 16) < int("10000", 16):
-        exit("debug start address must be greater than 0x10000")
-
-    debug_size_address = string2int(config["debug"]["length"])
-    ext_slave_start_address = string2int(config["ext_slaves"]["address"])
-    ext_slave_size_address = string2int(config["ext_slaves"]["length"])
-
-    flash_mem_start_address = string2int(config["flash_mem"]["address"])
-    flash_mem_size_address = string2int(config["flash_mem"]["length"])
-
-    stack_size = string2int(config["linker_script"]["stack_size"])
-    heap_size = string2int(config["linker_script"]["heap_size"])
-
-    plic_used_n_interrupts = len(config["interrupts"]["list"])
-    plit_n_interrupts = config["interrupts"]["number"]
-    ext_int_list = {
-        f"EXT_INTR_{k}": v
-        for k, v in enumerate(range(plic_used_n_interrupts, plit_n_interrupts))
-    }
-
-    interrupts = {**config["interrupts"]["list"], **ext_int_list}
-
     # Here the xheep system is built,
     # The missing gaps are filled, like the missing end address of the data section.
     xheep.build()
@@ -134,31 +90,40 @@ def generate_xheep(args):
     # Validate the configuration, performing some sanity checks
     xheep.validate()
 
-    if (
-        int(stack_size, 16) + int(heap_size, 16)
-    ) > xheep.memory_ss().ram_size_address():
-        exit(
-            "The stack and heap section must fit in the RAM size, instead they take "
-            + str(int(stack_size, 16) + int(heap_size, 16))
-            + " bytes while RAM size is "
-            + str(xheep.memory_ss().ram_size_address())
-            + " bytes."
-        )
-
     kwargs = {
         "xheep": xheep,
-        "debug_start_address": debug_start_address,
-        "debug_size_address": debug_size_address,
-        "has_spi_slave": has_spi_slave,
-        "ext_slave_start_address": ext_slave_start_address,
-        "ext_slave_size_address": ext_slave_size_address,
-        "flash_mem_start_address": flash_mem_start_address,
-        "flash_mem_size_address": flash_mem_size_address,
-        "stack_size": stack_size,
-        "heap_size": heap_size,
-        "plic_used_n_interrupts": plic_used_n_interrupts,
-        "plit_n_interrupts": plit_n_interrupts,
-        "interrupts": interrupts,
+    }
+
+    return kwargs
+
+
+def generate_xalp(args):
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+
+    # X-ALP is configured exclusively through the Python configuration file.
+    if not str(args.config).endswith(".py"):
+        exit("X-ALP generation requires a Python configuration file (--config *.py)")
+
+    xalp = load_config.load_cfg_file(pathlib.PurePath(str(args.config)))
+
+    # Load pads configuration file
+    pad_ring = load_config.load_pad_cfg(pathlib.PurePath(str(args.pads_cfg)), xalp)
+    if pad_ring is None:
+        exit(f"Error loading pads configuration file: {args.pads_cfg}")
+    xalp.set_padring(pad_ring)
+
+    # Here the X-ALP system is built and validated.
+    xalp.build()
+    xalp.validate()
+
+    # "xalp" is the X-ALP specific handle; "xheep" is also exposed so that
+    # templates shared with the X-HEEP flow (which only use system-level
+    # accessors such as get_padring()) render unchanged for both systems.
+    kwargs = {
+        "xalp": xalp,
+        "xheep": xalp,
     }
 
     return kwargs
@@ -172,17 +137,16 @@ def main():
         metavar="file",
         type=str,
         required=True,
-        help="X-HEEP general HJSON configuration",
+        help="System general configuration (.py or .hjson)",
     )
 
     parser.add_argument(
-        "--python_config",
-        metavar="file",
-        type=str,
-        required=False,
+        "--system",
+        metavar="xheep,xalp",
+        choices=["xheep", "xalp"],
         nargs="?",
-        default="",
-        help="X-HEEP general Python configuration",
+        default="xheep",
+        help="System to generate: xheep or xalp (default: xheep)",
     )
 
     parser.add_argument(
@@ -191,7 +155,7 @@ def main():
         metavar="file",
         type=str,
         required=True,
-        help="Pads HJSON configuration",
+        help="Pads configuration",
     )
 
     parser.add_argument(
@@ -257,11 +221,20 @@ def main():
 
     args = parser.parse_args()
 
-    print(f"{Colors.BLUE}[MCU-GEN]{Colors.RESET} Generating X-HEEP configuration...")
-    kwargs = generate_xheep(args)
-    print(
-        f"{Colors.GREEN}[MCU-GEN]{Colors.RESET} X-HEEP configuration generated successfully"
-    )
+    if args.system == "xalp":
+        print(f"{Colors.BLUE}[MCU-GEN]{Colors.RESET} Generating X-ALP configuration...")
+        kwargs = generate_xalp(args)
+        print(
+            f"{Colors.GREEN}[MCU-GEN]{Colors.RESET} X-ALP configuration generated successfully"
+        )
+    else:
+        print(
+            f"{Colors.BLUE}[MCU-GEN]{Colors.RESET} Generating X-HEEP configuration..."
+        )
+        kwargs = generate_xheep(args)
+        print(
+            f"{Colors.GREEN}[MCU-GEN]{Colors.RESET} X-HEEP configuration generated successfully"
+        )
 
     # Handle single template or multiple templates
     outtpl_list = [t for t in re.split(r"[,\s]+", args.outtpl or "") if t]

@@ -64,7 +64,7 @@ def write_template(tpl, structs, enums, struct_name):
 
     lower_case_name = struct_name.lower()
     upper_case_name = struct_name.upper()
-    start_addr_def = "{}_peri ((volatile {} *) {}_START_ADDRESS)".format(
+    start_addr_def = "{}_peri ((volatile {} *) {}_BASE_ADDRESS)".format(
         lower_case_name, struct_name, upper_case_name
     )
 

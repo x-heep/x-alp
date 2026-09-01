@@ -1,32 +1,44 @@
-# User Peripherals
+# Copyright 2026 EPFL
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author(s): Pacsort17, marinPh, David Mallasén
+# Description: User Peripherals (optional peripherals)
+
+from typing import List, Optional
+
 from .abstractions import UserPeripheral, PeripheralDomain
 
 from .user_peripherals import PDM2PCM
 
-# User Peripherals Classes
 
-
-# Domain Class
 class UserPeripheralDomain(PeripheralDomain):
     """
-    Domain for user peripherals. All user peripherals must be added.
-
-    Start address : 0x30000000
-    Length :        0x00100000
+    Subsystem for user peripherals (switchable domain). All user peripherals must be added.
     """
 
-    def __init__(self, start_address: int = 0x30000000, length: int = 0x00100000):
+    def __init__(
+        self,
+        start_address: Optional[int] = None,
+        length: Optional[int] = None,
+        power_domain: str = "peripheral_subsystem",
+        clock_gating: bool = True,
+        peripherals: Optional[List[UserPeripheral]] = None,
+    ):
         """
         Initialize the user peripheral domain.
-        Start address : 0x30000000
-        Length :       0x00100000
 
-        At the beginning, there is no base peripheral. All non-added peripherals will be added during build().
+        At the beginning, there is no user peripheral. All non-added peripherals will be added during build().
+
+        By default the user peripheral domain belongs to the "peripheral_subsystem" power domain and supports clock gating.
         """
         super().__init__(
             name="User",
             start_address=start_address,
             length=length,
+            power_domain=power_domain,
+            clock_gating=clock_gating,
+            peripherals=peripherals,
         )
 
     def get_pdm2pcm(self):
@@ -60,4 +72,5 @@ class UserPeripheralDomain(PeripheralDomain):
             print(
                 f"Warning : Peripheral {peripheral.get_name()} is not in the domain {self._name}"
             )
+            return
         self._peripherals.remove(peripheral)

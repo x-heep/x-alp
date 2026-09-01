@@ -1,31 +1,31 @@
-# Base Peripherals (mandatory peripherals)
+# Copyright 2026 EPFL
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author(s): Pacsort17, marinPh, David Mallasén
+# Description: Base Peripherals (mandatory, always-on peripherals)
+
+from bus_type import BusType
 from .abstractions import BasePeripheral, PeripheralDomain
 from copy import deepcopy
+from typing import List, Optional
 
 from .base_peripherals import (
     SOC_ctrl,
     Bootrom,
     SPI_flash,
-    SPI_memio,
     DMA,
     Power_manager,
     RV_timer_ao,
     Fast_intr_ctrl,
     Ext_peripheral,
-    Pad_control,
-    GPIO_ao,
+    W25Q128JW_Controller,
 )
-
-
-# Base Peripherals Classes
 
 
 class BasePeripheralDomain(PeripheralDomain):
     """
-    Domain for base peripherals. All base peripherals must be added.
-
-    Start address : 0x20000000
-    Length :       0x00100000
+    Subsystem for base peripherals (always-on domain). All base peripherals must be added.
     """
 
     # List of all base peripherals names
@@ -33,7 +33,6 @@ class BasePeripheralDomain(PeripheralDomain):
         SOC_ctrl(),
         Bootrom(),
         SPI_flash(),
-        SPI_memio(),
         DMA(),
         Power_manager(),
         RV_timer_ao(),
@@ -41,18 +40,26 @@ class BasePeripheralDomain(PeripheralDomain):
         Ext_peripheral(),
     ]
 
-    def __init__(self, start_address: int = 0x20000000, length: int = 0x00100000):
+    def __init__(
+        self,
+        start_address: Optional[int] = None,
+        length: Optional[int] = None,
+        peripherals: Optional[List[BasePeripheral]] = None,
+    ):
         """
         Initialize the base peripheral domain.
-        Start address : 0x20000000
-        Length :       0x00100000
 
-        At the beginning, there is no base peripheral. All non-added peripherals will be added during build().
+        At the beginning, there are no base peripherals. All missing peripherals will be added during build().
+
+        The base peripheral domain is always-on: it belongs to no switchable power domain and is not clock gated.
         """
         super().__init__(
             name="Base",
             start_address=start_address,
             length=length,
+            power_domain=None,
+            clock_gating=False,
+            peripherals=peripherals,
         )
 
     def add_peripheral(self, peripheral: BasePeripheral):
@@ -75,6 +82,7 @@ class BasePeripheralDomain(PeripheralDomain):
             print(
                 f"Warning : Peripheral {peripheral.get_name()} is not in the domain {self._name}"
             )
+            return
         self._peripherals.remove(peripheral)
 
     def add_missing_peripherals(self):
@@ -132,13 +140,33 @@ class BasePeripheralDomain(PeripheralDomain):
 
         raise ValueError("No Power_manager peripheral found")
 
-    def validate(self):
+    def get_W25Q128JW_controller(self):
+        """
+        Get the W25Q128JW_Controller peripheral.
+
+        :return: The W25Q128JW_Controller peripheral.
+        :rtype: W25Q128JW_Controller
+        """
+        for p in self._peripherals:
+            if isinstance(p, W25Q128JW_Controller):
+                return p
+
+        raise ValueError("No W25Q128JW_Controller peripheral found")
+
+    def validate(self, address_length: Optional[int] = None, bus_type: BusType = None):
         """
         Validate the base peripheral domain. Checks if all base peripherals are added, if they don't
         overlap and if their configuration paths are valid. Checks also if dmas are valid.
+
+        :param int address_length: The length of the address space of the peripheral domain. If `None`, the length given at construction is used.
+        :param BusType bus_type: The bus type of the system.
         """
         for dma in self.get_all_dmas():
             dma.validate()
+
+        for peripheral in self._peripherals:
+            if type(peripheral) == W25Q128JW_Controller:
+                peripheral.validate(bus_type)
 
         # Check if all base peripherals are added
         missing = []
@@ -156,4 +184,4 @@ class BasePeripheralDomain(PeripheralDomain):
                 f"[MCU-GEN - BasePeripheralDomain] ERROR: Missing base peripherals in domain {self._name}: {', '.join(missing)}"
             )
 
-        super().validate()
+        super().validate(address_length)
