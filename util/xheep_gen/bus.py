@@ -367,8 +367,6 @@ class Bus:
                 continue
             sub_base = slave.get_start_address()
             for peripheral in slave.get_peripherals():
-                if not peripheral.has_reg_if_ports():
-                    continue
                 offset = peripheral.get_address() or 0
                 base = sub_base + offset
                 size = peripheral.get_length()

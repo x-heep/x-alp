@@ -264,7 +264,8 @@ class System:
 
     def remove_peripheral_subsystem(self, name: str):
         """
-        Remove a peripheral subsystem from the system.
+        Remove a peripheral subsystem from the system, together with the
+        peripherals it brought in.
 
         Note: :class:`PeripheralDomain` appends " Peripheral Domain" to the
         name given at construction, so the full name returned by
@@ -275,8 +276,26 @@ class System:
         for ss in self._peripheral_subsystems:
             if ss.get_name() == name:
                 self._peripheral_subsystems.remove(ss)
+                removed = {p.get_name() for p in ss.get_peripherals()}
+                self._peripherals = [
+                    p for p in self._peripherals if p.get_name() not in removed
+                ]
                 return
         print(f"Warning : Peripheral subsystem {name} is not in the system")
+
+    def _find_peripheral_subsystem(self, subsystem_type):
+        """
+        Returns the stored peripheral subsystem of the given type, not a copy,
+        so that callers can build or validate it in place.
+
+        :param type subsystem_type: The subsystem class to look for.
+        :return: The stored subsystem, `None` if not present.
+        :rtype: PeripheralDomain
+        """
+        for ss in self._peripheral_subsystems:
+            if isinstance(ss, subsystem_type):
+                return ss
+        return None
 
     def get_peripheral_subsystem(self, name: str):
         """

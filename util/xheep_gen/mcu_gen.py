@@ -14,7 +14,7 @@ import re
 import logging
 from mako.template import Template
 import load_config
-from xheep import BusType
+from bus_type import BusType
 from cpu.cpu import CPU
 
 

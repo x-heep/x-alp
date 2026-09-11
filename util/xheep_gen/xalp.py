@@ -84,7 +84,8 @@ class XAlp(System):
         Builds the AXI bus out of the configured components and address map.
 
         Masters follow the connected components: a CPU master when a CPU is
-        connected and a debug module master when a debug subsystem is set.
+        connected, a debug module master when a debug subsystem is set, and
+        one master per master port of every peripheral that masters the bus.
         The external master port always exists and is tied off when unused.
 
         Slaves are the memory subsystem window (when a memory subsystem is
@@ -102,6 +103,9 @@ class XAlp(System):
             bus.add_master(AxiMaster("cpu"))
         if self.debug_ss() is not None:
             bus.add_master(AxiMaster("debug_module"))
+        for peripheral in self._peripherals:
+            for i in range(peripheral.get_num_master_ports()):
+                bus.add_master(AxiMaster(f"{peripheral.get_name()}_{i}"))
         bus.add_master(AxiMaster("ext_master"))
 
         slaves = []

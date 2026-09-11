@@ -31,25 +31,35 @@ class Peripheral(ABC):
         self,
         offset=None,
         length=None,
-        has_master_ports: bool = False,
-        num_master_ports: Optional[int] = None,
-        has_slave_ports: bool = False,
-        num_slave_ports: Optional[int] = None,
-        has_reg_if_ports: bool = True,
-        num_reg_if_ports: Optional[int] = None,
+        region: Optional[AddressRegion] = None,
+        num_master_ports: int = 0,
     ):
         """
-        Initialize the peripheral with a given address.
+        Initialize the peripheral with the region it occupies in its domain.
+
+        The region is the peripheral's window, relative to the start of the
+        peripheral domain it belongs to. Every peripheral is reachable through
+        its register interface, so the region is what makes it a register
+        slave of the domain; no extra flag declares it.
+
+        The region may be given either directly or as an offset and a length.
+        A region without a start address is placed automatically during
+        :meth:`PeripheralDomain.build`.
 
         :param int offset: The virtual (in peripheral domain) memory address of the peripheral. If None, the offset will be automatically compute during build function.
         :param int length: The size taken in memory by the peripheral. If None, the length will be automatically set to 64KB.
-        :param bool has_master_ports: True if the peripheral has master ports.
-        :param int num_master_ports: Number of master ports. If None, defaults to 1 when enabled and 0 when disabled.
-        :param bool has_slave_ports: True if the peripheral has slave ports.
-        :param int num_slave_ports: Number of slave ports. If None, defaults to 1 when enabled and 0 when disabled.
-        :param bool has_reg_if_ports: True if the peripheral has register interface ports.
-        :param int num_reg_if_ports: Number of register interface ports. If None, defaults to 1 when enabled and 0 when disabled.
+        :param AddressRegion region: The region of the peripheral, as an alternative to offset and length.
+        :param int num_master_ports: Number of master ports. Zero when the peripheral does not master the bus.
+        :raise ValueError: when both a region and an offset or a length are given.
         """
+        if region is not None:
+            if offset is not None or length is not None:
+                raise ValueError(
+                    "Peripheral should be configured with either a region or an offset and a length, not both"
+                )
+            offset = region.get_start_address()
+            length = region.get_length()
+
         if type(offset) == int and offset >= 0x00000000:
             self._address_offset = offset
         else:
@@ -58,35 +68,18 @@ class Peripheral(ABC):
         if length is not None:
             self._length = length
 
-        self._has_master_ports, self._num_master_ports = self._normalize_ports(
-            "master", has_master_ports, num_master_ports
-        )
-        self._has_slave_ports, self._num_slave_ports = self._normalize_ports(
-            "slave", has_slave_ports, num_slave_ports
-        )
-        self._has_reg_if_ports, self._num_reg_if_ports = self._normalize_ports(
-            "register interface", has_reg_if_ports, num_reg_if_ports
-        )
+        if type(num_master_ports) is not int:
+            raise TypeError("Number of master ports should be of type int")
+        if num_master_ports < 0:
+            raise ValueError("Number of master ports should be positive")
+        self._num_master_ports = num_master_ports
 
-    @staticmethod
-    def _normalize_ports(port_name: str, enabled: bool, count: Optional[int]):
-        if type(enabled) is not bool:
-            raise TypeError(f"{port_name} ports enabled flag should be of type bool")
-        if count is None:
-            count = 1 if enabled else 0
-        if type(count) is not int:
-            raise TypeError(f"Number of {port_name} ports should be of type int")
-        if count < 0:
-            raise ValueError(f"Number of {port_name} ports should be positive")
-        if enabled and count == 0:
-            raise ValueError(
-                f"Number of {port_name} ports should be greater than zero when enabled"
-            )
-        if not enabled and count != 0:
-            raise ValueError(
-                f"Number of {port_name} ports should be zero when disabled"
-            )
-        return enabled, count
+    def get_region(self) -> AddressRegion:
+        """
+        :return: The peripheral's window, relative to the start of its domain.
+        :rtype: AddressRegion
+        """
+        return AddressRegion(self.get_name(), self._address_offset, self._length)
 
     def get_address(self):
         """
@@ -155,10 +148,10 @@ class Peripheral(ABC):
 
     def has_master_ports(self) -> bool:
         """
-        :return: True if the peripheral has master ports.
+        :return: True if the peripheral masters the bus.
         :rtype: bool
         """
-        return self._has_master_ports
+        return self._num_master_ports > 0
 
     def get_num_master_ports(self):
         """
@@ -166,48 +159,6 @@ class Peripheral(ABC):
         :rtype: int
         """
         return self._num_master_ports
-
-    def has_slave_ports(self) -> bool:
-        """
-        :return: True if the peripheral has slave ports.
-        :rtype: bool
-        """
-        return self._has_slave_ports
-
-    def get_num_slave_ports(self):
-        """
-        :return: Number of slave ports.
-        :rtype: int
-        """
-        return self._num_slave_ports
-
-    def has_reg_if_ports(self) -> bool:
-        """
-        :return: True if the peripheral has register interface ports.
-        :rtype: bool
-        """
-        return self._has_reg_if_ports
-
-    def has_register_interface_ports(self) -> bool:
-        """
-        :return: True if the peripheral has register interface ports.
-        :rtype: bool
-        """
-        return self.has_reg_if_ports()
-
-    def get_num_reg_if_ports(self):
-        """
-        :return: Number of register interface ports.
-        :rtype: int
-        """
-        return self._num_reg_if_ports
-
-    def get_num_register_interface_ports(self):
-        """
-        :return: Number of register interface ports.
-        :rtype: int
-        """
-        return self.get_num_reg_if_ports()
 
 
 class BasePeripheral(Peripheral, ABC):
