@@ -210,7 +210,7 @@ class XHeep:
         """
         if not isinstance(debug_ss, DebugSS):
             raise TypeError(
-                f"XHeep.debug_ss should be of type DebugSS not {type(self._debug_ss)}"
+                f"XHeep.debug_ss should be of type DebugSS not {type(debug_ss)}"
             )
         self._debug_ss = debug_ss
 
@@ -234,7 +234,7 @@ class XHeep:
         """
         if not isinstance(address_map, AddressMap):
             raise TypeError(
-                f"XHeep.address_map should be of type AddressMap not {type(self._address_map)}"
+                f"XHeep.address_map should be of type AddressMap not {type(address_map)}"
             )
         self._address_map = address_map
 

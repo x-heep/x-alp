@@ -7,6 +7,7 @@
 
 from typing import List, Optional
 
+from address_map.address_region import AddressRegion
 from .abstractions import UserPeripheral, PeripheralDomain
 
 from .user_peripherals import PDM2PCM
@@ -33,9 +34,7 @@ class UserPeripheralDomain(PeripheralDomain):
         By default the user peripheral domain belongs to the "peripheral_subsystem" power domain and supports clock gating.
         """
         super().__init__(
-            name="User",
-            start_address=start_address,
-            length=length,
+            region=AddressRegion("User", start_address, length),
             power_domain=power_domain,
             clock_gating=clock_gating,
             peripherals=peripherals,

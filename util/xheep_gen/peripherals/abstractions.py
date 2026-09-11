@@ -11,6 +11,8 @@ from abc import (
 from copy import deepcopy
 from typing import List, Optional
 
+from address_map.address_region import AddressRegion
+
 
 class Peripheral(ABC):
     """
@@ -246,9 +248,7 @@ class PeripheralDomain:
 
     def __init__(
         self,
-        name: str,
-        start_address: Optional[int] = None,
-        length: Optional[int] = None,
+        region: AddressRegion,
         power_domain: Optional[str] = None,
         clock_gating: bool = False,
         peripherals: Optional[List[Peripheral]] = None,
@@ -271,9 +271,9 @@ class PeripheralDomain:
             raise TypeError(
                 f"PeripheralDomain.clock_gating should be of type bool not {type(clock_gating)}"
             )
-        self._name = f"{name} Peripheral Domain"
-        self._start_address = start_address
-        self._length = length
+        self._name = f"{region.get_name()} Peripheral Domain"
+        self._start_address = region.get_start_address()
+        self._length = region.get_length()
         self._power_domain = power_domain
         self._clock_gating = clock_gating
         self._peripherals = []

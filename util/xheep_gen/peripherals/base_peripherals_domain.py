@@ -6,6 +6,7 @@
 # Description: Base Peripherals (mandatory, always-on peripherals)
 
 from bus_type import BusType
+from address_map.address_region import AddressRegion
 from .abstractions import BasePeripheral, PeripheralDomain
 from copy import deepcopy
 from typing import List, Optional
@@ -54,9 +55,7 @@ class BasePeripheralDomain(PeripheralDomain):
         The base peripheral domain is always-on: it belongs to no switchable power domain and is not clock gated.
         """
         super().__init__(
-            name="Base",
-            start_address=start_address,
-            length=length,
+            region=AddressRegion("Base", start_address, length),
             power_domain=None,
             clock_gating=False,
             peripherals=peripherals,

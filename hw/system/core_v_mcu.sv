@@ -164,8 +164,14 @@ module core_v_mcu (
         .reg_rsp_i(reg_rsp_sig)
     );
 
+    assign ext_slv_req_o                            = axi_slave_req_sig[EXT_SLAVES_S_BUS_IDX];
+    assign axi_slave_rsp_sig[EXT_SLAVES_S_BUS_IDX]  = ext_slv_rsp_i;
 
+    assign axi_master_req_sig[EXT_MASTER_M_BUS_IDX] = ext_mst_req_i;
+    assign ext_mst_rsp_o                            = axi_master_rsp_sig[EXT_MASTER_M_BUS_IDX];
 
+    assign ext_reg_req_o                            = reg_req_sig[EXT_PERIPHERAL_REG_IDX];
+    assign reg_rsp_sig[EXT_PERIPHERAL_REG_IDX]      = ext_reg_rsp_i;
 
     //
     //  ███████████                      ███            █████                                   ████
@@ -241,8 +247,8 @@ module core_v_mcu (
         .rst_ni(rst_ni),
 
         // AXI Slave Interface
-        .axi_slv_req_i(axi_slave_req_sig[DEBUG_MODULE_S_BUS_IDX]),
-        .axi_slv_rsp_o(axi_slave_rsp_sig[DEBUG_MODULE_S_BUS_IDX]),
+        .axi_slv_req_i(axi_slave_req_sig[DEBUG_S_BUS_IDX]),
+        .axi_slv_rsp_o(axi_slave_rsp_sig[DEBUG_S_BUS_IDX]),
 
         // AXI Master Interface
         .axi_mst_req_o(axi_master_req_sig[DEBUG_MODULE_M_BUS_IDX]),

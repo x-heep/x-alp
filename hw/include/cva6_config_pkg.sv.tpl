@@ -7,6 +7,9 @@
 // Based on cva6_config_pkg.sv from the CVA6 repository.
 //
 
+<%
+    linker_sections = list(xalp.memory_ss().iter_linker_sections()) if xalp.memory_ss() else []
+%>\
 package cva6_config_pkg;
 
     // static debug hartinfo
@@ -196,19 +199,21 @@ package cva6_config_pkg;
             core_v_mcu_pkg::CODE_ZONE_SIZE
         }
         ),
-        NrCachedRegionRules: unsigned'(2),
+        NrCachedRegionRules: unsigned'(${len(linker_sections)}),
         CachedRegionAddrBase:
         1024'(
         {
-            core_v_mcu_pkg::CODE_ZONE_BASE_ADDR,
-            core_v_mcu_pkg::DATA_ZONE_BASE_ADDR
+% for section in linker_sections:
+            core_v_mcu_pkg::${section.name.upper()}_ZONE_BASE_ADDR${"" if loop.last else ","}
+% endfor
         }
         ),
         CachedRegionLength:
         1024'(
         {
-            core_v_mcu_pkg::CODE_ZONE_SIZE,
-            core_v_mcu_pkg::DATA_ZONE_SIZE
+% for section in linker_sections:
+            core_v_mcu_pkg::${section.name.upper()}_ZONE_SIZE${"" if loop.last else ","}
+% endfor
         }
         ),
         MaxOutstandingStores: unsigned'(7),

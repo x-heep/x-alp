@@ -9,6 +9,7 @@
 
     peripherals = [peripheral.get_name() for peripheral in xalp.get_peripherals()]
     masters = [master.get_name() for master in xalp.bus().get_masters()]
+    slaves = [slave.get_name() for slave in xalp.bus().get_slaves()]
 %>
 module core_v_mcu (
 
@@ -168,19 +169,19 @@ module core_v_mcu (
         .reg_rsp_i(reg_rsp_sig)
     );
 
-% if "ext_slave" in xalp.bus().get_slaves():
-    assign ext_slv_req_o                     = axi_slave_req_sig[EXT_S_BUS_IDX];
-    assign axi_slave_rsp_sig[EXT_S_BUS_IDX]  = ext_slv_rsp_i;
+% if "ext_slaves" in slaves:
+    assign ext_slv_req_o                          = axi_slave_req_sig[EXT_SLAVES_S_BUS_IDX];
+    assign axi_slave_rsp_sig[EXT_SLAVES_S_BUS_IDX] = ext_slv_rsp_i;
 % endif
 
-% if "ext_master" in xalp.bus().get_masters():
-    assign axi_master_req_sig[EXT_M_BUS_IDX] = ext_mst_req_i;
-    assign ext_mst_rsp_o                     = axi_master_rsp_sig[EXT_M_BUS_IDX];
+% if "ext_master" in masters:
+    assign axi_master_req_sig[EXT_MASTER_M_BUS_IDX] = ext_mst_req_i;
+    assign ext_mst_rsp_o                            = axi_master_rsp_sig[EXT_MASTER_M_BUS_IDX];
 % endif
 
-% if "ext_peripheral" in xalp.bus().get_slaves():
-    assign ext_reg_req_o                     = reg_req_sig[EXT_REG_IDX];
-    assign reg_rsp_sig[EXT_REG_IDX]          = ext_reg_rsp_i;
+% if "ext_peripheral" in peripherals:
+    assign ext_reg_req_o                       = reg_req_sig[EXT_PERIPHERAL_REG_IDX];
+    assign reg_rsp_sig[EXT_PERIPHERAL_REG_IDX] = ext_reg_rsp_i;
 % endif
 
     // 
@@ -266,8 +267,8 @@ module core_v_mcu (
         .rst_ni(rst_ni),
 
         // AXI Slave Interface
-        .axi_slv_req_i(axi_slave_req_sig[DEBUG_MODULE_S_BUS_IDX]),
-        .axi_slv_rsp_o(axi_slave_rsp_sig[DEBUG_MODULE_S_BUS_IDX]),
+        .axi_slv_req_i(axi_slave_req_sig[DEBUG_S_BUS_IDX]),
+        .axi_slv_rsp_o(axi_slave_rsp_sig[DEBUG_S_BUS_IDX]),
 
         // AXI Master Interface
         .axi_mst_req_o(axi_master_req_sig[DEBUG_MODULE_M_BUS_IDX]),

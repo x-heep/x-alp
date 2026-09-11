@@ -64,7 +64,7 @@ SOURCE ?=
 # System Configuration
 # ============================================================================
 PADS_CFG ?= configs/pad_cfg.py
-X_ALP_CFG  ?= configs/system.py
+X_ALP_CFG  ?= configs/soc.py
 
 # Register generation tools
 REGTOOL            := hw/vendor/x-heep/pulp_platform/register_interface/vendor/lowrisc_opentitan/util/regtool.py

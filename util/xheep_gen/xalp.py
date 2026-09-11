@@ -1,10 +1,11 @@
 from copy import deepcopy
 
-from bus import Bus
+from bus import AxiMaster, Bus, BusSlave
 from cpu.cpu import CPU
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import PeripheralDomain
 from system import System
+from bus_type import BusType
 
 
 class XAlp(System):
@@ -13,16 +14,16 @@ class XAlp(System):
 
     An instance of this class is passed to the mako templates.
 
-    Inherits the generic system infrastructure from :class:`System`. Unlike
-    :class:`XHeep`, the configuration is bus-centric: the system starts
-    from the bus (received at construction), and every component (CPU,
-    memory subsystem, peripheral subsystems) is connected to it
-    independently. Each peripheral subsystem is an independent bus node and
-    can be grouped with others in power and clock-gating domains (see
-    :class:`PeripheralDomain`).
+    Inherits the generic system infrastructure from :class:`System`. The
+    configuration is address-map centric: the configuration script declares
+    the top-level :class:`AddressMap` regions and connects the components
+    (CPU, debug subsystem, memory subsystem, peripheral subsystems). The
+    AXI bus is not written by hand, it is derived from that configuration
+    when :meth:`build` is called. Each peripheral subsystem is an
+    independent bus node and can be grouped with others in power and
+    clock-gating domains (see :class:`PeripheralDomain`).
 
-    :param Bus bus: The bus of the system.
-    :raise TypeError: when parameters are of incorrect type.
+    :param str platform_name: The name of the platform.
     """
 
     AVAILABLE_CPUS = ["cva6"]
@@ -44,54 +45,124 @@ class XAlp(System):
     ]
     """Constant list of peripheral names that must be present in X-ALP."""
 
-    def __init__(self, bus: Bus):
-        if not isinstance(bus, Bus):
-            raise TypeError(f"XAlp.bus should be of type Bus not {type(bus)}")
-        super().__init__(bus.bus_type())
-        self._bus = bus
+    MEMORY_START_ADDRESS = 0x00000000
+    """Start address of the memory subsystem window on the bus."""
+
+    def __init__(self, platform_name: str):
+        super().__init__(BusType.AXI)
+        self._platform_name = platform_name
+        self._bus = None
+
+    def platform_name(self) -> str:
+        """
+        :return: the name of the platform
+        :rtype: str
+        """
+        return self._platform_name
 
     def bus(self) -> Bus:
         """
-        :return: the bus of the system
+        :return: the bus derived from the configuration, `None` before :meth:`build` is called.
         :rtype: Bus
         """
         return self._bus
 
     def build(self):
         """
-        Makes the system and its bus address map ready to be used.
+        Makes the system ready to be used and derives the bus from the
+        configured address map and components.
         """
         super().build()
-        self._bus.generate_address_map()
-        self._bus.build_address_map()
-
-    def get_configured_peripheral_names(self):
-        """
-        :return: Names of peripherals configured in subsystems or directly on the bus.
-        :rtype: list[str]
-        """
-        names = super().get_configured_peripheral_names()
-        names.extend(
-            peripheral.get_name() for peripheral in self._bus.get_all_peripherals()
-        )
-        return names
+        self._bus = self._derive_bus()
 
     # ------------------------------------------------------------
-    # Bus connections (bus-centric naming)
+    # Bus derivation
+    # ------------------------------------------------------------
+
+    def _derive_bus(self) -> Bus:
+        """
+        Builds the AXI bus out of the configured components and address map.
+
+        Masters follow the connected components: a CPU master when a CPU is
+        connected and a debug module master when a debug subsystem is set.
+        The external master port always exists and is tied off when unused.
+
+        Slaves are the memory subsystem window (when a memory subsystem is
+        connected) plus one node per address map region, keeping the region
+        name. A region that covers a connected peripheral subsystem is added
+        as that subsystem, so its register-interface peripherals become REG
+        slaves nested in its window.
+
+        :return: The derived bus.
+        :rtype: Bus
+        """
+        bus = Bus(self.bus_type())
+
+        if self.cpu() is not None:
+            bus.add_master(AxiMaster("cpu"))
+        if self.debug_ss() is not None:
+            bus.add_master(AxiMaster("debug_module"))
+        bus.add_master(AxiMaster("ext_master"))
+
+        slaves = []
+        if self.memory_ss() is not None:
+            slaves.append(
+                BusSlave(
+                    "mem",
+                    self.MEMORY_START_ADDRESS,
+                    self.memory_ss().ram_size_address(),
+                )
+            )
+
+        subsystems = {
+            subsystem.get_start_address(): subsystem
+            for subsystem in self._peripheral_subsystems
+        }
+        address_map = self.address_map()
+        for region in address_map.get_regions() if address_map else []:
+            subsystem = subsystems.get(region.get_start_address())
+            if subsystem is not None:
+                slaves.append(subsystem)
+            else:
+                slaves.append(
+                    BusSlave(
+                        region.get_name(),
+                        region.get_start_address(),
+                        region.get_length(),
+                    )
+                )
+
+        # Slaves are placed in the order they are added, so feed them to the
+        # bus sorted by address.
+        for slave in sorted(slaves, key=lambda slave: slave.get_start_address()):
+            bus.add_slave(slave)
+        bus.build_address_map()
+
+        return bus
+
+    # ------------------------------------------------------------
+    # Component connections
     # ------------------------------------------------------------
 
     def connect_cpu(self, cpu: CPU):
         """
-        Connects the CPU to the bus.
+        Connects the CPU to the system.
 
         :param CPU cpu: The CPU to connect.
         :raise TypeError: when cpu is of incorrect type.
+        :raise ValueError: when a CPU is already connected.
         """
+        if not isinstance(cpu, CPU):
+            raise TypeError(f"XAlp.cpu should be of type CPU not {type(cpu)}")
+        if self._cpu is not None:
+            raise ValueError(
+                f"CPU {self._cpu.get_name()} is already connected to the bus. Only one CPU can be connected."
+            )
         self.set_cpu(cpu)
 
     def connect_memory_ss(self, memory_ss: MemorySS):
         """
-        Connects the memory subsystem to the bus.
+        Connects the memory subsystem to the system.
 
         :param MemorySS memory_ss: The memory subsystem to connect.
         :raise TypeError: when memory_ss is of incorrect type.
@@ -100,7 +171,7 @@ class XAlp(System):
 
     def connect_peripheral_subsystem(self, subsystem: PeripheralDomain):
         """
-        Connects a peripheral subsystem to the bus. The subsystem should
+        Connects a peripheral subsystem to the system. The subsystem should
         already contain all peripherals well configured. When connecting a
         subsystem, a deepcopy is made to avoid side effects.
 
@@ -112,15 +183,26 @@ class XAlp(System):
         :raise TypeError: when subsystem is of incorrect type.
         :raise ValueError: when a subsystem with the same name is already connected.
         """
+        if not isinstance(subsystem, PeripheralDomain):
+            raise TypeError(
+                f"subsystem should be of type PeripheralDomain not {type(subsystem)}"
+            )
+        if subsystem.get_name() in [
+            ss.get_name() for ss in self._peripheral_subsystems
+        ]:
+            raise ValueError(
+                f"Subsystems with name {subsystem.get_name()} is already connected to the bus."
+            )
         self.add_peripheral_subsystem(subsystem)
 
     def disconnect_peripheral_subsystem(self, name: str):
         """
-        Disconnects a peripheral subsystem from the bus.
+        Disconnects a peripheral subsystem from the system.
 
         Note: :class:`PeripheralDomain` appends " Peripheral Domain" to the
-        name given at construction, so the full name returned by
-        `get_name()` must be passed (e.g. "Base Peripheral Domain").
+        name of the region given at construction, so the full name returned
+        by `get_name()` must be passed (e.g. "peripheral_domain Peripheral
+        Domain").
 
         :param str name: The full name of the subsystem to disconnect.
         """
