@@ -30,11 +30,6 @@ class DMA(BasePeripheral):
         hw_fifo_mode: str = "yes",
         zero_padding: str = "yes",
         is_included: str = "yes",
-        has_master_ports: bool = True,
-        has_slave_ports: bool = False,
-        num_slave_ports: int = None,
-        has_reg_if_ports: bool = True,
-        num_reg_if_ports: int = None,
     ):
         """
         Initialize the DMA peripheral.
@@ -49,12 +44,7 @@ class DMA(BasePeripheral):
         super().__init__(
             address,
             length,
-            has_master_ports=has_master_ports,
             num_master_ports=num_master_ports,
-            has_slave_ports=has_slave_ports,
-            num_slave_ports=num_slave_ports,
-            has_reg_if_ports=has_reg_if_ports,
-            num_reg_if_ports=num_reg_if_ports,
         )
         self._ch_length = ch_length
         self._num_channels = num_channels
@@ -102,7 +92,6 @@ class DMA(BasePeripheral):
         Set the number of master ports in the DMA.
         """
         self._num_master_ports = value
-        self._has_master_ports = value > 0
 
     def get_num_master_ports(self):
         """

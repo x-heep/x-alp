@@ -61,7 +61,7 @@ class BusSlave:
     :param int size: The size of the window in bytes.
     """
 
-    def __init__(self, name: str, base = None, size = None):
+    def __init__(self, name: str, base=None, size=None):
         if type(name) is not str or name == "":
             raise ValueError("BusSlave name should be a non-empty string")
         if base is not None and type(base) is not int:
@@ -424,8 +424,6 @@ class Bus:
                 continue
             sub_base = slave.get_start_address()
             for peripheral in slave.get_peripherals():
-                if not peripheral.has_reg_if_ports():
-                    continue
                 offset = peripheral.get_address() or 0
                 base = sub_base + offset
                 size = peripheral.get_length()

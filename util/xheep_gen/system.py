@@ -9,6 +9,8 @@ from peripherals.abstractions import PeripheralDomain
 from peripherals.base_peripherals_domain import BasePeripheralDomain
 from peripherals.user_peripherals_domain import UserPeripheralDomain
 from pads.pad_ring import PadRing
+from debug_ss.debug_ss import DebugSS
+from address_map.address_map import AddressMap
 
 
 class System:
@@ -60,6 +62,10 @@ class System:
         self._xif: CvXIf = None
 
         self._memory_ss = None
+
+        self._debug_ss: DebugSS = None
+
+        self._address_map: AddressMap = None
 
         self._peripheral_subsystems: List[PeripheralDomain] = []
 
@@ -174,6 +180,54 @@ class System:
         return self._memory_ss
 
     # ------------------------------------------------------------
+    # Debug Subsystem
+    # ------------------------------------------------------------
+
+    def set_debug_ss(self, debug_ss: DebugSS):
+        """
+        Sets the debug subsystem of the system.
+
+        :param DebugSS debug_ss: The debug subsystem to set.
+        :raise TypeError: when debug_ss is of incorrect type.
+        """
+        if not isinstance(debug_ss, DebugSS):
+            raise TypeError(
+                f"XHeep.debug_ss should be of type DebugSS not {type(self._debug_ss)}"
+            )
+        self._debug_ss = debug_ss
+
+    def debug_ss(self) -> DebugSS:
+        """
+        :return: the configured debug subsystem
+        :rtype: DebugSS
+        """
+        return self._debug_ss
+
+    # ------------------------------------------------------------
+    # Address Map
+    # ------------------------------------------------------------
+
+    def set_address_map(self, address_map: AddressMap):
+        """
+        Sets the address map of the system.
+
+        :param AddressMap address_map: The address map to set.
+        :raise TypeError: when address_map is of incorrect type.
+        """
+        if not isinstance(address_map, AddressMap):
+            raise TypeError(
+                f"XHeep.address_map should be of type AddressMap not {type(self._address_map)}"
+            )
+        self._address_map = address_map
+
+    def address_map(self) -> AddressMap:
+        """
+        :return: the system's top-level address map.
+        :rtype: AddressMap
+        """
+        return self._address_map
+
+    # ------------------------------------------------------------
     # Peripheral Subsystems
     # ------------------------------------------------------------
 
@@ -210,7 +264,8 @@ class System:
 
     def remove_peripheral_subsystem(self, name: str):
         """
-        Remove a peripheral subsystem from the system.
+        Remove a peripheral subsystem from the system, together with the
+        peripherals it brought in.
 
         Note: :class:`PeripheralDomain` appends " Peripheral Domain" to the
         name given at construction, so the full name returned by
@@ -221,8 +276,26 @@ class System:
         for ss in self._peripheral_subsystems:
             if ss.get_name() == name:
                 self._peripheral_subsystems.remove(ss)
+                removed = {p.get_name() for p in ss.get_peripherals()}
+                self._peripherals = [
+                    p for p in self._peripherals if p.get_name() not in removed
+                ]
                 return
         print(f"Warning : Peripheral subsystem {name} is not in the system")
+
+    def _find_peripheral_subsystem(self, subsystem_type):
+        """
+        Returns the stored peripheral subsystem of the given type, not a copy,
+        so that callers can build or validate it in place.
+
+        :param type subsystem_type: The subsystem class to look for.
+        :return: The stored subsystem, `None` if not present.
+        :rtype: PeripheralDomain
+        """
+        for ss in self._peripheral_subsystems:
+            if isinstance(ss, subsystem_type):
+                return ss
+        return None
 
     def get_peripheral_subsystem(self, name: str):
         """
@@ -410,17 +483,6 @@ class System:
         if self.xif() is not None and self.cpu().get_name() in ["cv32e40p"]:
             raise RuntimeError(
                 f"[MCU-GEN] ERROR: CV-X-IF enabled (set_xif()) with incompatible CPU ({self.cpu().get_name()})."
-            )
-
-        if not self.memory_ss():
-            raise RuntimeError("[MCU-GEN] ERROR: A memory subsystem must be configured")
-        self.memory_ss().validate()
-
-        if self.memory_ss().has_il_ram() and (
-            self._bus_type not in self.IL_COMPATIBLE_BUS_TYPES
-        ):
-            raise RuntimeError(
-                f"[MCU-GEN] ERROR: This system has a {self._bus_type} bus, one of {self.IL_COMPATIBLE_BUS_TYPES} is required for interleaved memory"
             )
 
         self._validate_peripheral_availability()

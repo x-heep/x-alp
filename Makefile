@@ -64,7 +64,7 @@ SOURCE ?=
 # System Configuration
 # ============================================================================
 PADS_CFG ?= configs/pad_cfg.py
-X_ALP_CFG  ?= configs/system.py
+X_ALP_CFG  ?= configs/soc.py
 
 # Register generation tools
 REGTOOL            := hw/vendor/x-heep/pulp_platform/register_interface/vendor/lowrisc_opentitan/util/regtool.py
@@ -130,7 +130,7 @@ conda:
 ## @section MCU Code Generation
 
 $(MCU_GEN_PRIMARY): $(MCU_GEN_SOURCES)
-	$(PYTHON) util/xheep_gen/mcu_gen.py --system xalp --python_config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
+	$(PYTHON) util/xheep_gen/mcu_gen.py --system xalp --config $(X_ALP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)"
 
 ## Force MCU regeneration regardless of source timestamps
 .PHONY: mcu-gen

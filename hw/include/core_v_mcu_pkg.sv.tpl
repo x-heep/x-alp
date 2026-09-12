@@ -79,13 +79,12 @@ package core_v_mcu_pkg;
     localparam addr_t ${s["macro"]}_BUS_END_ADDR = ${s["macro"]}_BUS_BASE_ADDR + ${s["macro"]}_BUS_SIZE;
 % endfor
 
-    // Code and Data memory zones (cacheable)
-    localparam addr_t CODE_ZONE_BASE_ADDR = 64'h0000_0000_0000_0000;
-    localparam addr_t CODE_ZONE_SIZE = 64'h0000_0000_0000_8000;
-    localparam addr_t CODE_ZONE_END_ADDR = CODE_ZONE_BASE_ADDR + CODE_ZONE_SIZE;
-    localparam addr_t DATA_ZONE_BASE_ADDR = 64'h0000_0000_0000_8000;
-    localparam addr_t DATA_ZONE_SIZE = 64'h0000_0000_0000_8000;
-    localparam addr_t DATA_ZONE_END_ADDR = DATA_ZONE_BASE_ADDR + DATA_ZONE_SIZE;
+    // Memory zones (cacheable), one per linker section
+% for section in xalp.memory_ss().iter_linker_sections() if xalp.memory_ss() else []:
+    localparam addr_t ${section.name.upper()}_ZONE_BASE_ADDR = 64'h${f'{section.start:016X}'};
+    localparam addr_t ${section.name.upper()}_ZONE_SIZE = 64'h${f'{section.end - section.start:016X}'};
+    localparam addr_t ${section.name.upper()}_ZONE_END_ADDR = ${section.name.upper()}_ZONE_BASE_ADDR + ${section.name.upper()}_ZONE_SIZE;
+% endfor
 
     // Register indexes
 % for r in xalp.bus().get_reg_slaves():
@@ -147,14 +146,14 @@ package core_v_mcu_pkg;
     //----------
 
 % for pad in xheep.get_padring().pad_list:
-    % if pad.global_index is not None:
-        localparam PAD_${pad.name.upper()} = ${pad.global_index};
-    % endif
+  % if pad.global_index is not None:
+    localparam PAD_${pad.name.upper()} = ${pad.global_index};
+  % endif
 % endfor
 
-  localparam NUM_PAD = ${len(xheep.get_padring().pad_list)};
+    localparam NUM_PAD = ${len(xalp.get_padring().pad_list)};
 
-  localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
+    localparam int unsigned NUM_PAD_PORT_SEL_WIDTH = NUM_PAD > 1 ? $clog2(NUM_PAD) : 32'd1;
 
 
 endpackage : core_v_mcu_pkg

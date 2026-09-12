@@ -6,11 +6,13 @@
   target_dir: "xheep_gen",
 
   upstream: {
-    url: "https://github.com/luigigiuffrida98/xheep_gen.git",
+    url: "https://github.com/LuigiGiuffrida98/xheep_gen.git",
     rev: "xalp-gen",
   },
 
   exclude_from_upstream: [
     ".gitignore"
+    ".github"
+    "Makefile"
   ],
 }
