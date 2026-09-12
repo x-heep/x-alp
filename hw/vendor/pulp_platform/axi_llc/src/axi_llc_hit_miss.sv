@@ -10,7 +10,7 @@
 /// depending on the input descriptor.
 /// The unit starts uninitialized and starts in the first cycle after each reset
 /// the tag pattern generator to perform a march X BIST onto the macros.
-/// After the BIST is finished, the macros are initialyzed to all zero.
+/// After the BIST is finished, the macros are initialized to all zero.
 /// During initialisation no descriptors can enter the unit.
 ///
 /// This unit keeps track of which cache lines are currently in use by descriptors
@@ -48,7 +48,9 @@ module axi_llc_hit_miss #(
   /// Way indicator, is a onehot signal with width: `Cfg.SetAssociativity`.
   parameter type                       way_ind_t = logic,
   /// Whether to print SRAM configs
-  parameter bit                        PrintSramCfg = 0
+  parameter bit                        PrintSramCfg = 0,
+  /// Number of low AXI ID bits used for miss counters.
+  parameter int unsigned               AxiIdLookupBits = 32'd0
 ) (
   /// Clock, positive edge triggered.
   input  logic     clk_i,
@@ -97,7 +99,7 @@ module axi_llc_hit_miss #(
   typedef struct packed {
     /// The request mode. What operation the tag storage should perform with the request.
     axi_llc_pkg::tag_mode_e mode;
-    /// The indicatior encodes with a hot signal, to which ways the request should be made.
+    /// The indicator encodes with a hot signal, to which ways the request should be made.
     way_ind_t               indicator;
     /// The index points to the cache line, for which the request is made.
     index_t                 index;
@@ -314,10 +316,10 @@ module axi_llc_hit_miss #(
       end
 
     ///////////////////////////////////////////////////////////////////////////////
-    // we come out of a reset, initialize the tag sram makros
+    // we come out of a reset, initialize the tag sram macros
     ///////////////////////////////////////////////////////////////////////////////
     end else begin
-      // first cycle after reset start initialization of the sram makros
+      // first cycle after reset start initialization of the sram macros
       store_req = store_req_t'{
         mode:      axi_llc_pkg::Bist,
         indicator: {Cfg.SetAssociativity{1'b1}},
@@ -360,8 +362,9 @@ module axi_llc_hit_miss #(
   assign cnt_up.valid = ~desc_o.flush & miss_valid_o & miss_ready_i;
 
   axi_llc_miss_counters #(
-    .Cfg     ( Cfg    ),
-    .cnt_t   ( cnt_t  )
+    .Cfg             ( Cfg             ),
+    .AxiIdLookupBits ( AxiIdLookupBits ),
+    .cnt_t           ( cnt_t           )
   ) i_miss_counters (
     .clk_i      (      clk_i ),
     .rst_ni     (     rst_ni ),

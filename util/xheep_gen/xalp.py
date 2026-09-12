@@ -4,6 +4,7 @@ from bus import AxiMaster, Bus, BusSlave
 from cpu.cpu import CPU
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import PeripheralDomain
+from peripherals.base_peripherals.llc import LLC
 from system import System
 from bus_type import BusType
 
@@ -36,6 +37,7 @@ class XAlp(System):
         "pad_control",
         "soc_ctrl",
         "uart",
+        "axi_llc",
     ]
     """Constant list of peripheral names available for X-ALP."""
 
@@ -110,13 +112,15 @@ class XAlp(System):
 
         slaves = []
         if self.memory_ss() is not None:
-            slaves.append(
-                BusSlave(
-                    "mem",
-                    self.MEMORY_START_ADDRESS,
-                    self.memory_ss().ram_size_address(),
-                )
-            )
+            # A memory subsystem may answer several disjoint windows on a
+            # single port (the LLC: its scratchpad and its cached region), so
+            # the first window is the port and the rest are extra rules.
+            windows = self.memory_ss().bus_windows(self.MEMORY_START_ADDRESS)
+            name, base, size = windows[0]
+            memory_slave = BusSlave(name, base, size)
+            for name, base, size in windows[1:]:
+                memory_slave.add_window(name, base, size)
+            slaves.append(memory_slave)
 
         subsystems = {
             subsystem.get_start_address(): subsystem
@@ -211,6 +215,14 @@ class XAlp(System):
         :param str name: The full name of the subsystem to disconnect.
         """
         self.remove_peripheral_subsystem(name)
+
+    def get_cache(self) -> LLC:
+        """
+        :return: the last-level cache when the memory subsystem is one, `None` otherwise.
+        :rtype: LLC
+        """
+        memory_ss = self.memory_ss()
+        return memory_ss if isinstance(memory_ss, LLC) else None
 
     # ------------------------------------------------------------
     # Power / Clock-Gating Domains

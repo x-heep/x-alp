@@ -182,21 +182,25 @@ package cva6_config_pkg;
             core_v_mcu_pkg::EXT_PERIPHERAL_REG_SIZE
         }
         ),
-        NrExecuteRegionRules: unsigned'(3),
+        NrExecuteRegionRules: unsigned'(${2 + len(linker_sections)}),
         ExecuteRegionAddrBase:
         1024'(
         {
             core_v_mcu_pkg::DEBUG_BUS_BASE_ADDR,
-            core_v_mcu_pkg::BOOTROM_REG_BASE_ADDR,
-            core_v_mcu_pkg::CODE_ZONE_BASE_ADDR
+            core_v_mcu_pkg::BOOTROM_REG_BASE_ADDR${"," if linker_sections else ""}
+% for section in linker_sections:
+            core_v_mcu_pkg::${section.name.upper()}_ZONE_BASE_ADDR${"" if loop.last else ","}
+% endfor
         }
         ),
         ExecuteRegionLength:
         1024'(
         {
             core_v_mcu_pkg::DEBUG_BUS_SIZE,
-            core_v_mcu_pkg::BOOTROM_REG_SIZE,
-            core_v_mcu_pkg::CODE_ZONE_SIZE
+            core_v_mcu_pkg::BOOTROM_REG_SIZE${"," if linker_sections else ""}
+% for section in linker_sections:
+            core_v_mcu_pkg::${section.name.upper()}_ZONE_SIZE${"" if loop.last else ","}
+% endfor
         }
         ),
         NrCachedRegionRules: unsigned'(${len(linker_sections)}),

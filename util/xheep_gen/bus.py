@@ -86,7 +86,9 @@ class BusSlave:
         if type(base) is not int or base < 0:
             raise ValueError("BusSlave window base should be a positive integer")
         if type(size) is not int or size <= 0:
-            raise ValueError("BusSlave window size should be a strictly positive integer")
+            raise ValueError(
+                "BusSlave window size should be a strictly positive integer"
+            )
         self._extra_windows.append({"name": name, "base": base, "size": size})
 
     def get_extra_windows(self):

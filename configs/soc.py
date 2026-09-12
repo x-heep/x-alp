@@ -6,9 +6,7 @@
 # Description: Generic (default) configuration for X-ALP
 
 from xalp import XAlp
-from bus import Bus, AxiMaster, BusSlave
 from cpu.cva6 import cva6
-from bus_type import BusType
 from address_map.address_map import AddressMap
 from address_map.address_region import AddressRegion
 
@@ -18,16 +16,14 @@ from peripherals.base_peripherals import (
     Bootrom,
     Fast_intr_ctrl,
     Ext_peripheral,
+    LLC,
 )
 from peripherals.user_peripherals import (
     UART,
 )
 
-from memory_ss.memory_ss import MemorySS
-from memory_ss.linker_section import LinkerSection
 from debug_ss.debug_ss import DebugSS
-from memory_ss.memory_ss import MemorySS
-from memory_ss.linker_section import LinkerSection
+
 
 def config():
 
@@ -37,15 +33,24 @@ def config():
 
     peripheral_domain = AddressRegion("peripheral_domain", start_address=0x20000000, length=0x00100000)
 
-    memory = MemorySS()
-    memory.add_ram_banks([64] * 2)
-    memory.add_linker_section(LinkerSection.by_size("code", 0, 0x00008000))
-    memory.add_linker_section(LinkerSection("data", 0x00008000, None))
-    soc.connect_memory_ss(memory)
+    # The memory subsystem is the last-level cache: its scratchpad answers at
+    # 0x10000000 and the region it caches, backed by the DRAM on its master
+    # port, at 0x80000000. Both are cacheable and executable by default.
+    llc = LLC(
+        set_assoc=16,
+        num_lines=256,
+        num_blocks=8,
+        spm_start=0x10000000,
+        cached_start=0x80000000,
+        cached_size=0x10000000,
+    )
+    soc.connect_memory_ss(llc)
 
     address_map = AddressMap()
+    # Kept at 0x00000000: the debug module ROM is where the linker places
+    # `extrom`, which the boot ROM hands control to.
     address_map.add_region(
-        AddressRegion("debug", start_address=0x10000000, length=0x00100000)
+        AddressRegion("debug", start_address=0x00000000, length=0x00100000)
     )
 
     address_map.add_region(peripheral_domain)
@@ -66,6 +71,7 @@ def config():
             Ext_peripheral(),
             Fast_intr_ctrl(),
             UART(),
+            llc,
         ],
     )
     soc.connect_peripheral_subsystem(peripherals)

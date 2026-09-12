@@ -278,6 +278,21 @@ class MemorySS:
             size += bank.size()
         return size
 
+    def bus_windows(self, start_address: int):
+        """
+        Describes how the memory subsystem is seen by the system bus.
+
+        The first window is the crossbar port itself, any further one is an
+        extra decoder rule pointing at that same port. Subclasses backed by
+        something other than plain RAM banks (the LLC, with its scratchpad and
+        its cached region) override this.
+
+        :param int start_address: Address the system reserves for the memory subsystem.
+        :return: The windows as ``(name, base, size)`` tuples.
+        :rtype: list[tuple[str, int, int]]
+        """
+        return [("mem", start_address, self.ram_size_address())]
+
     def iter_ram_banks(self) -> Iterable[Bank]:
         """
         :return: an iterator over all banks.

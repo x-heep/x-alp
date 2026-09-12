@@ -10,7 +10,7 @@
 /// `axi_llc_pkg::Bist`:
 ///   The pattern gets written or read to all macros, BIST resulte gets activated
 /// `axi_llc_pkg::Flush`:
-///   Perform a way trageted eviction, the tag is written in with all zero.
+///   Perform a way targeted eviction, the tag is written in with all zero.
 /// `axi_llc_pkg::Lookup`:
 ///   Perform a tag lookup in all non SPM ways, hit/eviction gets set if needed.
 ///   Writes the tag into the macro if needed.
@@ -298,19 +298,20 @@ module axi_llc_tag_store #(
     );
 
     // comparator (XNOR)
-    assign ram_compared = tag_data_t'{
-          val: bist_pattern.val,
-          dit: bist_pattern.dit,
-          tag: (req_q.mode == axi_llc_pkg::Bist) ? bist_pattern.tag : req_q.tag
-        } ~^ ram_rdata;
-    assign tag_equ[i] = &ram_compared.tag; // valid if the stored tag equals the one looked up
-    assign tag_val[i] = ram_rdata.val;     // indicates where valid values are in the line
-    assign tag_dit[i] = ram_rdata.dit;     // indicates which tags are dirty
+    tag_t tag_compare;
+    logic i_tag_equ;
 
-    // hit detection
-    assign hit[i]        = req_q.indicator[i] & tag_val[i] & tag_equ[i];
-    // BIST also add the two bits of valid and dirty
-    assign bist_res[i]   = ram_compared.val & ram_compared.dit & tag_equ[i];
+    assign tag_compare  = (req_q.mode == axi_llc_pkg::Bist) ? bist_pattern.tag : req_q.tag;
+    assign i_tag_equ    = &(ram_rdata.tag ~^ tag_compare);
+    assign tag_equ[i]   = i_tag_equ;
+    assign tag_val[i]   = ram_rdata.val;
+    assign tag_dit[i]   = ram_rdata.dit;
+
+    assign hit[i]      = req_q.indicator[i] & tag_val[i] & tag_equ[i];
+    assign bist_res[i] = (ram_rdata.val == bist_pattern.val) &
+                         (ram_rdata.dit == bist_pattern.dit) &
+                         i_tag_equ;
+
     // assignment to wide output signal that goes to the tag output mux
     assign stored_tag[i] = ram_rdata;
   end
