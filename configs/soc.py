@@ -5,8 +5,6 @@
 # Author(s): David Mallasen
 # Description: Generic (default) configuration for X-ALP
 
-from turtle import pd
-
 from xalp import XAlp
 from bus import Bus, AxiMaster, BusSlave
 from cpu.cva6 import cva6
