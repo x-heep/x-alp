@@ -1,9 +1,10 @@
 from copy import deepcopy
 
-from bus import AxiMaster, Bus, BusSlave
+from bus.bus import AxiMaster, Bus, AxiSlave
 from cpu.cpu import CPU
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import PeripheralDomain
+from peripherals.base_peripherals.llc import LLC
 from system import System
 from bus_type import BusType
 
@@ -36,6 +37,7 @@ class XAlp(System):
         "pad_control",
         "soc_ctrl",
         "uart",
+        "axi_llc",
     ]
     """Constant list of peripheral names available for X-ALP."""
 
@@ -103,20 +105,22 @@ class XAlp(System):
             bus.add_master(AxiMaster("cpu"))
         if self.debug_ss() is not None:
             bus.add_master(AxiMaster("debug_module"))
-        for peripheral in self._peripherals:
+        for peripheral in self.get_peripherals():
             for i in range(peripheral.get_num_master_ports()):
                 bus.add_master(AxiMaster(f"{peripheral.get_name()}_{i}"))
         bus.add_master(AxiMaster("ext_master"))
 
         slaves = []
         if self.memory_ss() is not None:
-            slaves.append(
-                BusSlave(
-                    "mem",
-                    self.MEMORY_START_ADDRESS,
-                    self.memory_ss().ram_size_address(),
-                )
-            )
+            # A memory subsystem may answer several disjoint windows on a
+            # single port (the LLC: its scratchpad and its cached region), so
+            # the first window is the port and the rest are extra rules.
+            windows = self.memory_ss().bus_windows(self.MEMORY_START_ADDRESS)
+            name, base, size = windows[0]
+            memory_slave = AxiSlave(name, base, size)
+            for name, base, size in windows[1:]:
+                memory_slave.add_window(name, base, size)
+            slaves.append(memory_slave)
 
         subsystems = {
             subsystem.get_start_address(): subsystem
@@ -129,7 +133,7 @@ class XAlp(System):
                 slaves.append(subsystem)
             else:
                 slaves.append(
-                    BusSlave(
+                    AxiSlave(
                         region.get_name(),
                         region.get_start_address(),
                         region.get_length(),
@@ -187,16 +191,6 @@ class XAlp(System):
         :raise TypeError: when subsystem is of incorrect type.
         :raise ValueError: when a subsystem with the same name is already connected.
         """
-        if not isinstance(subsystem, PeripheralDomain):
-            raise TypeError(
-                f"subsystem should be of type PeripheralDomain not {type(subsystem)}"
-            )
-        if subsystem.get_name() in [
-            ss.get_name() for ss in self._peripheral_subsystems
-        ]:
-            raise ValueError(
-                f"Subsystems with name {subsystem.get_name()} is already connected to the bus."
-            )
         self.add_peripheral_subsystem(subsystem)
 
     def disconnect_peripheral_subsystem(self, name: str):
@@ -211,6 +205,14 @@ class XAlp(System):
         :param str name: The full name of the subsystem to disconnect.
         """
         self.remove_peripheral_subsystem(name)
+
+    def get_cache(self) -> LLC:
+        """
+        :return: the last-level cache when the memory subsystem is one, `None` otherwise.
+        :rtype: LLC
+        """
+        memory_ss = self.memory_ss()
+        return memory_ss if isinstance(memory_ss, LLC) else None
 
     # ------------------------------------------------------------
     # Power / Clock-Gating Domains

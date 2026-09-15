@@ -6,9 +6,7 @@
 # Description: Generic (default) configuration for X-ALP
 
 from xalp import XAlp
-from bus import Bus, AxiMaster, BusSlave
 from cpu.cva6 import cva6
-from bus_type import BusType
 from address_map.address_map import AddressMap
 from address_map.address_region import AddressRegion
 

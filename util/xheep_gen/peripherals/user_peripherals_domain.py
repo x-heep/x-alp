@@ -18,6 +18,8 @@ class UserPeripheralDomain(PeripheralDomain):
     Subsystem for user peripherals (switchable domain). All user peripherals must be added.
     """
 
+    _peripheral_type = UserPeripheral
+
     def __init__(
         self,
         start_address: Optional[int] = None,
@@ -50,26 +52,3 @@ class UserPeripheralDomain(PeripheralDomain):
             if isinstance(peripheral, PDM2PCM):
                 return peripheral
         return None
-
-    def add_peripheral(self, peripheral: UserPeripheral):
-        """
-        Add a peripheral to the domain if it is a UserPeripheral. If not, raise an error.
-
-        :param UserPeripheral peripheral: The peripheral to add.
-        """
-        if not isinstance(peripheral, UserPeripheral):
-            raise ValueError("Peripheral is not a UserPeripheral")
-        self._peripherals.append(peripheral)
-
-    def remove_peripheral(self, peripheral: UserPeripheral):
-        """
-        Remove a peripheral from the domain if it is a UserPeripheral.
-
-        :param UserPeripheral peripheral: The peripheral to remove.
-        """
-        if peripheral not in self._peripherals:
-            print(
-                f"Warning : Peripheral {peripheral.get_name()} is not in the domain {self._name}"
-            )
-            return
-        self._peripherals.remove(peripheral)
