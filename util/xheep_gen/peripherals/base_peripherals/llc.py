@@ -102,17 +102,9 @@ class LLC(BasePeripheral, MemorySS):
         """:return: the number of blocks per line."""
         return self._num_blocks
 
-    def get_data_width(self) -> int:
-        """:return: the AXI data width in bits, which is also one block."""
-        return self._data_width
-
     # ------------------------------------------------------------
     # Address windows
     # ------------------------------------------------------------
-
-    def get_spm_start(self) -> int:
-        """:return: the base address of the SPM window."""
-        return self._spm_start
 
     def get_spm_size(self) -> int:
         """
@@ -122,14 +114,6 @@ class LLC(BasePeripheral, MemorySS):
         return (
             self._set_assoc * self._num_lines * self._num_blocks * self._data_width // 8
         )
-
-    def get_cached_start(self) -> int:
-        """:return: the base address of the cached (DRAM) window."""
-        return self._cached_start
-
-    def get_cached_size(self) -> int:
-        """:return: the size of the cached (DRAM) window in bytes."""
-        return self._cached_size
 
     def bus_windows(self, start_address: int):
         """
@@ -158,31 +142,31 @@ class LLC(BasePeripheral, MemorySS):
                 self.add_linker_section(LinkerSection(name, base, base + size))
         MemorySS.build(self)
 
+    def validate(self):
+        """
+        Validate the cache configuration.
 
-def _self_check():
-    """Runnable sanity check: `python3 -m peripherals.base_peripherals.llc`."""
-    llc = LLC(
-        set_assoc=8, num_lines=128, num_blocks=4, data_width=64, spm_start=0x40000000
-    )
-    # 8 ways * 128 lines * 4 blocks * 8 B = 32 KiB
-    assert llc.get_spm_size() == 32 * 1024, hex(llc.get_spm_size())
-    assert llc.bus_windows(0) == [
-        ("llc", 0x40000000, 32 * 1024),
-        ("dram", 0x80000000, 0x10000000),
-    ]
-    # Left alone, the cache declares its whole SPM and cached region.
-    llc.build()
-    assert [(s.name, s.start, s.end) for s in llc.iter_linker_sections()] == [
-        ("llc", 0x40000000, 0x40008000),
-        ("dram", 0x80000000, 0x90000000),
-    ]
-    # A configuration that adds sections of its own keeps them.
-    custom = LLC()
-    custom.add_linker_section(LinkerSection("code", 0x10000000, 0x10008000))
-    custom.build()
-    assert [s.name for s in custom.iter_linker_sections()] == ["code"]
-    print("LLC self-check OK")
+        The LLC is not backed by RAM banks, so the RAM bank checks of
+        :meth:`MemorySS.validate` do not apply; what has to hold is that the
+        cache geometry is a usable one and that the two address regions it
+        answers do not overlap.
 
+        :raise RuntimeError: when the geometry or the address regions are invalid.
+        """
+        for name, value in (
+            ("set_assoc", self._set_assoc),
+            ("num_lines", self._num_lines),
+            ("num_blocks", self._num_blocks),
+        ):
+            if value & (value - 1) != 0:
+                raise RuntimeError(
+                    f"[MCU-GEN - LLC] ERROR: {name} should be a power of two, got {value}"
+                )
 
-if __name__ == "__main__":
-    _self_check()
+        regions = sorted(self.bus_windows(self._spm_start), key=lambda w: w[1])
+        for (name, base, size), (next_name, next_base, _) in zip(regions, regions[1:]):
+            if base + size > next_base:
+                raise RuntimeError(
+                    f"[MCU-GEN - LLC] ERROR: The {name} region (ends at {base + size:#010X}) "
+                    f"overlaps {next_name} (starts at {next_base:#010X})."
+                )

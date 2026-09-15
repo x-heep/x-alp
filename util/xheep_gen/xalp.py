@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from bus import AxiMaster, Bus, BusSlave
+from bus.bus import AxiMaster, Bus, AxiSlave
 from cpu.cpu import CPU
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import PeripheralDomain
@@ -105,7 +105,7 @@ class XAlp(System):
             bus.add_master(AxiMaster("cpu"))
         if self.debug_ss() is not None:
             bus.add_master(AxiMaster("debug_module"))
-        for peripheral in self._peripherals:
+        for peripheral in self.get_peripherals():
             for i in range(peripheral.get_num_master_ports()):
                 bus.add_master(AxiMaster(f"{peripheral.get_name()}_{i}"))
         bus.add_master(AxiMaster("ext_master"))
@@ -117,7 +117,7 @@ class XAlp(System):
             # the first window is the port and the rest are extra rules.
             windows = self.memory_ss().bus_windows(self.MEMORY_START_ADDRESS)
             name, base, size = windows[0]
-            memory_slave = BusSlave(name, base, size)
+            memory_slave = AxiSlave(name, base, size)
             for name, base, size in windows[1:]:
                 memory_slave.add_window(name, base, size)
             slaves.append(memory_slave)
@@ -133,7 +133,7 @@ class XAlp(System):
                 slaves.append(subsystem)
             else:
                 slaves.append(
-                    BusSlave(
+                    AxiSlave(
                         region.get_name(),
                         region.get_start_address(),
                         region.get_length(),
@@ -191,16 +191,6 @@ class XAlp(System):
         :raise TypeError: when subsystem is of incorrect type.
         :raise ValueError: when a subsystem with the same name is already connected.
         """
-        if not isinstance(subsystem, PeripheralDomain):
-            raise TypeError(
-                f"subsystem should be of type PeripheralDomain not {type(subsystem)}"
-            )
-        if subsystem.get_name() in [
-            ss.get_name() for ss in self._peripheral_subsystems
-        ]:
-            raise ValueError(
-                f"Subsystems with name {subsystem.get_name()} is already connected to the bus."
-            )
         self.add_peripheral_subsystem(subsystem)
 
     def disconnect_peripheral_subsystem(self, name: str):

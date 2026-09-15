@@ -29,6 +29,8 @@ class BasePeripheralDomain(PeripheralDomain):
     Subsystem for base peripherals (always-on domain). All base peripherals must be added.
     """
 
+    _peripheral_type = BasePeripheral
+
     # List of all base peripherals names
     _default_base_peripherals = [
         SOC_ctrl(),
@@ -60,29 +62,6 @@ class BasePeripheralDomain(PeripheralDomain):
             clock_gating=False,
             peripherals=peripherals,
         )
-
-    def add_peripheral(self, peripheral: BasePeripheral):
-        """
-        Add a peripheral to the domain if it is a BasePeripheral. If not, raise an error.
-
-        :param BasePeripheral peripheral: The peripheral to add.
-        """
-        if not isinstance(peripheral, BasePeripheral):
-            raise ValueError("Peripheral is not a BasePeripheral")
-        self._peripherals.append(peripheral)
-
-    def remove_peripheral(self, peripheral: BasePeripheral):
-        """
-        Remove a peripheral from the domain if it is a BasePeripheral.
-
-        :param BasePeripheral peripheral: The peripheral to remove.
-        """
-        if peripheral not in self._peripherals:
-            print(
-                f"Warning : Peripheral {peripheral.get_name()} is not in the domain {self._name}"
-            )
-            return
-        self._peripherals.remove(peripheral)
 
     def add_missing_peripherals(self):
         """

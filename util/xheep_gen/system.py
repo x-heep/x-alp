@@ -6,8 +6,6 @@ from cpu.cpu import CPU
 from cv_x_if import CvXIf
 from memory_ss.memory_ss import MemorySS
 from peripherals.abstractions import PeripheralDomain
-from peripherals.base_peripherals_domain import BasePeripheralDomain
-from peripherals.user_peripherals_domain import UserPeripheralDomain
 from pads.pad_ring import PadRing
 from debug_ss.debug_ss import DebugSS
 from address_map.address_map import AddressMap
@@ -68,8 +66,6 @@ class System:
         self._address_map: AddressMap = None
 
         self._peripheral_subsystems: List[PeripheralDomain] = []
-
-        self._peripherals: List = []
 
         self._padring: PadRing = None
 
@@ -233,10 +229,14 @@ class System:
 
     def get_peripherals(self):
         """
-        :return: List of all peripherals configured in the system.
+        :return: List of all peripherals configured in the system, gathered from its peripheral subsystems.
         :rtype: list[Peripheral]
         """
-        return [deepcopy(peripheral) for peripheral in self._peripherals]
+        return [
+            peripheral
+            for ss in self._peripheral_subsystems
+            for peripheral in ss.get_peripherals()
+        ]
 
     def add_peripheral_subsystem(self, subsystem: PeripheralDomain):
         """
@@ -259,8 +259,6 @@ class System:
                 f"A peripheral subsystem named {subsystem.get_name()} is already present in the system"
             )
         self._peripheral_subsystems.append(deepcopy(subsystem))
-        for peripheral in subsystem.get_peripherals():
-            self._peripherals.append(deepcopy(peripheral))
 
     def remove_peripheral_subsystem(self, name: str):
         """
@@ -276,10 +274,6 @@ class System:
         for ss in self._peripheral_subsystems:
             if ss.get_name() == name:
                 self._peripheral_subsystems.remove(ss)
-                removed = {p.get_name() for p in ss.get_peripherals()}
-                self._peripherals = [
-                    p for p in self._peripherals if p.get_name() not in removed
-                ]
                 return
         print(f"Warning : Peripheral subsystem {name} is not in the system")
 
@@ -295,23 +289,6 @@ class System:
         for ss in self._peripheral_subsystems:
             if isinstance(ss, subsystem_type):
                 return ss
-        return None
-
-    def get_peripheral_subsystem(self, name: str):
-        """
-        Returns a deepcopy of the peripheral subsystem with the given name.
-
-        Note: :class:`PeripheralDomain` appends " Peripheral Domain" to the
-        name given at construction, so the full name returned by
-        `get_name()` must be passed (e.g. "Base Peripheral Domain").
-
-        :param str name: The full name of the subsystem.
-        :return: The peripheral subsystem, `None` if not found.
-        :rtype: PeripheralDomain
-        """
-        for ss in self._peripheral_subsystems:
-            if ss.get_name() == name:
-                return deepcopy(ss)
         return None
 
     def get_peripheral_subsystems(self):
@@ -346,60 +323,6 @@ class System:
         for ss in self._peripheral_subsystems:
             names.extend(peripheral.get_name() for peripheral in ss.get_peripherals())
         return names
-
-    def get_base_peripheral_domain(self):
-        """
-        Returns a deepcopy of the base peripheral domain (convenience
-        accessor, first subsystem of type BasePeripheralDomain).
-
-        :return: The base peripheral domain, `None` if not present.
-        :rtype: BasePeripheralDomain
-        """
-        for ss in self._peripheral_subsystems:
-            if isinstance(ss, BasePeripheralDomain):
-                return deepcopy(ss)
-        return None
-
-    def get_user_peripheral_domain(self):
-        """
-        Returns a deepcopy of the user peripheral domain (convenience
-        accessor, first subsystem of type UserPeripheralDomain).
-
-        :return: The user peripheral domain, `None` if not present.
-        :rtype: UserPeripheralDomain
-        """
-        for ss in self._peripheral_subsystems:
-            if isinstance(ss, UserPeripheralDomain):
-                return deepcopy(ss)
-        return None
-
-    def are_base_peripherals_configured(self) -> bool:
-        """
-        :return: `True` if the base peripherals are configured, `False` otherwise.
-        :rtype: bool
-        """
-        return any(
-            isinstance(ss, BasePeripheralDomain) for ss in self._peripheral_subsystems
-        )
-
-    def are_user_peripherals_configured(self) -> bool:
-        """
-        :return: `True` if the user peripherals are configured, `False` otherwise.
-        :rtype: bool
-        """
-        return any(
-            isinstance(ss, UserPeripheralDomain) for ss in self._peripheral_subsystems
-        )
-
-    def are_peripherals_configured(self) -> bool:
-        """
-        :return: `True` if both base and user peripherals are configured, `False` otherwise.
-        :rtype: bool
-        """
-        return (
-            self.are_base_peripherals_configured()
-            and self.are_user_peripherals_configured()
-        )
 
     # ------------------------------------------------------------
     # Pad Ring
@@ -487,6 +410,9 @@ class System:
 
         self._validate_peripheral_availability()
 
+        if self.memory_ss():
+            self.memory_ss().validate()
+
         # Check that each peripheral subsystem is valid
         for ss in self._peripheral_subsystems:
             ss.validate()
@@ -510,7 +436,7 @@ class System:
 
         # Check that all subsystems start above the protected low address range
         for ss in self._peripheral_subsystems:
-            if ss.get_start_address() < 0x10000:  # from mcu_gen.py
+            if ss.get_start_address() < 0x10000:
                 raise RuntimeError(
                     f"[MCU-GEN] ERROR: Peripheral subsystem start address must be greater than 0x10000, current address of {ss.get_name()} is {ss.get_start_address():#08X}."
                 )

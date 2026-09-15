@@ -64,21 +64,38 @@ class XHeep(System):
             self.remove_peripheral_subsystem(existing.get_name())
         self.add_peripheral_subsystem(domain)
 
-    # ------------------------------------------------------------
-    # CPU
-    # ------------------------------------------------------------
+    def get_base_peripheral_domain(self):
+        """
+        Returns a deepcopy of the base peripheral domain.
 
-    # ------------------------------------------------------------
-    # CORE-V eXtension Interface (CV-X-IF)
-    # ------------------------------------------------------------
+        :return: The base peripheral domain, `None` if not present.
+        :rtype: BasePeripheralDomain
+        """
+        return deepcopy(self._find_peripheral_subsystem(BasePeripheralDomain))
 
-    # ------------------------------------------------------------
-    # Bus
-    # ------------------------------------------------------------
+    def get_user_peripheral_domain(self):
+        """
+        Returns a deepcopy of the user peripheral domain.
 
-    # ------------------------------------------------------------
-    # Memory
-    # ------------------------------------------------------------
+        :return: The user peripheral domain, `None` if not present.
+        :rtype: UserPeripheralDomain
+        """
+        return deepcopy(self._find_peripheral_subsystem(UserPeripheralDomain))
+
+    def are_base_peripherals_configured(self) -> bool:
+        """
+        :return: `True` if the base peripherals are configured, `False` otherwise.
+        :rtype: bool
+        """
+        return self._find_peripheral_subsystem(BasePeripheralDomain) is not None
+
+    def are_user_peripherals_configured(self) -> bool:
+        """
+        :return: `True` if the user peripherals are configured, `False` otherwise.
+        :rtype: bool
+        """
+        return self._find_peripheral_subsystem(UserPeripheralDomain) is not None
+
 
     # ------------------------------------------------------------
     # Linker Script Configuration
