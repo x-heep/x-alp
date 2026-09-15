@@ -4,7 +4,8 @@ from bus_type import BusType
 from typing import List, Optional
 
 from peripherals.abstractions import PeripheralDomain
-from xheep_gen.bus.axi_slave import AxiSlave
+from bus.axi_slave import AxiSlave
+from bus.axi_master import AxiMaster
 
 
 def _macro_name(name: str) -> str:
