@@ -22,4 +22,33 @@
       "src_files.yml",
     ]
   },
+
+  axi_llc: {
+    upstream: {
+      url: https://github.com/pulp-platform/axi_llc.git
+      rev: master
+    }
+
+    exclude_from_upstream: [
+      ".github",
+      "doc",
+      "logs",
+      "scripts",
+      "sw",
+      "test",
+      "util",
+      ".gitignore",
+      ".gitlab-ci.yml",
+      "Bender.lock",
+      "Bender.yml",
+      "CHANGELOG.md",
+      "CODEOWNERS",
+      "CONTRIBUTING.md",
+      "LICENSE",
+      "Makefile",
+      "README.md",
+      "requirements.txt",
+      "VERSION"
+    ]
+  },
 }

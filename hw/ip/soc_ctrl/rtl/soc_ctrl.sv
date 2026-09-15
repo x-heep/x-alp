@@ -29,20 +29,30 @@ module soc_ctrl #(
     soc_ctrl_hw2reg_t hw2reg;
 
 `ifndef SYNTHESIS
-    logic testbench_set_exit_loop[1];
+    logic        testbench_set_exit_loop      [1];
     //forced by simulation for preloading, do not touch
     //only arrays can be "forced" in verilator, thus array of 1 element is done
     //At synthesis time this signal will get removed
+    logic [31:0] testbench_set_boot_address   [1];
+    logic        testbench_set_boot_address_en[1];
     always_ff @(posedge clk_i or negedge rst_ni) begin : proc_
         if (~rst_ni) begin
-            testbench_set_exit_loop[0] <= '0;
+            testbench_set_exit_loop[0]       <= '0;
+            testbench_set_boot_address[0]    <= '0;
+            testbench_set_boot_address_en[0] <= '0;
         end
     end
     assign hw2reg.boot_exit_loop.d  = testbench_set_exit_loop[0];
     assign hw2reg.boot_exit_loop.de = testbench_set_exit_loop[0];
+    // Lets the testbench point the boot ROM at a preloaded image, whose entry
+    // depends on which memory it was linked into.
+    assign hw2reg.boot_address.d    = testbench_set_boot_address[0];
+    assign hw2reg.boot_address.de   = testbench_set_boot_address_en[0];
 `else
     assign hw2reg.boot_exit_loop.d  = 1'b0;
     assign hw2reg.boot_exit_loop.de = 1'b0;
+    assign hw2reg.boot_address.d    = 32'b0;
+    assign hw2reg.boot_address.de   = 1'b0;
 `endif
 
     assign hw2reg.boot_select.de = 1'b1;

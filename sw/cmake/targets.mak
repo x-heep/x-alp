@@ -18,7 +18,9 @@
 build : build/Makefile
 	@echo Build 
 	${MAKE} -s -C build
-	@cp build/main.elf build/main.spm.elf
+	@# The testbench picks which memory to preload from this suffix, so it has
+	@# to name the memory the binary was actually linked into.
+	@cp build/main.elf build/main.${LINKER}.elf
 
 setup : build/Makefile
 
