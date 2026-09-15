@@ -68,7 +68,7 @@ class MemorySS:
             self._ram_next_idx += 1
 
         if section_name != "":
-            self.add_linker_section_for_banks(section_name, banks)
+            self.add_linker_section_for_banks(section_name, banks=banks)
         # Add all new banks if no error was raised
         self._ram_banks += banks
 
@@ -278,6 +278,21 @@ class MemorySS:
             size += bank.size()
         return size
 
+    def bus_windows(self, start_address: int):
+        """
+        Describes how the memory subsystem is seen by the system bus.
+
+        The first window is the crossbar port itself, any further one is an
+        extra decoder rule pointing at that same port. Subclasses backed by
+        something other than plain RAM banks (the LLC, with its scratchpad and
+        its cached region) override this.
+
+        :param int start_address: Address the system reserves for the memory subsystem.
+        :return: The windows as ``(name, base, size)`` tuples.
+        :rtype: list[tuple[str, int, int]]
+        """
+        return [("mem", start_address, self.ram_size_address())]
+
     def iter_ram_banks(self) -> Iterable[Bank]:
         """
         :return: an iterator over all banks.
@@ -308,7 +323,7 @@ class MemorySS:
 
     def iter_bank_numwords(self) -> Generator[int, None, None]:
         """
-        Iterates over the size of the ram banks in number of words.
+        Iterates over the sizes of the RAM banks in number of words.
 
         :return: Generator over the sizes
         :rtype: Generator[int, None, None]
@@ -319,13 +334,30 @@ class MemorySS:
                 sizes.add(b.size())
                 yield b.size() // 4
 
+    def linker_data_region_size(self) -> int:
+        """
+        Returns the size of the linker data region.
+        If a linker section named `data` is configured, its size is used.
+        Otherwise raises a RuntimeError.
+
+        :return: The linker data region size in bytes.
+        :rtype: int
+        """
+        for section in self._linker_sections:
+            if section.name == "data":
+                return section.size
+
+        raise RuntimeError("Memory subsystem must be built first to obtain data region")
+
     def build(self):
         """
         Finalizes the memory subsystem configuration.
-
-        - Aplies the overrides for the interleaved memory as the normal memory needs to be configured first.
-        - Sorts the linker sections by starting address.
-        - Inferes the missing linker section ends with the start of the next section if present. If not it uses the end of the last memory bank.
+                - Applies the overrides for the interleaved memory, as the normal memory
+                    needs to be configured first.
+                - Sorts the linker sections by starting address.
+                - Infers the missing linker section ends using the start of the next
+                    section if present; otherwise it uses the end of the last memory
+                    bank.
         """
 
         if self._ignore_ram_interleaved:
