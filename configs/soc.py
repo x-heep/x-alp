@@ -10,7 +10,7 @@ from cpu.cva6 import cva6
 from address_map.address_map import AddressMap
 from address_map.address_region import AddressRegion
 
-from peripherals.abstractions import PeripheralDomain
+from peripherals.peripheral_domain import PeripheralDomain
 from peripherals.base_peripherals import (
     SOC_ctrl,
     Bootrom,
@@ -27,13 +27,16 @@ from debug_ss.debug_ss import DebugSS
 from memory_ss.memory_ss import MemorySS
 from memory_ss.linker_section import LinkerSection
 
+
 def config():
 
     soc = XAlp("X-ALP")
 
     soc.connect_cpu(cva6())
 
-    peripheral_domain = AddressRegion("peripheral_domain", start_address=0x20000000, length=0x00100000)
+    peripheral_domain = AddressRegion(
+        "peripheral_domain", start_address=0x20000000, length=0x00100000
+    )
 
     memory = MemorySS()
     memory.add_ram_banks([64] * 2)
@@ -55,7 +58,7 @@ def config():
     soc.set_debug_ss(DebugSS())
 
     peripherals = PeripheralDomain(
-        peripheral_domain,
+        peripheral_domain.get_name(),
         power_domain=None,
         clock_gating=False,
         peripherals=[
@@ -66,6 +69,6 @@ def config():
             UART(),
         ],
     )
-    soc.connect_peripheral_subsystem(peripherals)
+    soc.connect_domain(peripherals)
 
     return soc

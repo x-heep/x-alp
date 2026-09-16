@@ -1,9 +1,16 @@
+# Copyright 2026 Politecnico di Torino
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Author(s): Luigi Giuffrida
+# Description: Bus class
+
 import warnings
 
 from bus_type import BusType
 from typing import List, Optional
 
-from peripherals.abstractions import PeripheralDomain
+from peripherals.peripheral_domain import PeripheralDomain
 from bus.axi_slave import AxiSlave
 from bus.axi_master import AxiMaster
 
@@ -21,6 +28,7 @@ def _macro_name(name: str) -> str:
         name = name[: -len(suffix)]
     return name.strip().upper().replace(" ", "_")
 
+
 #: Default window size used when an AXI slave is added without an explicit size.
 DEFAULT_SLAVE_SIZE = 0x1000
 
@@ -30,7 +38,7 @@ class Bus:
     Represents a system bus.
 
     In bus-centric systems (see :class:`XAlp`) the bus is created first and
-    every component (CPU, memory subsystem, peripheral subsystems) is then
+    every component (CPU, memory subsystem, domains) is then
     connected to it.
 
     :param BusType bus_type: The type of the bus.
@@ -76,7 +84,7 @@ class Bus:
         """
         Add an AXI slave to the bus. A slave is either a :class:`AxiSlave`
         (a plain address window such as MEM / DEBUG_MODULE / EXT_SLAVE) or a
-        :class:`PeripheralDomain` (a peripheral subsystem whose register-interface
+        :class:`PeripheralDomain` (a domain whose register-interface
         peripherals become REG slaves nested in its window).
 
         :param slave: The slave node to add.
@@ -84,7 +92,7 @@ class Bus:
         """
         if not isinstance(slave, (AxiSlave, PeripheralDomain)):
             raise TypeError(
-                "Bus slave should be a AxiSlave or a PeripheralDomain (peripheral subsystem)"
+                "Bus slave should be a AxiSlave or a PeripheralDomain (domain)"
             )
         if slave.get_length() is None:
             warnings.warn(
@@ -106,7 +114,7 @@ class Bus:
         size gets :data:`DEFAULT_SLAVE_SIZE`. A slave with no explicit base is
         placed at the next free address after the previous slave (starting from
         ``start_address``); a slave with an explicit base must not start before
-        that next free address. Peripheral subsystem slaves are then built so
+        that next free address. Domain slaves are then built so
         their register-interface peripherals get offsets assigned.
 
         :param int start_address: First address used for auto-placed slaves.
@@ -207,9 +215,9 @@ class Bus:
 
     def get_reg_slaves(self):
         """
-        :return: Register-interface slaves nested in peripheral subsystem AXI
+        :return: Register-interface slaves nested in domain AXI
             windows, as ``{name, macro, idx, base, size, end}`` with absolute
-            addresses (subsystem base + peripheral offset).
+            addresses (domain base + peripheral offset).
         :rtype: list[dict]
         """
         result = []
