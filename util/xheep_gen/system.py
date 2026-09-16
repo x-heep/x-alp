@@ -359,7 +359,7 @@ class System:
         if self.memory_ss():
             self.memory_ss().build()
         for d in self._domains:
-            # A domain carries no window of its own: it takes the one of the
+            # A domain carries no region of its own: it takes the one of the
             # address map region sharing its name.
             region = (
                 self.address_map().get_region(d.get_name())
