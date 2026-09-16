@@ -10,7 +10,7 @@ from cpu.cva6 import cva6
 from address_map.address_map import AddressMap
 from address_map.address_region import AddressRegion
 
-from peripherals.abstractions import PeripheralDomain
+from peripherals.peripheral_domain import PeripheralDomain
 from peripherals.base_peripherals import (
     SOC_ctrl,
     Bootrom,
@@ -29,9 +29,11 @@ def config():
 
     soc = XAlp("X-ALP")
 
-    soc.connect_cpu(cva6())
+    soc.set_cpu(cva6())
 
-    peripheral_domain = AddressRegion("peripheral_domain", start_address=0x20000000, length=0x00100000)
+    peripheral_domain = AddressRegion(
+        "peripheral_domain", start_address=0x20000000, length=0x00100000
+    )
 
     # The memory subsystem is the last-level cache: its scratchpad answers at
     # 0x10000000 and the region it caches, backed by the DRAM on its master
@@ -62,7 +64,7 @@ def config():
     soc.set_debug_ss(DebugSS())
 
     peripherals = PeripheralDomain(
-        peripheral_domain,
+        peripheral_domain.get_name(),
         power_domain=None,
         clock_gating=False,
         peripherals=[
@@ -74,6 +76,6 @@ def config():
             llc,
         ],
     )
-    soc.connect_peripheral_subsystem(peripherals)
+    soc.add_domain(peripherals)
 
     return soc
