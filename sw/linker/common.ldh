@@ -29,14 +29,15 @@ SECTIONS {
   __stack_pointer$  = 0;
 
   /* Further addresses */
-  __base_debug          = 0x00000000;
-  __base_ext_slaves     = 0xF0000000;
-  __base_soc_ctrl       = 0x20000000;
-  __base_bootrom        = 0x20010000;
-  __base_ext_peripheral = 0x20020000;
-  __base_fast_intr_ctrl = 0x20030000;
-  __base_uart           = 0x20040000;
-  __base_axi_llc        = 0x20050000;
-  __base_spm            = ORIGIN(spm);
-  __base_dram           = ORIGIN(dram);
+  __base_debug             = 0x00000000;
+  __base_peripheral_domain = 0x20000000;
+  __base_ext_slaves        = 0xF0000000;
+  __base_soc_ctrl          = 0x20000000;
+  __base_bootrom           = 0x20010000;
+  __base_ext_peripheral    = 0x20020000;
+  __base_fast_intr_ctrl    = 0x20030000;
+  __base_uart              = 0x20040000;
+  __base_axi_llc           = 0x20050000;
+  __base_spm               = ORIGIN(spm);
+  __base_dram              = ORIGIN(dram);
 }

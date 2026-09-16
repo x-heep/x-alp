@@ -87,9 +87,15 @@ _boot_wait_bist:
     andi t2, t2, (1 << AXI_LLC_BIST_STATUS_DONE_BIT)
     beqz t2, _boot_wait_bist
 
-    li   t2, -1
+    // Lock every way as SPM. CFG_SPM reads back every bit software wrote while
+    // FLUSHED only ever carries the SetAssociativity implemented ones, so write
+    // exactly the mask of implemented ways: the loop below compares the two.
+    lw   t0, AXI_LLC_SET_ASSO_LOW_REG_OFFSET(t1)
+    li   t2, 1
+    sll  t2, t2, t0
+    addi t2, t2, -1
     sw   t2, AXI_LLC_CFG_SPM_LOW_REG_OFFSET(t1)
-    sw   t2, AXI_LLC_CFG_SPM_HIGH_REG_OFFSET(t1)
+    sw   zero, AXI_LLC_CFG_SPM_HIGH_REG_OFFSET(t1)
     li   t2, 1
     sw   t2, AXI_LLC_COMMIT_CFG_REG_OFFSET(t1)
     // Wait for the commit to land before fetching from the SPM: while the LLC

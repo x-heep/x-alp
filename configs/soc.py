@@ -46,7 +46,7 @@ def config():
         cached_start=0x80000000,
         cached_size=0x10000000,
     )
-    soc.connect_memory_ss(llc)
+    soc.set_memory_ss(llc)
 
     address_map = AddressMap()
     # Kept at 0x00000000: the debug module ROM is where the linker places

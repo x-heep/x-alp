@@ -38,6 +38,7 @@ extern "C" {
 #define EXT_SLAVES_SIZE 0x0000000001000000
 #define EXT_SLAVES_END_ADDRESS (EXT_SLAVES_START_ADDRESS + EXT_SLAVES_SIZE)
 
+
 // Register-interface slaves. Primary macro is <NAME>_BASE_ADDRESS;
 // <NAME>_START_ADDRESS is provided as an alias so firmware can use either name.
 #define SOC_CTRL_BASE_ADDRESS 0x0000000020000000
@@ -70,10 +71,12 @@ extern "C" {
 #define AXI_LLC_SIZE 0x0000000000010000
 #define AXI_LLC_END_ADDRESS (AXI_LLC_BASE_ADDRESS + AXI_LLC_SIZE)
 
+
 // Linker-defined base address symbols (from common.ldh). The *address* of each
 // symbol is the corresponding base address; use as &__base_<name>.
 #ifndef __ASSEMBLER__
 extern char __base_debug;
+extern char __base_peripheral_domain;
 extern char __base_ext_slaves;
 extern char __base_soc_ctrl;
 extern char __base_bootrom;
