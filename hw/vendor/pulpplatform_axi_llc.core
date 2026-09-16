@@ -1,0 +1,43 @@
+CAPI=2:
+
+name: pulp-platform.org::axi_llc
+
+# Copyright 2021 OpenHW Group
+# Solderpad Hardware License, Version 2.1, see LICENSE.md for details.
+# SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
+
+filesets:
+  files_rtl:
+    files:
+    - pulp_platform/axi_llc/include/axi_llc/assign.svh : {is_include_file: true, include_path: pulp_platform/axi_llc/include}
+    - pulp_platform/axi_llc/include/axi_llc/typedef.svh : {is_include_file: true, include_path: pulp_platform/axi_llc/include}
+    - pulp_platform/axi_llc/src/eviction_refill/axi_llc_ax_master.sv 
+    - pulp_platform/axi_llc/src/eviction_refill/axi_llc_r_master.sv 
+    - pulp_platform/axi_llc/src/eviction_refill/axi_llc_w_master.sv 
+    - pulp_platform/axi_llc/src/hit_miss_detect/axi_llc_evict_box.sv 
+    - pulp_platform/axi_llc/src/hit_miss_detect/axi_llc_lock_box_bloom.sv 
+    - pulp_platform/axi_llc/src/hit_miss_detect/axi_llc_miss_counters.sv 
+    - pulp_platform/axi_llc/src/hit_miss_detect/axi_llc_tag_pattern_gen.sv 
+    - pulp_platform/axi_llc/src/hit_miss_detect/axi_llc_tag_store.sv 
+    - pulp_platform/axi_llc/src/axi_llc_burst_cutter.sv 
+    - pulp_platform/axi_llc/src/axi_llc_chan_splitter.sv 
+    - pulp_platform/axi_llc/src/axi_llc_config.sv 
+    - pulp_platform/axi_llc/src/axi_llc_data_way.sv 
+    - pulp_platform/axi_llc/src/axi_llc_evict_unit.sv 
+    - pulp_platform/axi_llc/src/axi_llc_hit_miss.sv 
+    - pulp_platform/axi_llc/src/axi_llc_merge_unit.sv 
+    - pulp_platform/axi_llc/src/axi_llc_pkg.sv 
+    - pulp_platform/axi_llc/src/axi_llc_read_unit.sv 
+    - pulp_platform/axi_llc/src/axi_llc_refill_unit.sv 
+    - pulp_platform/axi_llc/src/axi_llc_reg_pkg.sv 
+    - pulp_platform/axi_llc/src/axi_llc_reg_top.sv 
+    - pulp_platform/axi_llc/src/axi_llc_reg_wrap.sv 
+    - pulp_platform/axi_llc/src/axi_llc_top.sv 
+    - pulp_platform/axi_llc/src/axi_llc_ways.sv 
+    - pulp_platform/axi_llc/src/axi_llc_write_unit.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+    - "!target_format ? (!target_lint ? (files_rtl))"

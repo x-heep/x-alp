@@ -1,0 +1,4 @@
+`verilator_config
+
+lint_off -rule EOFNEWLINE -file "*/*axi_llc*/*/*.sv*"
+lint_off -rule MULTIDRIVEN -file "*/*axi_llc*/*/*.sv*"
