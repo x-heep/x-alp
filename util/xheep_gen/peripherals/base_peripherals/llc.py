@@ -19,32 +19,32 @@ class LLC(BasePeripheral, MemorySS):
     address map:
 
     * a *memory subsystem*: instead of on-chip RAM banks it gives the system
-      two windows, its scratchpad (SPM, whose size is fixed by the cache
+      two regions, its scratchpad (SPM, whose size is fixed by the cache
       geometry) and the cached region it backs with the DRAM hanging off its
-      master port. Both windows answer on a single crossbar port. Connect it
-      with :meth:`System.set_memory_ss`.
+      master port. Both answer on a single crossbar port. Connect it with
+      :meth:`System.set_memory_ss`.
     * a *peripheral*, i.e. a register-interface node inside a peripheral
       domain. ``offset``/``length`` describe that configuration register
-      window. Add the same object to the peripheral domain to get it.
+      region. Add the same object to the peripheral domain to get it.
 
     Every parameter of the cache is configurable here: the geometry
     (``set_assoc``, ``num_lines``, ``num_blocks``, ``data_width``) drives the
     ``axi_llc`` instance in the RTL and fixes the SPM size, while
-    ``spm_start``, ``cached_start`` and ``cached_size`` place the two windows.
+    ``spm_start``, ``cached_start`` and ``cached_size`` place the two regions.
 
     Unless the configuration adds linker sections of its own, the whole SPM
     and the whole cached region are declared as sections, which is what marks
     them cacheable and executable for the CPU.
 
-    :param int offset: Offset of the configuration register window in its domain. `None` places it automatically.
-    :param int length: Size of the configuration register window in bytes.
+    :param int offset: Offset of the configuration register region in its domain. `None` places it automatically.
+    :param int length: Size of the configuration register region in bytes.
     :param int set_assoc: Number of ways.
     :param int num_lines: Number of lines per way.
     :param int num_blocks: Number of blocks per line.
     :param int data_width: AXI data width in bits (one block).
-    :param int spm_start: Base address of the SPM window.
-    :param int cached_start: Base address of the cached (DRAM) window.
-    :param int cached_size: Size of the cached (DRAM) window in bytes.
+    :param int spm_start: Base address of the SPM region.
+    :param int cached_start: Base address of the cached (DRAM) region.
+    :param int cached_size: Size of the cached (DRAM) region in bytes.
     """
 
     _name = "axi_llc"
@@ -103,12 +103,12 @@ class LLC(BasePeripheral, MemorySS):
         return self._num_blocks
 
     # ------------------------------------------------------------
-    # Address windows
+    # Address regions
     # ------------------------------------------------------------
 
     def get_spm_size(self) -> int:
         """
-        :return: the size of the SPM window in bytes. Every way is usable as
+        :return: the size of the SPM region in bytes. Every way is usable as
             scratchpad, so this is the whole cache capacity.
         """
         return (
@@ -117,13 +117,18 @@ class LLC(BasePeripheral, MemorySS):
 
     def build(self):
         """
-        Declares the whole SPM and the whole cached region as linker sections
-        when the configuration did not add any of its own, then finalizes the
-        memory subsystem.
+        Declares the whole SPM ("llc") and the whole cached region ("dram") as
+        linker sections when the configuration did not add any of its own,
+        then finalizes the memory subsystem. These sections are what the
+        system reads back to place the two bus regions of the cache.
         """
         if not self._linker_sections:
-            for name, base, size in self.bus_windows(self._spm_start):
-                self.add_linker_section(LinkerSection(name, base, base + size))
+            self.add_linker_section(
+                LinkerSection.by_size("llc", self._spm_start, self.get_spm_size())
+            )
+            self.add_linker_section(
+                LinkerSection.by_size("dram", self._cached_start, self._cached_size)
+            )
         MemorySS.build(self)
 
     def validate(self):
@@ -147,10 +152,10 @@ class LLC(BasePeripheral, MemorySS):
                     f"[MCU-GEN - LLC] ERROR: {name} should be a power of two, got {value}"
                 )
 
-        regions = sorted(self.bus_windows(self._spm_start), key=lambda w: w[1])
-        for (name, base, size), (next_name, next_base, _) in zip(regions, regions[1:]):
-            if base + size > next_base:
+        regions = sorted(self.iter_linker_sections(), key=lambda s: s.start)
+        for region, next_region in zip(regions, regions[1:]):
+            if region.end > next_region.start:
                 raise RuntimeError(
-                    f"[MCU-GEN - LLC] ERROR: The {name} region (ends at {base + size:#010X}) "
-                    f"overlaps {next_name} (starts at {next_base:#010X})."
+                    f"[MCU-GEN - LLC] ERROR: The {region.name} region (ends at {region.end:#010X}) "
+                    f"overlaps {next_region.name} (starts at {next_region.start:#010X})."
                 )

@@ -29,7 +29,7 @@ def _macro_name(name: str) -> str:
     return name.strip().upper().replace(" ", "_")
 
 
-#: Default window size used when an AXI slave is added without an explicit size.
+#: Default size used when an AXI slave is added without an explicit size.
 DEFAULT_SLAVE_SIZE = 0x1000
 
 
@@ -53,6 +53,7 @@ class Bus:
         self._bus_type = bus_type
         self._masters: List[AxiMaster] = []
         self._slaves: list = []
+        self._addr_rules: list = []
 
     def bus_type(self) -> Optional[BusType]:
         """
@@ -83,9 +84,9 @@ class Bus:
     def add_slave(self, slave):
         """
         Add an AXI slave to the bus. A slave is either a :class:`AxiSlave`
-        (a plain address window such as MEM / DEBUG_MODULE / EXT_SLAVE) or a
+        (a plain address region such as MEM / DEBUG_MODULE / EXT_SLAVE) or a
         :class:`PeripheralDomain` (a domain whose register-interface
-        peripherals become REG slaves nested in its window).
+        peripherals become REG slaves nested in its region).
 
         :param slave: The slave node to add.
         :raise TypeError: when slave is of incorrect type.
@@ -101,14 +102,40 @@ class Bus:
             )
         self._slaves.append(slave)
 
+    def add_addr_rule(self, name: str, base: int, size: int, slave):
+        """
+        Decode another address region onto the port of an already added slave.
+        The crossbar takes more address rules than it has ports, so a single
+        port can answer several disjoint regions: the LLC, for instance, has
+        its cached region as the region of its slave and its scratchpad as an
+        extra rule.
+
+        :param str name: The name of the region, used for its address parameters.
+        :param int base: The start address of the region.
+        :param int size: The size of the region in bytes.
+        :param slave: The already added slave whose port decodes the region.
+        :raise ValueError: when a parameter is invalid or the slave is unknown.
+        """
+        if type(name) is not str or name == "":
+            raise ValueError("Address rule name should be a non-empty string")
+        if type(base) is not int or base < 0:
+            raise ValueError("Address rule base should be a positive integer")
+        if type(size) is not int or size <= 0:
+            raise ValueError("Address rule size should be a strictly positive integer")
+        if not any(slave is s for s in self._slaves):
+            raise ValueError(
+                f"The slave decoding {name} should be added to the bus first"
+            )
+        self._addr_rules.append((name, base, size, slave))
+
     def get_slaves(self):
         """:return: The ordered list of AXI slave nodes."""
         return list(self._slaves)
 
     def build_address_map(self, start_address: int = 0):
         """
-        Build the AXI slave windows and their nested register sub-buses, then
-        validate that the AXI slave windows do not overlap.
+        Build the AXI slave regions and their nested register sub-buses, then
+        validate that the AXI slave regions do not overlap.
 
         Slaves are placed in the order they were added. A slave with no explicit
         size gets :data:`DEFAULT_SLAVE_SIZE`. A slave with no explicit base is
@@ -144,14 +171,13 @@ class Bus:
         self._validate_axi_slaves()
 
     def _validate_axi_slaves(self):
-        # Validated per window, not per slave: a slave may own several disjoint
-        # windows (e.g. the LLC's SPM and cached regions), and every one of them
-        # becomes its own decoder rule that must not overlap any other.
-        windows = sorted(self.get_axi_addr_rules(), key=lambda w: w["base"])
-        for current, nxt in zip(windows, windows[1:]):
+        # Checked per decoder rule, not per slave: a port may be decoded by
+        # several rules and none of them may overlap another.
+        rules = sorted(self.get_axi_addr_rules(), key=lambda r: r["base"])
+        for current, nxt in zip(rules, rules[1:]):
             if current["end"] > nxt["base"]:
                 raise ValueError(
-                    f"AXI window {current['name']} (ends at {hex(current['end'])}) "
+                    f"AXI region {current['name']} (ends at {hex(current['end'])}) "
                     f"overlaps {nxt['name']} (starts at {hex(nxt['base'])})"
                 )
 
@@ -167,7 +193,7 @@ class Bus:
 
     def get_axi_slaves(self):
         """
-        :return: Ordered AXI slave windows as ``{name, macro, idx, base, size, end}``.
+        :return: Ordered AXI slaves as ``{name, macro, idx, base, size, end}``.
         :rtype: list[dict]
         """
         result = []
@@ -188,35 +214,36 @@ class Bus:
 
     def get_axi_addr_rules(self):
         """
-        :return: One decoder rule per AXI address window, as
-            ``{name, macro, port, idx, base, size, end}``. ``macro`` names the
-            window itself while ``port`` names the slave owning the crossbar
-            port, so a slave with secondary windows (see
-            :meth:`AxiSlave.add_window`) contributes one rule per window, all
-            pointing at the same port index.
+        :return: One decoder rule per address region, as
+            ``{name, macro, port, idx, base, size, end}``, in slave order with
+            the extra rules of a slave right after its own. ``macro`` names the
+            region while ``port`` names the slave decoding it, so a slave given
+            extra regions with :meth:`add_addr_rule` contributes one rule per
+            region, all pointing at the same port index.
         :rtype: list[dict]
         """
         rules = []
         for entry, slave in zip(self.get_axi_slaves(), self._slaves):
             rules.append(dict(entry, port=entry["macro"]))
-            for window in getattr(slave, "get_extra_windows", list)():
-                rules.append(
-                    {
-                        "name": window["name"],
-                        "macro": _macro_name(window["name"]),
-                        "port": entry["macro"],
-                        "idx": entry["idx"],
-                        "base": window["base"],
-                        "size": window["size"],
-                        "end": window["base"] + window["size"],
-                    }
-                )
+            for name, base, size, target in self._addr_rules:
+                if target is slave:
+                    rules.append(
+                        {
+                            "name": name,
+                            "macro": _macro_name(name),
+                            "port": entry["macro"],
+                            "idx": entry["idx"],
+                            "base": base,
+                            "size": size,
+                            "end": base + size,
+                        }
+                    )
         return rules
 
     def get_reg_slaves(self):
         """
         :return: Register-interface slaves nested in domain AXI
-            windows, as ``{name, macro, idx, base, size, end}`` with absolute
+            regions, as ``{name, macro, idx, base, size, end}`` with absolute
             addresses (domain base + peripheral offset).
         :rtype: list[dict]
         """
