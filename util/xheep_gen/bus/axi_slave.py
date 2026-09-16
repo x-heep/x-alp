@@ -5,13 +5,14 @@
 # Author(s): Luigi Giuffrida
 # Description: AXI slave window on the bus (e.g. MEM, DEBUG_MODULE, EXT_SLAVE).
 
+
 class AxiSlave:
     """
     A non-peripheral AXI slave window on the bus (e.g. MEM, DEBUG_MODULE,
     EXT_SLAVE).
 
     Exposes the same name/address accessors as peripherals and peripheral
-    subsystems so the address generator can treat every AXI slave uniformly.
+    domains so the address generator can treat every AXI slave uniformly.
 
     A slave may own more than one disjoint address window while still being a
     single crossbar port: the LLC, for instance, answers both its SPM window

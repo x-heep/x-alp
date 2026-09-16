@@ -22,7 +22,7 @@ class LLC(BasePeripheral, MemorySS):
       two windows, its scratchpad (SPM, whose size is fixed by the cache
       geometry) and the cached region it backs with the DRAM hanging off its
       master port. Both windows answer on a single crossbar port. Connect it
-      with :meth:`XAlp.connect_memory_ss`.
+      with :meth:`System.set_memory_ss`.
     * a *peripheral*, i.e. a register-interface node inside a peripheral
       domain. ``offset``/``length`` describe that configuration register
       window. Add the same object to the peripheral domain to get it.
@@ -114,22 +114,6 @@ class LLC(BasePeripheral, MemorySS):
         return (
             self._set_assoc * self._num_lines * self._num_blocks * self._data_width // 8
         )
-
-    def bus_windows(self, start_address: int):
-        """
-        The LLC is a single crossbar port answering two disjoint windows: the
-        scratchpad ("llc") and the cached region ("dram") it backs with the
-        memory on its master port. Both are placed by hand, so the address the
-        system reserves for the memory subsystem is ignored.
-
-        :param int start_address: Unused, see above.
-        :return: The two windows as ``(name, base, size)`` tuples.
-        :rtype: list[tuple[str, int, int]]
-        """
-        return [
-            ("llc", self._spm_start, self.get_spm_size()),
-            ("dram", self._cached_start, self._cached_size),
-        ]
 
     def build(self):
         """
