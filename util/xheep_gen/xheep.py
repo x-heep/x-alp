@@ -54,12 +54,8 @@ class XHeep(System):
         Ext_peripheral(),
     ]
 
-    def __init__(
-        self,
-        bus_type: BusType,
-    ):
+    def __init__(self):
         super().__init__()
-        self.set_bus_type(bus_type)
         self._linker_script_config: LinkerScript = None
         self._interrupts: Interrupts = None
 
