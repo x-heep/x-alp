@@ -22,7 +22,7 @@ class LLC(BasePeripheral, MemorySS):
       two windows, its scratchpad (SPM, whose size is fixed by the cache
       geometry) and the cached region it backs with the DRAM hanging off its
       master port. Both windows answer on a single crossbar port. Connect it
-      with :meth:`XAlp.connect_memory_ss`.
+      with :meth:`System.set_memory_ss`.
     * a *peripheral*, i.e. a register-interface node inside a peripheral
       domain. ``offset``/``length`` describe that configuration register
       window. Add the same object to the peripheral domain to get it.

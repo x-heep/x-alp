@@ -32,7 +32,7 @@ def config():
 
     soc = XAlp("X-ALP")
 
-    soc.connect_cpu(cva6())
+    soc.set_cpu(cva6())
 
     peripheral_domain = AddressRegion(
         "peripheral_domain", start_address=0x20000000, length=0x00100000
@@ -42,7 +42,7 @@ def config():
     memory.add_ram_banks([64] * 2)
     memory.add_linker_section(LinkerSection.by_size("code", 0, 0x00008000))
     memory.add_linker_section(LinkerSection("data", 0x00008000, None))
-    soc.connect_memory_ss(memory)
+    soc.set_memory_ss(memory)
 
     address_map = AddressMap()
     address_map.add_region(
@@ -69,6 +69,6 @@ def config():
             UART(),
         ],
     )
-    soc.connect_domain(peripherals)
+    soc.add_domain(peripherals)
 
     return soc

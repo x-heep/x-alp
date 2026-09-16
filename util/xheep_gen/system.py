@@ -284,20 +284,6 @@ class System:
         """
         return list(self._domains)
 
-    def get_available_peripherals(self):
-        """
-        :return: Peripheral names available for this system flavor.
-        :rtype: list[str]
-        """
-        return list(self.AVAILABLE_PERIPHERALS)
-
-    def get_minimum_peripherals(self):
-        """
-        :return: Peripheral names that must be present.
-        :rtype: list[str]
-        """
-        return list(self.MINIMUM_PERIPHERALS)
-
     def get_configured_peripheral_names(self):
         """
         :return: Names of peripherals configured in the system.
@@ -452,7 +438,7 @@ class System:
     def _validate_peripheral_availability(self):
         configured_peripherals = self.get_configured_peripheral_names()
 
-        available_peripherals = self.get_available_peripherals()
+        available_peripherals = self.AVAILABLE_PERIPHERALS
         if available_peripherals:
             unsupported = sorted(
                 set(configured_peripherals) - set(available_peripherals)
@@ -462,7 +448,7 @@ class System:
                     f"[MCU-GEN] ERROR: Unsupported peripherals for {type(self).__name__}: {', '.join(unsupported)}"
                 )
 
-        minimum_peripherals = self.get_minimum_peripherals()
+        minimum_peripherals = self.MINIMUM_PERIPHERALS
         if minimum_peripherals:
             missing = sorted(set(minimum_peripherals) - set(configured_peripherals))
             if missing:

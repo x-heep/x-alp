@@ -228,15 +228,6 @@ class PeripheralDomain:
             raise ValueError("No DMA peripheral found")
         return dmas
 
-    def get_dma(self):
-        """
-        Get the main DMA peripheral (the first appended DMA peripheral).
-
-        :return: The DMA peripheral.
-        :rtype: DMA
-        """
-        return self.get_all_dmas()[0]
-
     def get_power_manager(self):
         """
         :return: The Power_manager peripheral.

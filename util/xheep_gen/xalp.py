@@ -156,54 +156,19 @@ class XAlp(System):
     # Component connections
     # ------------------------------------------------------------
 
-    def connect_cpu(self, cpu: CPU):
+    def set_cpu(self, cpu: CPU):
         """
-        Connects the CPU to the system.
+        Sets the CPU of the system. X-ALP accepts a single CPU.
 
-        :param CPU cpu: The CPU to connect.
+        :param CPU cpu: The CPU to set.
         :raise TypeError: when cpu is of incorrect type.
-        :raise ValueError: when a CPU is already connected.
+        :raise ValueError: when a CPU is already set.
         """
-        if not isinstance(cpu, CPU):
-            raise TypeError(f"XAlp.cpu should be of type CPU not {type(cpu)}")
         if self._cpu is not None:
             raise ValueError(
                 f"CPU {self._cpu.get_name()} is already connected to the bus. Only one CPU can be connected."
             )
-        self.set_cpu(cpu)
-
-    def connect_memory_ss(self, memory_ss: MemorySS):
-        """
-        Connects the memory subsystem to the system.
-
-        :param MemorySS memory_ss: The memory subsystem to connect.
-        :raise TypeError: when memory_ss is of incorrect type.
-        """
-        self.set_memory_ss(memory_ss)
-
-    def connect_domain(self, domain: PeripheralDomain):
-        """
-        Connects a domain to the system. The domain should already contain
-        all peripherals well configured. Its name must match the name of the
-        address map region it is mapped to.
-
-        Any number of domains can be connected, each one is an independent
-        bus node and can be grouped with others in power / clock-gating
-        domains.
-
-        :param PeripheralDomain domain: The domain to connect.
-        :raise TypeError: when domain is of incorrect type.
-        :raise ValueError: when a domain with the same name is already connected.
-        """
-        self.add_domain(domain)
-
-    def disconnect_domain(self, name: str):
-        """
-        Disconnects a domain from the system.
-
-        :param str name: The name of the domain to disconnect.
-        """
-        self.remove_domain(name)
+        super().set_cpu(cpu)
 
     def get_cache(self) -> LLC:
         """
