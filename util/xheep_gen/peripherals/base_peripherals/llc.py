@@ -115,22 +115,6 @@ class LLC(BasePeripheral, MemorySS):
             self._set_assoc * self._num_lines * self._num_blocks * self._data_width // 8
         )
 
-    def bus_windows(self, start_address: int):
-        """
-        The LLC is a single crossbar port answering two disjoint windows: the
-        scratchpad ("llc") and the cached region ("dram") it backs with the
-        memory on its master port. Both are placed by hand, so the address the
-        system reserves for the memory subsystem is ignored.
-
-        :param int start_address: Unused, see above.
-        :return: The two windows as ``(name, base, size)`` tuples.
-        :rtype: list[tuple[str, int, int]]
-        """
-        return [
-            ("llc", self._spm_start, self.get_spm_size()),
-            ("dram", self._cached_start, self._cached_size),
-        ]
-
     def build(self):
         """
         Declares the whole SPM and the whole cached region as linker sections

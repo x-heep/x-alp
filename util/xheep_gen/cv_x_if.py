@@ -20,4 +20,3 @@ class CvXIf:
         self.x_rfw_width = x_rfw_width
         self.x_misa = x_misa
         self.x_ecs_xs = x_ecs_xs
-
