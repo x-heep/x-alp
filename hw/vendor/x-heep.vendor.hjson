@@ -49,6 +49,7 @@
     # Unused X-HEEP files
     "util/xheep_gen",
     "util/xheep_gen.lock.hjson",
+    "util/xheep_gen.vendor.hjson",
     # Unused PULP Platform files
     "hw/vendor/pulp_platform/common_cells/.github",
     "hw/vendor/pulp_platform/common_cells/lint",
