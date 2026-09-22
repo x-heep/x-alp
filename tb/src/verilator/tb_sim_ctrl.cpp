@@ -224,8 +224,9 @@ void TbSimCtrl::ForceBoot() {
     long long unsigned entry_point;
     dut->tb_get_entry_address(mem_type_,
                               &entry_point); // TODO: make it configurable
-    unsigned req_accepted = 0;
-    // dut->tb_write_entry_address(entry_point);
+    // The boot ROM jumps to SOC_CTRL.BOOT_ADDRESS, so it has to point at the
+    // image before the wait loop is released.
+    dut->tb_write_entry_address(entry_point);
     runCycles(1);
     dut->tb_preload_force();
     runCycles(1);

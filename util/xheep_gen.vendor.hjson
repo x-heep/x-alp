@@ -6,8 +6,8 @@
   target_dir: "xheep_gen",
 
   upstream: {
-    url: "https://github.com/LuigiGiuffrida98/xheep_gen.git",
-    rev: "xalp-gen",
+    url: "https://github.com/x-heep/xheep_gen.git",
+    rev: "7327dd9f83deb1fa166f78e5453993359f7d2087",
   },
 
   exclude_from_upstream: [

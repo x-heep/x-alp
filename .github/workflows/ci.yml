@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Project
         uses: ./.github/actions/setup-project
-      - name: Compile all apps with GCC and Clang
+      - name: Compile all apps with GCC and Clang (spm and dram)
         shell: bash -le {0}
         run: |
           export ARCH=rv64gc_zifencei && \
@@ -81,7 +81,7 @@ jobs:
           export RISCV_XALP=$RISCV_XHEEP && \
           export COMPILER_PREFIX=riscv32-corev- && \
           make mcu-gen && \
-          python3 test/test_apps/test_apps.py --compilers gcc --compiler-paths /tools/riscv --compiler-prefixes riscv32-corev- --table
+          python3 test/test_apps/test_apps.py --compilers gcc --compiler-paths /tools/riscv --compiler-prefixes riscv32-corev- --linkers spm --table
 
   # test-rv-profile:
   #   name: Test RV Profile

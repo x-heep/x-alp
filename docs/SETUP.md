@@ -441,7 +441,7 @@ make mcu-gen
 |-----------|---------|---------|-------------|
 | `PROJECT` | `hello_world` | Any folder in `sw/applications/` | Application to build |
 | `TARGET` | `sim` | `sim`, `pynq-z2`, `nexys-a7-100t`, zcu104, zcu102 | Target platform/FPGA |
-| `LINKER` | `on_chip` | `on_chip`, `flash_load`, `flash_exec` | Memory layout and linking strategy |
+| `LINKER` | `spm` | `spm`, `dram`, `rom` | Memory layout and linking strategy |
 | `COMPILER` | `gcc` | `gcc`, `clang` | C/C++ compiler to use |
 | `COMPILER_PREFIX` | `riscv32-corev-` | `riscv32-corev-`, `riscv32-unknown-elf-` | RISC-V toolchain prefix |
 | `ARCH` | `rv32imc` | `rv32imc`, `rv32gc`, `rv64gc_zifencei`, or any valid RISC-V ISA | Target architecture |
@@ -622,10 +622,10 @@ make mcu-gen
 ls sw/linker/
 
 # 3. Use correct LINKER parameter matching your target
-make app PROJECT=hello_world TARGET=sim LINKER=on_chip
+make app PROJECT=hello_world TARGET=sim LINKER=spm
 
 # 4. For FPGA targets, try:
-make app PROJECT=hello_world TARGET=pynq-z2 LINKER=on_chip
+make app PROJECT=hello_world TARGET=pynq-z2 LINKER=spm
 ```
 
 ---

@@ -13,15 +13,20 @@ extern "C" {
 
 // AXI slave windows. Primary macro is <NAME>_START_ADDRESS; <NAME>_BASE_ADDRESS
 // is provided as an alias so firmware can use either name.
-#define MEM_START_ADDRESS 0x0000000000000000
-#define MEM_BASE_ADDRESS MEM_START_ADDRESS
-#define MEM_SIZE 0x0000000000020000
-#define MEM_END_ADDRESS (MEM_START_ADDRESS + MEM_SIZE)
-
-#define DEBUG_START_ADDRESS 0x0000000010000000
+#define DEBUG_START_ADDRESS 0x0000000000000000
 #define DEBUG_BASE_ADDRESS DEBUG_START_ADDRESS
 #define DEBUG_SIZE 0x0000000000100000
 #define DEBUG_END_ADDRESS (DEBUG_START_ADDRESS + DEBUG_SIZE)
+
+#define LLC_START_ADDRESS 0x0000000010000000
+#define LLC_BASE_ADDRESS LLC_START_ADDRESS
+#define LLC_SIZE 0x0000000000040000
+#define LLC_END_ADDRESS (LLC_START_ADDRESS + LLC_SIZE)
+
+#define DRAM_START_ADDRESS 0x0000000080000000
+#define DRAM_BASE_ADDRESS DRAM_START_ADDRESS
+#define DRAM_SIZE 0x0000000010000000
+#define DRAM_END_ADDRESS (DRAM_START_ADDRESS + DRAM_SIZE)
 
 #define PERIPHERAL_DOMAIN_START_ADDRESS 0x0000000020000000
 #define PERIPHERAL_DOMAIN_BASE_ADDRESS PERIPHERAL_DOMAIN_START_ADDRESS
@@ -59,6 +64,27 @@ extern "C" {
 #define UART_START_ADDRESS UART_BASE_ADDRESS
 #define UART_SIZE 0x0000000000010000
 #define UART_END_ADDRESS (UART_BASE_ADDRESS + UART_SIZE)
+
+#define AXI_LLC_BASE_ADDRESS 0x0000000020050000
+#define AXI_LLC_START_ADDRESS AXI_LLC_BASE_ADDRESS
+#define AXI_LLC_SIZE 0x0000000000010000
+#define AXI_LLC_END_ADDRESS (AXI_LLC_BASE_ADDRESS + AXI_LLC_SIZE)
+
+// Linker-defined base address symbols (from common.ldh). The *address* of each
+// symbol is the corresponding base address; use as &__base_<name>.
+#ifndef __ASSEMBLER__
+extern char __base_debug;
+extern char __base_peripheral_domain;
+extern char __base_ext_slaves;
+extern char __base_soc_ctrl;
+extern char __base_bootrom;
+extern char __base_ext_peripheral;
+extern char __base_fast_intr_ctrl;
+extern char __base_uart;
+extern char __base_axi_llc;
+extern char __base_spm;
+extern char __base_dram;
+#endif // __ASSEMBLER__
 
 #ifdef __cplusplus
 } // extern "C"

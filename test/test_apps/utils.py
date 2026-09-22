@@ -175,8 +175,7 @@ def print_results(
 def print_table_header(
     app_list: list,
     app_blacklist: list,
-    compilers: list,
-    compiler_prefixes: list,
+    columns: list,
     compile_only: bool,
     simulators: list,
 ):
@@ -185,8 +184,7 @@ def print_table_header(
 
     :param list app_list: The list of all the apps.
     :param list app_blacklist: The list of apps to be skipped.
-    :param list compilers: The list of compilers to use for testing.
-    :param list compiler_prefixes: The list of compiler prefixes to use for testing.
+    :param list columns: The list of (key, label) compilation columns to print.
     :param bool compile_only: If True, only print the compilation results.
     :param list simulators: The list of simulators to use for testing.
 
@@ -199,16 +197,14 @@ def print_table_header(
     )
     max_app_name_len = max(max_app_name_len, len("Application"))
 
-    # Calculate max column width for compiler columns
+    # Calculate max column width for compilation columns
     max_col_width = 10
-    for compiler, prefix in zip(compilers, compiler_prefixes):
-        col_name = f"{compiler}({prefix})"
+    for _, col_name in columns:
         max_col_width = max(max_col_width, len(col_name))
 
     # Print header
     header = f"{'Application':<{max_app_name_len}}"
-    for compiler, prefix in zip(compilers, compiler_prefixes):
-        col_name = f"{compiler}({prefix})"
+    for _, col_name in columns:
         header += f" | {col_name:>{max_col_width}}"
     if not compile_only:
         for simulator in simulators:
@@ -223,7 +219,7 @@ def print_table_row(
     an_app: Application,
     max_app_name_len: int,
     max_col_width: int,
-    compilers: list,
+    columns: list,
     dry_run: bool,
     compile_only: bool,
     simulators: list,
@@ -234,23 +230,23 @@ def print_table_row(
     :param Application an_app: The application for which to print the results.
     :param int max_app_name_len: The maximum width of the application name column.
     :param int max_col_width: The maximum width of the compiler/simulator result columns.
-    :param list compilers: The list of compilers used for testing.
+    :param list columns: The list of (key, label) compilation columns to print.
     :param bool dry_run: If True, print "DRY RUN" instead of the actual results.
     :param bool compile_only: If True, only print the compilation results.
     :param list simulators: The list of simulators used for testing.
     """
     row = f"{an_app.name:<{max_app_name_len}}"
-    for compiler in compilers:
-        if compiler not in an_app.compilation_success:
+    for key, _ in columns:
+        if key not in an_app.compilation_success:
             status = "SKIPPED"
             color = BColors.WARNING
-        elif an_app.compilation_success[compiler] is None:
+        elif an_app.compilation_success[key] is None:
             status = "SKIPPED"
             color = BColors.WARNING
         elif dry_run:
             status = "DRY RUN"
             color = BColors.OKCYAN
-        elif an_app.compilation_success[compiler]:
+        elif an_app.compilation_success[key]:
             status = "OK"
             color = BColors.OKGREEN
         else:

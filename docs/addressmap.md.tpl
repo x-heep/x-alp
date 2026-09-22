@@ -12,7 +12,7 @@ ${"##"} AXI Slaves
 
 | Index | Name | Base Address | Size | End Address |
 |-------|------|-------------|------|-------------|
-% for s in xalp.bus().get_axi_slaves():
+% for s in xalp.bus().get_axi_addr_rules():
 | ${s["idx"]} | ${s["macro"]} | `0x${f'{s["base"]:016x}'}` | `0x${f'{s["size"]:016x}'}` | `0x${f'{s["end"]:016x}'}` |
 % endfor
 

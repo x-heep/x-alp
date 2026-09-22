@@ -79,9 +79,26 @@ module testharness #(
     logic                 tb_mem_we;
     logic [         63:0] tb_mem_rdata;
 
+    // DRAM behind the LLC master port. Sized to hold a test binary, not the
+    // whole architectural DRAM window: only the low DramAddrWidth address bits
+    // reach it, so anything linked past that wraps.
+    localparam int unsigned DramWords = 32'd8192;  // 64 KiB at 64 bit/word
+    localparam int unsigned DramAddrWidth = $clog2(DramWords * 8);
+
+    core_v_mcu_pkg::axi_mst_req_t                     ext_llc_req;
+    core_v_mcu_pkg::axi_mst_rsp_t                     ext_llc_rsp;
+
+    logic                                             tb_dram_req;
+    logic                         [DramAddrWidth-1:0] tb_dram_addr;
+    logic                         [             63:0] tb_dram_wdata;
+    logic                         [              7:0] tb_dram_strb;
+    logic                                             tb_dram_we;
+    logic                         [             63:0] tb_dram_rdata;
+    logic                                             tb_dram_valid_q;
+
     // Internal signals
-    logic                 clk;
-    logic                 rst_n;
+    logic                                             clk;
+    logic                                             rst_n;
 
     assign clk   = clk_i;
     assign rst_n = rst_ni;
@@ -108,7 +125,65 @@ module testharness #(
         .ext_mst_rsp_o(),
         .ext_reg_req_o(),
         .ext_reg_rsp_i('0),
-        .test_mode_i  (1'b0)
+        .test_mode_i  (1'b0),
+        .ext_llc_req_o(ext_llc_req),
+        .ext_llc_rsp_i(ext_llc_rsp)
+    );
+
+    // ----
+    // DRAM
+    // ----
+    // Backs the LLC's cached region. Without it every cache miss stalls
+    // forever, so LINKER=dram binaries never start.
+    axi_to_mem #(
+        .axi_req_t   (core_v_mcu_pkg::axi_mst_req_t),
+        .axi_resp_t  (core_v_mcu_pkg::axi_mst_rsp_t),
+        .AddrWidth   (DramAddrWidth),
+        .DataWidth   (64),
+        .NumBanks    (1),
+        .BufDepth    (1),
+        .HideStrb    (0),
+        .OutFifoDepth(1)
+    ) u_tb_dram_axi_to_mem (
+        .clk_i       (clk_i),
+        .rst_ni      (rst_ni),
+        .busy_o      (),
+        .axi_req_i   (ext_llc_req),
+        .axi_resp_o  (ext_llc_rsp),
+        .mem_req_o   (tb_dram_req),
+        .mem_gnt_i   (tb_dram_req),
+        .mem_addr_o  (tb_dram_addr),
+        .mem_wdata_o (tb_dram_wdata),
+        .mem_strb_o  (tb_dram_strb),
+        .mem_atop_o  (),
+        .mem_we_o    (tb_dram_we),
+        .mem_rvalid_i(tb_dram_valid_q),
+        .mem_rdata_i (tb_dram_rdata)
+    );
+
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
+            tb_dram_valid_q <= '0;
+        end else begin
+            tb_dram_valid_q <= tb_dram_req;
+        end
+    end
+
+    sram_wrapper #(
+        .NumWords (DramWords),
+        .DataWidth(64)
+    ) u_tb_dram (
+        .clk_i           (clk_i),
+        .rst_ni          (rst_ni),
+        .req_i           (tb_dram_req),
+        .we_i            (tb_dram_we),
+        .addr_i          (tb_dram_addr[DramAddrWidth-1:3]),
+        .wdata_i         (tb_dram_wdata),
+        .be_i            (tb_dram_strb),
+        .pwrgate_ni      ('1),
+        .pwrgate_ack_no  (),
+        .set_retentive_ni('1),
+        .rdata_o         (tb_dram_rdata)
     );
 
     // --------
