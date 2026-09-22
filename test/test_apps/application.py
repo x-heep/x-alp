@@ -66,7 +66,7 @@ class Application:
         :param str compiler_path: The path to the RISC-V compiler toolchain.
         :param str compiler_prefix: The prefix for the compiler binaries.
         :param str compiler: The compiler to use (e.g., "gcc" or "clang").
-        :param str linker: The linker to use (e.g., "on_chip").
+        :param str linker: The linker to use (e.g., "spm").
         :param str extra_parameters: Extra parameters to pass to the "make app" command.
         :param bool dry_run: If True, only print the compilation command without executing it.
         :param bool verbose: If True, print detailed messages about the compilation process.

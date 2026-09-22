@@ -6,7 +6,7 @@
 This script compiles or runs all the apps in X-HEEP
 
 FUTURE WORK:
-- The current setup only uses the on_chip linker.
+- The apps are only simulated with the first compiler/linker combination.
 """
 
 import argparse
@@ -28,6 +28,9 @@ from utils import (
 COMPILERS = ["gcc", "clang"]
 COMPILER_PATH = [os.environ.get("RISCV_XHEEP") for _ in COMPILERS]
 COMPILER_PREFIXES = ["riscv32-unknown-" for _ in COMPILERS]
+
+# Default linkers (memory layouts) to compile every app with
+LINKERS = ["spm", "dram"]
 
 # Available simulators
 SIMULATORS = ["verilator"]
@@ -86,6 +89,10 @@ def main():
         help="Override default compiler paths. Can be a single path (shared among all the compilers) or a comma-separated list (a different path for each compiler).",
     )
     parser.add_argument(
+        "--linkers",
+        help="Override default list of linkers (memory layouts) to test.",
+    )
+    parser.add_argument(
         "--compiler-prefixes",
         help="Override default compiler prefixes. Can be a single prefix (shared among all the compilers) or a comma-separated list (a different prefix for each compiler).",
     )
@@ -132,6 +139,18 @@ def main():
             )
             exit(1)
 
+    # Override the default list of linkers if specified
+    linkers = LINKERS
+    if args.linkers:
+        linkers = args.linkers.split(",")
+
+    # One compilation column per compiler/linker combination
+    columns = [
+        (f"{compiler}-{linker}", f"{compiler}({compiler_prefix},{linker})")
+        for compiler, compiler_prefix in zip(compilers, compiler_prefixes)
+        for linker in linkers
+    ]
+
     # Get a list with all the applications we want to test
     app_list = get_apps("sw/applications", WHITELIST, BLACKLIST)
 
@@ -155,8 +174,7 @@ def main():
         max_app_name_len, max_col_width = print_table_header(
             app_list,
             BLACKLIST,
-            compilers,
-            compiler_prefixes,
+            columns,
             args.compile_only,
             simulators,
         )
@@ -171,10 +189,18 @@ def main():
                     flush=True,
                 )
         else:
-            # Compile the app with every compiler, leaving gcc for last
-            #   so the simulation is done with gcc
-            for compiler_path, compiler_prefix, compiler in zip(
-                compiler_paths, compiler_prefixes, compilers
+            # Compile the app with every compiler/linker combination in reverse
+            #   order, so the build left in place (and thus simulated) is the one
+            #   of the first compiler and the first linker
+            combinations = [
+                (compiler_path, compiler_prefix, compiler, linker)
+                for compiler_path, compiler_prefix, compiler in zip(
+                    compiler_paths, compiler_prefixes, compilers
+                )
+                for linker in linkers
+            ]
+            for compiler_path, compiler_prefix, compiler, linker in reversed(
+                combinations
             ):
                 if in_list(an_app.name, CLANG_BLACKLIST) and compiler == "clang":
                     if not args.table:
@@ -184,18 +210,21 @@ def main():
                             + BColors.ENDC,
                             flush=True,
                         )
-                    an_app.set_compilation_status(compiler, None)  # Mark as skipped
+                    # Mark as skipped
+                    an_app.set_compilation_status(f"{compiler}-{linker}", None)
                 else:
                     compilation_result = an_app.compile(
                         compiler_path,
                         compiler_prefix,
                         compiler,
-                        "on_chip",
+                        linker,
                         None,
                         args.dry_run,
                         verbose=not args.table,
                     )
-                    an_app.set_compilation_status(compiler, compilation_result)
+                    an_app.set_compilation_status(
+                        f"{compiler}-{linker}", compilation_result
+                    )
 
             # Run the app with every simulator if the compilation was successful
             if not args.compile_only and an_app.compilation_succeeded():
@@ -224,7 +253,7 @@ def main():
                     an_app,
                     max_app_name_len,
                     max_col_width,
-                    compilers,
+                    columns,
                     args.dry_run,
                     args.compile_only,
                     simulators,
