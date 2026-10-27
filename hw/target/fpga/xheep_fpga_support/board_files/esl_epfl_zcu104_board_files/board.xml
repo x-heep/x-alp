@@ -250,10 +250,10 @@
                 <pin_map port_index="1" component_pin="c0_ddr4_ba1"/>
               </pin_maps>
             </port_map>
-            <port_map logical_port="BG" physical_port="c0_ddr4_bg" dir="out" left="1" right="0"> 
+            <!-- Installed PL SODIMM MTA4ATF51264HZ-2G6E1 is 1Rx16: a single bank-group pin (bg1/AB16 unused), see preset.xml -->
+            <port_map logical_port="BG" physical_port="c0_ddr4_bg" dir="out">
               <pin_maps>
                 <pin_map port_index="0" component_pin="c0_ddr4_bg0"/>
-				<pin_map port_index="1" component_pin="c0_ddr4_bg1"/>
 			  </pin_maps>
             </port_map>
             <port_map logical_port="CK_C" physical_port="c0_ddr4_ck_c" dir="out" > 

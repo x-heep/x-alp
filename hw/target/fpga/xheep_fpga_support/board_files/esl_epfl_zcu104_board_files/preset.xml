@@ -6,7 +6,8 @@
     <ip vendor="xilinx.com" library="ip" name="ddr4">
       <user_parameters>
         <user_parameter name="CONFIG.C0.DDR4_MemoryType" value="SODIMMs" />
-        <user_parameter name="CONFIG.C0.DDR4_MemoryPart" value="MTA8ATF51264HZ-2G1" />
+        <!-- Installed PL SODIMM is MTA4ATF51264HZ-2G6E1 (1Rx16, one bank-group pin), not the x8 MTA8ATF51264HZ -->
+        <user_parameter name="CONFIG.C0.DDR4_MemoryPart" value="MTA4ATF51264HZ-2G6" />
         <user_parameter name="CONFIG.C0.DDR4_DataWidth" value="64" />
         <user_parameter name="CONFIG.C0.DDR4_TimePeriod" value="938" />
         <user_parameter name="CONFIG.C0.DDR4_InputClockPeriod" value="3335" />

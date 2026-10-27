@@ -18,7 +18,7 @@ module xilinx_core_v_mcu_wrapper #(
     output logic        ddr4_sdram_act_n,
     output logic [16:0] ddr4_sdram_adr,
     output logic [ 1:0] ddr4_sdram_ba,
-    output logic [ 1:0] ddr4_sdram_bg,
+    output logic        ddr4_sdram_bg,       // x16 SODIMM: one bank-group pin
     output logic        ddr4_sdram_ck_c,
     output logic        ddr4_sdram_ck_t,
     output logic        ddr4_sdram_cke,
@@ -30,7 +30,7 @@ module xilinx_core_v_mcu_wrapper #(
     output logic        ddr4_sdram_odt,
     output logic        ddr4_sdram_reset_n,
 `else
-    input logic clk_i,
+    input  logic        clk_i,
 `endif
 
     inout logic rst_i,
@@ -53,17 +53,17 @@ module xilinx_core_v_mcu_wrapper #(
 
     import core_v_mcu_pkg::*;
 
-    wire                                       clk_gen;
-    wire                                       rst_n;
+    wire clk_gen;
+    wire rst_n;
 `ifdef FPGA_ZCU104
-    wire                                       ddr4_ref_clk;
+    wire ddr4_ref_clk;
 `endif
     logic         [                      31:0] exit_value;
     logic         [CLK_LED_COUNT_LENGTH - 1:0] clk_count;
 
-    axi_mst_req_t llc_req;
-    axi_mst_rsp_t llc_rsp;
-    axi_mst_rsp_t ext_mst_rsp_unused;
+    axi_llc_req_t                              llc_req;
+    axi_llc_rsp_t                              llc_rsp;
+    axi_mst_rsp_t                              ext_mst_rsp_unused;
 
     // Active-low SoC and AXI reset; active-high DDR controller reset.
     assign rst_n     = !rst_i;

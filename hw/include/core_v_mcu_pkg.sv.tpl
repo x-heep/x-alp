@@ -32,6 +32,8 @@ package core_v_mcu_pkg;
     // AXI configuration parameters
     localparam int unsigned AxiMstIdWidth = 4;
     localparam int unsigned AxiSlvIdWidth = AxiMstIdWidth + $clog2(totalAxiMasters);
+    // The LLC bypass mux prepends one bit to the ID on its master port.
+    localparam int unsigned AxiLlcIdWidth = AxiSlvIdWidth + 1;
     localparam int unsigned AxiAddrWidth = 64;
     localparam int unsigned AxiDataWidth = 64;
     localparam int unsigned AxiUserWidth = 64;
@@ -44,10 +46,13 @@ package core_v_mcu_pkg;
     localparam type axi_user_t = logic [AxiUserWidth   -1:0];
     localparam type axi_mst_id_t = logic [AxiMstIdWidth  -1:0];
     localparam type axi_slv_id_t = logic [AxiSlvIdWidth  -1:0];
+    localparam type axi_llc_id_t = logic [AxiLlcIdWidth  -1:0];
 
     `AXI_TYPEDEF_ALL_CT(axi_mst, axi_mst_req_t, axi_mst_rsp_t, addr_t, axi_mst_id_t, axi_data_t,
                         axi_strb_t, axi_user_t)
     `AXI_TYPEDEF_ALL_CT(axi_slv, axi_slv_req_t, axi_slv_rsp_t, addr_t, axi_slv_id_t, axi_data_t,
+                        axi_strb_t, axi_user_t)
+    `AXI_TYPEDEF_ALL_CT(axi_llc, axi_llc_req_t, axi_llc_rsp_t, addr_t, axi_llc_id_t, axi_data_t,
                         axi_strb_t, axi_user_t)
 
     `REG_BUS_TYPEDEF_ALL(reg, addr_t, logic [31:0], logic [3:0])

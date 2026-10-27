@@ -345,7 +345,9 @@ vivado-fpga-nobuild:
 ## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
 .PHONY: vivado-fpga-pgm
 vivado-fpga-pgm:
-	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --run x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee programfpga.log
+	@# Edalize's own `pgm` rule (fusesoc --run is a no-op without its pgm option);
+	@# -o keeps make from rebuilding the bitstream when a source is newer than it.
+	$(MAKE) -C build/$(subst :,_,$(XALP))/$(FPGA_BOARD)-vivado pgm -o $(subst :,_,$(XALP)).bit 2>&1 | tee programfpga.log
 
 
 # ============================================================================

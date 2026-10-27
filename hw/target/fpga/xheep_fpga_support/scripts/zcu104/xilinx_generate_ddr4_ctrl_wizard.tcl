@@ -15,6 +15,7 @@ create_bd_design $design_name
 # Use the ZCU104 board DDR4 pin map for the external interface.
 set ddr4_sdram [create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddr4_rtl:1.0 -board_intf ddr4_sdram ddr4_sdram]
 set S_AXI [create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 S_AXI]
+# ID_WIDTH and C0.DDR4_AxiIDWidth must equal core_v_mcu_pkg::AxiLlcIdWidth.
 set_property -dict [list \
   CONFIG.ADDR_WIDTH {32} \
   CONFIG.ARUSER_WIDTH {0} \
@@ -30,7 +31,7 @@ set_property -dict [list \
   CONFIG.HAS_REGION {1} \
   CONFIG.HAS_RRESP {1} \
   CONFIG.HAS_WSTRB {1} \
-  CONFIG.ID_WIDTH {4} \
+  CONFIG.ID_WIDTH {7} \
   CONFIG.MAX_BURST_LENGTH {256} \
   CONFIG.NUM_READ_OUTSTANDING {2} \
   CONFIG.NUM_READ_THREADS {1} \
@@ -59,9 +60,8 @@ set c0_sys_clk_i [create_bd_port -dir I -type clk -freq_hz 300000000 c0_sys_clk_
 set ddr4_0 [create_bd_cell -type ip -vlnv xilinx.com:ip:ddr4:2.2 ddr4_0]
 set_property -dict [list \
   CONFIG.ADDN_UI_CLKOUT1_FREQ_HZ {100} \
-  CONFIG.C0.BANK_GROUP_WIDTH {2} \
   CONFIG.C0.DDR4_AxiAddressWidth {32} \
-  CONFIG.C0.DDR4_AxiIDWidth {4} \
+  CONFIG.C0.DDR4_AxiIDWidth {7} \
   CONFIG.C0.DDR4_InputClockPeriod {3333} \
   CONFIG.C0_CLOCK_BOARD_INTERFACE {Custom} \
   CONFIG.C0_DDR4_BOARD_INTERFACE {ddr4_sdram} \
@@ -71,6 +71,9 @@ set_property -dict [list \
 
 # Create instance: axi_dwidth_converter_0
 set axi_dwidth_converter_0 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0]
+# Always pack LLC line bursts into full 512-bit beats: the default (1) packs only
+# modifiable AxCACHE, and the LLC forwards the requester's (non-modifiable) attribute.
+set_property CONFIG.PACKING_LEVEL {2} $axi_dwidth_converter_0
 
 # Create instance: axi_clock_converter_0
 set axi_clock_converter_0 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_clock_converter:2.1 axi_clock_converter_0]
