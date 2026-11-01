@@ -194,6 +194,17 @@ module core_v_mcu (
         .reg_rsp_i(reg_rsp_sig)
     );
 
+
+    dma_subsystem u_dma_subsystem (
+        .clk_i (clk_i),
+        .rst_ni(rst_ni),
+
+        //AXI Master
+        .bus_req_o(axi_master_req_sig[DMA_M_BUS_IDX]),
+        .bus_rsp_i(axi_master_rsp_sig[DMA_M_BUS_IDX])
+    );
+
+
     assign ext_slv_req_o                            = axi_slave_req_sig[EXT_SLAVES_S_BUS_IDX];
     assign axi_slave_rsp_sig[EXT_SLAVES_S_BUS_IDX]  = ext_slv_rsp_i;
 

@@ -1,0 +1,70 @@
+CAPI=2:
+
+name: x-heep:x-alp:core-v-mcu:0.0.1
+filesets:
+
+  subsystems_rtl:
+    file_type: systemVerilogSource
+    files:
+      - subsystems/memory_subsystem.sv
+      - subsystems/cpu_subsystem.sv
+      - subsystems/bus_subsystem.sv
+      - subsystems/bootrom_subsystem.sv
+      - subsystems/uart_subsystem.sv
+      - subsystems/debug_subsystem.sv
+
+  files_rtl:
+    file_type: systemVerilogSource
+    files:
+      - include/core_v_mcu_pkg.sv
+      - include/cva6_config_pkg.sv
+      - system/core_v_mcu.sv
+
+  vendor_modules:
+    depend:
+      - pulp-platform.org::axi:0.39.8
+      - pulp-platform.org::axi_riscv_atomics
+      - pulp-platform.org::axi_llc
+      - pulp-platform.org::riscv_dbg
+      - pulp-platform.org::register_interface
+      - pulp-platform.org::reg_to_axi
+      - openhwgroup.org::cva6:1.4.0
+      - lowrisc:ip:uart
+  
+  ip_modules:
+    depend:
+      - x-alp:ip:boot_rom
+      - x-heep:ip:soc_ctrl
+      - x-heep:ip:fast_intr_ctrl
+      - x-heep:ip:pad_ring
+      - x-heep:ip:pad_control
+
+  simulation_rtl:
+    depend:
+      - x-heep:sim:pad_cells
+      - x-heep:sim:sram_wrapper
+
+  waivers:
+    file_type: vlt
+    files:
+      - misc/vendor/common-waivers.vlt
+      - misc/vendor/axi-waivers.vlt
+      - misc/vendor/common_cells-waivers.vlt
+      - misc/vendor/cva6-waivers.vlt
+      - misc/vendor/fpnew-waivers.vlt
+      - misc/vendor/fpu_div_sqrt-waivers.vlt
+      - misc/vendor/hpdcache-waivers.vlt
+      - misc/vendor/tech_cells-waivers.vlt
+      - misc/vendor/axi_riscv_atomics-waivers.vlt
+      - misc/vendor/axi_llc-waivers.vlt
+      - misc/simulation.vlt
+      
+targets:
+  default:
+    filesets:
+    - "!target_format ? (!target_lint ? (vendor_modules))"
+    - ip_modules
+    - target_sim ? (simulation_rtl)
+    - tool_verilator ? (waivers)
+    - files_rtl
+    - subsystems_rtl
