@@ -45,6 +45,7 @@ class XAlp(System):
         "soc_ctrl",
         "uart",
         "axi_llc",
+        "dma",
     ]
     """Constant list of peripheral names available for X-ALP."""
 

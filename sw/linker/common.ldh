@@ -38,6 +38,7 @@ SECTIONS {
   __base_fast_intr_ctrl    = 0x20030000;
   __base_uart              = 0x20040000;
   __base_axi_llc           = 0x20050000;
+  __base_dma               = 0x20060000;
   __base_spm               = ORIGIN(spm);
   __base_dram              = ORIGIN(dram);
 }
