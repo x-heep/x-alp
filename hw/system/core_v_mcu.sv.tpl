@@ -208,8 +208,8 @@ module core_v_mcu (
         .rst_ni (rst_ni),
 
         //AXI Master
-        .bus_req_o(axi_master_req_sig[DMA_M_BUS_IDX]),
-        .bus_rsp_i(axi_master_rsp_sig[DMA_M_BUS_IDX])
+        .bus_req_o(axi_master_req_sig[DMA_0_M_BUS_IDX]),
+        .bus_rsp_i(axi_master_rsp_sig[DMA_0_M_BUS_IDX])
     );
 
 
