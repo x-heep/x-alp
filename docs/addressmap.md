@@ -6,8 +6,9 @@
 |-------|------|
 | 0 | CPU |
 | 1 | DEBUG_MODULE |
-| 2 | DMA_0 |
-| 3 | EXT_MASTER |
+| 2 | DMA_R |
+| 3 | DMA_W |
+| 4 | EXT_MASTER |
 
 ## AXI Slaves
 
