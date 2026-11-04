@@ -6,6 +6,7 @@ filesets:
   subsystems_rtl:
     file_type: systemVerilogSource
     files:
+      - subsystems/dma_subsystem.sv
       - subsystems/memory_subsystem.sv
       - subsystems/cpu_subsystem.sv
       - subsystems/bus_subsystem.sv

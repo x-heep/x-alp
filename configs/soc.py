@@ -12,6 +12,7 @@ from address_map.address_region import AddressRegion
 
 from peripherals.peripheral_domain import PeripheralDomain
 from peripherals.base_peripherals import (
+    DMA,
     SOC_ctrl,
     Bootrom,
     Fast_intr_ctrl,
@@ -74,6 +75,7 @@ def config():
             Fast_intr_ctrl(),
             UART(),
             llc,
+            DMA()
         ],
     )
     soc.add_domain(peripherals)
