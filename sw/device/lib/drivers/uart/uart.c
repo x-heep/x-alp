@@ -100,7 +100,8 @@ static uint8_t uart_rx_fifo_read(const uart_t *uart) {
  * Read 1 byte from the RX FIFO.
  */
 size_t uart_getchar(const uart_t *uart, uint8_t *data) {
-  while (uart_rx_empty(uart));
+  while (uart_rx_empty(uart))
+    ;
   *data = uart_rx_fifo_read(uart);
   return 1;
 }

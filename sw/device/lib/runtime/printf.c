@@ -160,7 +160,8 @@ static inline void _out_fct(char character, void *buffer, size_t idx, size_t max
 // 'maxsize'
 static inline unsigned int _strnlen_s(const char *str, size_t maxsize) {
   const char *s;
-  for (s = str; *s && maxsize--; ++s);
+  for (s = str; *s && maxsize--; ++s)
+    ;
   return (unsigned int)(s - str);
 }
 
