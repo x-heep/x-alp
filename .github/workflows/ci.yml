@@ -158,7 +158,8 @@ jobs:
         with:
           python-version: 3.12
       - name: Install requirements
-        run: pip install -r util/python-requirements.txt
+        # only what vendor.py/git-diff.py need; full requirements pin yamlfmt -> ruamel.yaml<0.16, which won't build on py>=3.11
+        run: pip install hjson==3.0.2 gitpython==3.1.25
       - name: Re-vendor and diff
         run: |
           find hw/vendor sw/vendor -maxdepth 2 -type f -name '*.vendor.hjson' | xargs -n1 util/vendor.py --verbose && \
