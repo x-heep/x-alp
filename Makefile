@@ -325,6 +325,32 @@ verilator-waves: .check-gtkwave
 	@gtkwave build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/waveform.fst util/wave.gtkw
 
 # ============================================================================
+# FPGA Build and Run
+# ============================================================================
+
+## @section Vivado
+
+## Builds (synthesis and implementation) the bitstream for the FPGA version using Vivado
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+## @param FUSESOC_FLAGS=--flag=<flagname>
+.PHONY: vivado-fpga
+vivado-fpga:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+.PHONY: vivado-fpga-nobuild
+vivado-fpga-nobuild:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --setup x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+## Loads the generated bitstream into the FPGA
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+.PHONY: vivado-fpga-pgm
+vivado-fpga-pgm:
+	@# Edalize's own `pgm` rule (fusesoc --run is a no-op without its pgm option);
+	@# -o keeps make from rebuilding the bitstream when a source is newer than it.
+	$(MAKE) -C build/$(subst :,_,$(XALP))/$(FPGA_BOARD)-vivado pgm -o $(subst :,_,$(XALP)).bit 2>&1 | tee programfpga.log
+
+
+# ============================================================================
 # Code Quality
 # ============================================================================
 

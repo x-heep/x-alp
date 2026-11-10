@@ -5,7 +5,7 @@
   axi_riscv_atomics: {
     upstream: {
       url: https://github.com/pulp-platform/axi_riscv_atomics.git
-      rev: 0ac3a78fe342c5a5b9b10bff49d58897f773059e
+      rev: 97a1dd2ac643c276880420a0cf8eea697f228aa9
     }
 
     exclude_from_upstream: [
@@ -23,10 +23,26 @@
     ]
   },
 
+  fpga-support: {
+
+    upstream: {
+        url: "https://github.com/pulp-platform/fpga-support.git",
+        rev: "a3ba269c0fc6cfcee6f81e5d9af018a08e479d2b",
+    }
+
+    exclude_from_upstream: [
+        "ci",
+        ".editorconfig",
+        "src_files.yml",
+        "synth",
+        "behav",
+    ]
+  },
+
   axi_llc: {
     upstream: {
       url: https://github.com/pulp-platform/axi_llc.git
-      rev: master
+      rev: 31059c4be62985f81bc46138f09e442d996aa3f3
     }
 
     exclude_from_upstream: [

@@ -1,0 +1,30 @@
+// Copyright 2026 X-HEEP contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "xheep_fpga_support",
+  target_dir: "xheep_fpga_support",
+
+  upstream: {
+    url: "https://github.com/x-heep/x-heep-fpga-support.git",
+    rev: "599a83b89359074b1fe4f5f44900ad42c3bf7fb1",
+  },
+
+  exclude_from_upstream: [ 
+    "board_files/genesys2",
+    "board_files/esl_epfl_nexys_a7_100t_board_files",
+    "board_files/esl_epfl_pynq_z2_board_files",
+    "constraints/genesys2",
+    "constraints/nexys",
+    "constraints/pynq-z2",
+    "scripts/genesys2",
+    "scripts/nexys",
+    "scripts/pynq-z2",
+    // X-ALP declares its FPGA filesets in xalp.core and maps tc_sram to
+    // tc_sram_xilinx (XPM), so the X-HEEP SRAM IP generator is not used.
+    "core-v-mini-mcu-fpga.core",
+    "*generate_sram.tcl.tpl",
+    "*sram_wrapper.sv.tpl",
+  ]
+
+}

@@ -13,15 +13,48 @@ filesets:
   testbench:
     depend:
       - x-heep:x-alp:tb:0.0.1
+    
+  rtl-fpga:
+    files:
+    - hw/target/fpga/xilinx_core_v_mcu_wrapper.sv
+    - hw/target/fpga/xheep_fpga_support/rtl/prim_xilinx_clk.sv
+    - hw/target/fpga/xheep_fpga_support/rtl/pad_cell_input_xilinx.sv
+    - hw/target/fpga/xheep_fpga_support/rtl/pad_cell_output_xilinx.sv
+    - hw/target/fpga/xheep_fpga_support/rtl/pad_cell_inout_xilinx.sv
+    # tc_sram (LLC data and tag arrays) mapped to XPM block RAM
+    - hw/vendor/x-heep/pulp_platform/tech_cells_generic/src/fpga/tc_sram_xilinx.sv
+    file_type: systemVerilogSource
+
+  fpga-aup-zu3:
+    files:
+    - hw/target/fpga/xheep_fpga_support/scripts/aup-zu3/xilinx_generate_clk_wizard.tcl: {file_type: tclSource}
+    - hw/target/fpga/xheep_fpga_support/constraints/aup-zu3/pin_assign.xdc: {file_type: xdc}
+    - hw/target/fpga/xheep_fpga_support/constraints/aup-zu3/constraints.xdc: {file_type: xdc}
+
+  fpga-zcu104:
+    files:
+    - hw/target/fpga/xheep_fpga_support/scripts/zcu104/xilinx_generate_clk_wizard.tcl: {file_type: tclSource}
+    - hw/target/fpga/xheep_fpga_support/scripts/zcu104/xilinx_generate_ddr4_ctrl_wizard.tcl: {file_type: tclSource}
+    - hw/target/fpga/xheep_fpga_support/constraints/zcu104/pin_assign.xdc: {file_type: xdc}
+    - hw/target/fpga/xheep_fpga_support/constraints/zcu104/constraints.xdc: {file_type: xdc}
+
+  xdc-fpga-common:
+    files:
+    - hw/target/fpga/xheep_fpga_support/constraints/common/spi_slave.xdc
+    # Tcl loops need unmanaged XDC (edalize: file_type SDC -> read_xdc -unmanaged)
+    - hw/target/fpga/xheep_fpga_support/constraints/common/jtag.xdc: {file_type: SDC}
+    - hw/target/fpga/xheep_fpga_support/constraints/common/sync.xdc: {file_type: SDC}
+    file_type: xdc
 
 targets:
-  default: &default
+  default: &default_target
     filesets:
     - x-alp
-    - testbench
     toplevel: x_alp
   sim:
-    <<: *default
+    <<: *default_target
+    filesets_append:
+    - testbench
     description: RTL simulation
     default_tool: verilator
     toplevel: testharness
@@ -83,10 +116,48 @@ targets:
         - '--module_net_variable_alignment=align'
         - '--indentation_spaces=4'
         - '--inplace'
+  aup-zu3:
+    <<: *default_target
+    default_tool: vivado
+    description: RD aup-zu3 Board
+    filesets_append:
+    - x-alp
+    - rtl-fpga
+    - fpga-aup-zu3
+    - xdc-fpga-common
+    parameters:
+    - SYNTHESIS=true
+    - FPGA_SYNTHESIS=true
+    - FPGA_AUP_ZU3=true
+    tools:
+      vivado:
+        part: xczu3eg-sfvc784-2-e
+        board_part: realdigital.org:aup-zu3-8gb:part0:1.0
+        board_repo_paths: [../../../hw/target/fpga/xheep_fpga_support/board_files/aup-zu3-8gb/1.0]
+    toplevel: [xilinx_core_v_mcu_wrapper]
+  zcu104:
+    <<: *default_target
+    default_tool: vivado
+    description: ZCU104 Evaluation Board
+    filesets_append:
+    - x-alp
+    - rtl-fpga
+    - fpga-zcu104
+    - xdc-fpga-common
+    parameters:
+    - SYNTHESIS=true
+    - FPGA_SYNTHESIS=true
+    - FPGA_ZCU104=true
+    tools:
+      vivado:
+        part: xczu7ev-ffvc1156-2-e
+        board_part: xilinx.com:zcu104:part0:1.0
+        board_repo_paths: [../../../hw/target/fpga/xheep_fpga_support/board_files/esl_epfl_zcu104_board_files]
+    toplevel: [xilinx_core_v_mcu_wrapper]
   
   # Static analysis
   lint:
-    <<: *default
+    <<: *default_target
     description: Perform static analysis using Verible
     default_tool: veriblelint
     tools:
@@ -184,3 +255,15 @@ parameters:
     paramtype: vlogdefine
     description: |
       Can isolate code that is (or is not) meant for Verilator only
+  FPGA_SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+  FPGA_AUP_ZU3:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false
+  FPGA_ZCU104:
+    datatype: bool
+    paramtype: vlogdefine
+    default: false

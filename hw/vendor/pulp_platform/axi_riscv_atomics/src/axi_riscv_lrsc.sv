@@ -44,6 +44,14 @@ module axi_riscv_lrsc #(
     parameter int unsigned AXI_ADDR_LSB = $clog2(AXI_DATA_WIDTH/8), // log2 of granularity for reservations (ignored LSBs)
     /// Enable debug prints (not synthesizable).
     parameter bit DEBUG = 1'b0,
+    /// Enable full bandwidth in ID queues
+    parameter bit FULL_BANDWIDTH = 1'b1,
+    /// Cut combinational path between input and output in ID queues with full bandwidth
+    parameter bit CUT_OUP_POP_INP_GNT = 1'b0,
+    /// Number of simultaineous reservations (power of 2, <= 2^AXI_ID_WIDTH or <= 2^(AXI_USER_ID_MSB - AXI_USER_ID_LSB + 1))
+    parameter int unsigned NUM_RESERVATIONS = 2**(AXI_USER_AS_ID ?
+            AXI_USER_ID_MSB - AXI_USER_ID_LSB + 1
+            : AXI_ID_WIDTH),
     /// Derived Parameters (do NOT change manually!)
     localparam int unsigned AXI_STRB_WIDTH = AXI_DATA_WIDTH / 8
 ) (
@@ -328,10 +336,11 @@ module axi_riscv_lrsc #(
 
     // IQ Queue to track in-flight reads
     id_queue #(
-        .ID_WIDTH   (AXI_ID_WIDTH),
-        .CAPACITY   (AXI_MAX_READ_TXNS),
-        .data_t     (r_flight_t),
-        .FULL_BW    (1'b1)
+        .ID_WIDTH            (AXI_ID_WIDTH),
+        .CAPACITY            (AXI_MAX_READ_TXNS),
+        .data_t              (r_flight_t),
+        .FULL_BW             (FULL_BANDWIDTH),
+        .CUT_OUP_POP_INP_GNT (CUT_OUP_POP_INP_GNT)
     ) i_read_in_flight_queue (
         .clk_i              (clk_i),
         .rst_ni             (rst_ni),
@@ -349,7 +358,9 @@ module axi_riscv_lrsc #(
         .oup_req_i          (rifq_oup_req),
         .oup_data_o         (rifq_oup_data),
         .oup_data_valid_o   (rifq_oup_data_valid),
-        .oup_gnt_o          (rifq_oup_gnt)
+        .oup_gnt_o          (rifq_oup_gnt),
+        .full_o             (),
+        .empty_o            ()
     );
     assign rifq_inp_data.excl = ar_push_excl;
 
@@ -512,10 +523,11 @@ module axi_riscv_lrsc #(
     b_cmd_flat_t b_status_inp_cmd_flat, b_status_oup_cmd_flat;
     assign b_status_inp_cmd_flat = b_cmd_flat_t'(b_status_inp_cmd);
     id_queue #(
-        .ID_WIDTH   (AXI_ID_WIDTH),
-        .CAPACITY   (AXI_MAX_WRITE_TXNS),
-        .data_t     (b_cmd_flat_t),
-        .FULL_BW    (1'b1)
+        .ID_WIDTH            (AXI_ID_WIDTH),
+        .CAPACITY            (AXI_MAX_WRITE_TXNS),
+        .data_t              (b_cmd_flat_t),
+        .FULL_BW             (FULL_BANDWIDTH),
+        .CUT_OUP_POP_INP_GNT (CUT_OUP_POP_INP_GNT)
     ) i_b_status_queue (
         .clk_i              (clk_i),
         .rst_ni             (rst_ni),
@@ -533,16 +545,19 @@ module axi_riscv_lrsc #(
         .oup_req_i          (b_status_oup_req),
         .oup_data_o         (b_status_oup_cmd_flat),
         .oup_data_valid_o   (b_status_oup_valid),
-        .oup_gnt_o          (b_status_oup_gnt)
+        .oup_gnt_o          (b_status_oup_gnt),
+        .full_o             (),
+        .empty_o            ()
     );
     assign b_status_oup_cmd = b_cmd_t'(b_status_oup_cmd_flat);
 
     // ID Queue to track in-flight writes.
     id_queue #(
-        .ID_WIDTH   (AXI_ID_WIDTH),
-        .CAPACITY   (AXI_MAX_WRITE_TXNS),
-        .data_t     (w_flight_t),
-        .FULL_BW    (1'b1)
+        .ID_WIDTH            (AXI_ID_WIDTH),
+        .CAPACITY            (AXI_MAX_WRITE_TXNS),
+        .data_t              (w_flight_t),
+        .FULL_BW             (FULL_BANDWIDTH),
+        .CUT_OUP_POP_INP_GNT (CUT_OUP_POP_INP_GNT)
     ) i_write_in_flight_queue (
         .clk_i              (clk_i),
         .rst_ni             (rst_ni),
@@ -560,7 +575,9 @@ module axi_riscv_lrsc #(
         .oup_req_i          (wifq_oup_req),
         .oup_data_o         (),
         .oup_data_valid_o   (wifq_oup_data_valid),
-        .oup_gnt_o          (wifq_oup_gnt)
+        .oup_gnt_o          (wifq_oup_gnt),
+        .full_o             (),
+        .empty_o            ()
     );
 
 // pragma translate_off
@@ -1017,7 +1034,8 @@ module axi_riscv_lrsc #(
             : slv_ar_id_i;
     axi_res_tbl #(
         .AXI_ADDR_WIDTH (AXI_ADDR_WIDTH-AXI_ADDR_LSB), // Track reservations with given granularity.
-        .AXI_ID_WIDTH   (RES_ID_WIDTH)
+        .AXI_ID_WIDTH   (RES_ID_WIDTH),
+        .NUM_RESERVATIONS (NUM_RESERVATIONS)
     ) i_art (
         .clk_i                  (clk_i),
         .rst_ni                 (rst_ni),
@@ -1036,21 +1054,21 @@ module axi_riscv_lrsc #(
     // Registers
     always_ff @(posedge clk_i, negedge rst_ni) begin
         if (~rst_ni) begin
-            ar_state_q = AR_IDLE;
-            aw_state_q = AW_IDLE;
-            b_state_q  = B_NORMAL;
-            clr_addr_q = '0;
-            clr_len_q  = '0;
-            clr_id_q   = '0;
-            aw_wait_q  = '0;
+            ar_state_q <= AR_IDLE;
+            aw_state_q <= AW_IDLE;
+            b_state_q  <= B_NORMAL;
+            clr_addr_q <= '0;
+            clr_len_q  <= '0;
+            clr_id_q   <= '0;
+            aw_wait_q  <= '0;
         end else begin
-            ar_state_q = ar_state_d;
-            aw_state_q = aw_state_d;
-            b_state_q  = b_state_d;
-            clr_addr_q = clr_addr_d;
-            clr_len_q  = clr_len_d;
-            clr_id_q   = clr_id_d;
-            aw_wait_q  = aw_wait_d;
+            ar_state_q <= ar_state_d;
+            aw_state_q <= aw_state_d;
+            b_state_q  <= b_state_d;
+            clr_addr_q <= clr_addr_d;
+            clr_len_q  <= clr_len_d;
+            clr_id_q   <= clr_id_d;
+            aw_wait_q  <= aw_wait_d;
         end
     end
 

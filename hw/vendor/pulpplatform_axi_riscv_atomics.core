@@ -8,6 +8,8 @@ name: pulp-platform.org::axi_riscv_atomics
 
 filesets:
   files_rtl:
+    depend:
+      - pulp-platform.org::axi
     files:
     - pulp_platform/axi_riscv_atomics/src/axi_res_tbl.sv 
     - pulp_platform/axi_riscv_atomics/src/axi_riscv_amos_alu.sv 
