@@ -33,8 +33,7 @@
   do {                                                                                                                 \
     if (!(expression)) {                                                                                               \
       _writestr("Assertion failed\n");                                                                                 \
-      while (1)                                                                                                        \
-        ;                                                                                                              \
+      while (1);                                                                                                       \
     }                                                                                                                  \
   } while (0)
 #endif // __cplusplus*/
