@@ -5,7 +5,7 @@
   axi_riscv_atomics: {
     upstream: {
       url: https://github.com/pulp-platform/axi_riscv_atomics.git
-      rev: 0ac3a78fe342c5a5b9b10bff49d58897f773059e
+      rev: 97a1dd2ac643c276880420a0cf8eea697f228aa9
     }
 
     exclude_from_upstream: [
