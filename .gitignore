@@ -56,3 +56,6 @@ hw/vendor/x-heep/hw/ip/pad_ring/pad_ring.sv
 private/
 hw/fpga/sram_wrapper.sv
 hw/fpga/scripts/generate_sram.tcl
+
+# Sphinx apidoc output
+docs/source/Configuration/xheep_gen/
