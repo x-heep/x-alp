@@ -62,8 +62,9 @@ char TbElfLoader::read_section_chunk(long long base, long long offset, char *buf
     return -1;
   }
 
-  // get memory vector for this section
-  auto mem = mems.find(base)->second;
+  // get memory vector for this section (by reference: copying it for every chunk made
+  // preloading quadratic in the section size)
+  const auto &mem = mems.find(base)->second;
 
   // check for out-of-bounds access
   if (offset < 0 || len < 0 || ((offset + len) > mem.size())) {
