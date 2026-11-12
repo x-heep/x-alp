@@ -23,13 +23,13 @@ CAPI=2:
 #       AXI as well.
 
 name: pulp-platform.org::reg_to_axi
-desc: "Registere Interface to AXI bridges"
+description: "Registere Interface to AXI bridges"
 
 filesets:
   rtl:
     depend:
     - pulp-platform.org::register_interface
-    - pulp-platform.org::axi:0.39.8
+    - pulp-platform.org::axi
     files:
     - pulp_platform/register_interface/src/axi_lite_to_reg.sv
     - pulp_platform/register_interface/src/axi_to_reg_v2.sv
