@@ -12,27 +12,6 @@ X-ALP is currently simulated with Verilator. You are welcome to explore the `X-A
 Architecture
 ^^^^^^^^^^^^
 
-The default configuration (``configs/soc.py``) generates the following system::
-
-                                 +--------------------+
-                                 |  CVA6 (RV64GC)     |       ext_mst_req_i
-     JTAG --> Debug module --+   |  I$ 16K / D$ 32K   |            |
-                             |   +---------+----------+            |
-                             |             | AXI                   |
-                             v             v                       v
-             +--------------------------------------------------------------+
-             |                AXI crossbar (64-bit addr / data)             |
-             +----+-----------------+-------------------+--------------+----+
-                  |                 |                   |              |
-              0x0000_0000       0x1000_0000         0x2000_0000    0xF000_0000
-              debug ROM        LLC SPM / cached     peripheral     ext_slv_req_o
-                               DRAM (0x8000_0000)   domain (REG)
-                                    |                   |
-                                AXI LLC            SOC_CTRL, BOOTROM, UART,
-                                    |              FAST_INTR_CTRL, AXI_LLC cfg,
-                              ext_llc_req_o        EXT_PERIPHERAL (ext_reg_req_o)
-                               (to DRAM)
-
 The full, generated address map is in :doc:`/Configuration/AddressMap`.
 
 CPU subsystem
