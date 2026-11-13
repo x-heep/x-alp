@@ -32,7 +32,7 @@ filesets:
     - openhwgroup/cvfpu/src/fpnew_top.sv
     file_type : systemVerilogSource
     depend:
-      - pulp-platform.org::common_cells:1.38.0
+      - pulp-platform.org::common_cells
 
 targets:
   default:
