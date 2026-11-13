@@ -17,7 +17,7 @@ runs:
         git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
     - name: Install Python dependencies
-      shell: bash -l {0}
+      shell: bash -le {0}
       run: |
         pip install -r util/python-requirements.txt
         pip install -r docs/python-requirements.txt

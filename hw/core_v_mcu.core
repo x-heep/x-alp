@@ -22,7 +22,7 @@ filesets:
 
   vendor_modules:
     depend:
-      - pulp-platform.org::axi:0.39.8
+      - pulp-platform.org::axi
       - pulp-platform.org::axi_riscv_atomics
       - pulp-platform.org::axi_llc
       - pulp-platform.org::riscv_dbg

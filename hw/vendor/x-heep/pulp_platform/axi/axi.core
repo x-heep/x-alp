@@ -1,6 +1,8 @@
 CAPI=2:
 
-name : pulp-platform.org::axi:0.39.8
+name: pulp-platform.org::axi:0.39.10
+description: AXI SystemVerilog synthesizable IP modules and verification infrastructure for high-performance on-chip communication.
+license: SHL-0.51
 
 filesets:
   rtl:
@@ -13,6 +15,7 @@ filesets:
       # Level 0
       - src/axi_pkg.sv
       # Level 1
+      - src/axi_demux_id_counters.sv
       - src/axi_intf.sv
       # Level 2
       - src/axi_atop_filter.sv
@@ -30,6 +33,7 @@ filesets:
       - src/axi_fifo_delay_dyn.sv
       - src/axi_id_remap.sv
       - src/axi_id_prepend.sv
+      - src/axi_inval_filter.sv
       - src/axi_isolate.sv
       - src/axi_join.sv
       - src/axi_lite_demux.sv
