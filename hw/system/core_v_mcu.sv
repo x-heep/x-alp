@@ -307,12 +307,12 @@ module core_v_mcu (
         .dma_reg_rsp_o(reg_rsp_sig[DMA_REG_IDX]),
 
         //AXI R Master
-        .bus_req_o(axi_master_req_sig[DMA_R_M_BUS_IDX]),
-        .bus_rsp_i(axi_master_rsp_sig[DMA_R_M_BUS_IDX]),
+        .bus_req_o_r(axi_master_req_sig[DMA_R_M_BUS_IDX]),
+        .bus_rsp_i_r(axi_master_rsp_sig[DMA_R_M_BUS_IDX]),
 
         //AXI W Master
-        .bus_req_o(axi_master_req_sig[DMA_W_M_BUS_IDX]),
-        .bus_rsp_i(axi_master_rsp_sig[DMA_W_M_BUS_IDX])
+        .bus_req_o_w(axi_master_req_sig[DMA_W_M_BUS_IDX]),
+        .bus_rsp_i_w(axi_master_rsp_sig[DMA_W_M_BUS_IDX])
     );
 
 endmodule
