@@ -21,12 +21,15 @@ module dma_subsystem (
     output core_v_mcu_pkg::reg_rsp_t dma_reg_rsp_o,
 
     // AXI bus Request Master Read
-    output core_v_mcu_pkg::axi_mst_req_t bus_req_o_r,  //this is a master!
+    output core_v_mcu_pkg::axi_mst_req_t bus_req_o_r,  //this is a master read!
     // AXI bus response Master Read
     input  core_v_mcu_pkg::axi_mst_rsp_t bus_rsp_i_r,
 
-    output core_v_mcu_pkg::axi_mst_req_t bus_req_o_w,  //
+    output core_v_mcu_pkg::axi_mst_req_t bus_req_o_w,  //this is a master write!
     input  core_v_mcu_pkg::axi_mst_rsp_t bus_rsp_i_w
+
+
+
 
 
 

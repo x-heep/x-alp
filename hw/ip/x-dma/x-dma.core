@@ -1,0 +1,18 @@
+CAPI=2:
+
+name: x-alp:ip:x-dma
+filesets:
+  vendor_modules:
+    depend:
+      - pulp-platform.org::register_interface
+
+  rtl:
+    file_type: systemVerilogSource
+    files:
+      - x_dma.sv
+
+targets:
+  default:
+    filesets:
+    - "!target_format ? (!target_lint ? (vendor_modules))"    
+    - rtl
