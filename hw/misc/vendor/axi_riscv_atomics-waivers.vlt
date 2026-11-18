@@ -2,3 +2,5 @@
 
 lint_off -rule CMPCONST -file "*/*axi_riscv_atomics*/*/axi_riscv_lrsc.sv"
 lint_off -rule UNSIGNED -file "*/*axi_riscv_atomics*/*/axi_riscv_lrsc.sv"
+// Newer common_cells id_queue adds full_o/empty_o, left unconnected upstream
+lint_off -rule PINMISSING -file "*/*axi_riscv_atomics*/*/axi_riscv_lrsc.sv" -match "Instance has missing pin: '*_o'"
