@@ -30,7 +30,7 @@ For more details, check the [official vendor documentation](https://opentitan.or
 
 [FuseSoC](https://fusesoc.readthedocs.io/en/stable/index.html) is an open-source package manager and build system for hardware designs. It manages dependencies, configurations and tool flows. X-ALP uses the X-HEEP fork of FuseSoC, installed with the Python environment.
 
-The main building blocks of FuseSoC are the `.core` files. A `.core` file is a self-contained description of a hardware module, including its sources, dependencies and configurations. The main `.core` file of X-ALP is `xalp.core` (core name `x-heep:x-alp:x-alp:0.0.1`), which defines the `sim`, `lint` and `format` targets and the simulation parameters. The other `.core` files are in `hw/` (e.g. `hw/core_v_mcu.core`) and `tb/` (`tb/tb.core`).
+The main building blocks of FuseSoC are the `.core` files. A `.core` file is a self-contained description of a hardware module, including its sources, dependencies and configurations. The main `.core` file of X-ALP is `xalp.core` (core name `x-heep:x-alp:x-alp:0.0.1`), which defines the `sim`, `lint` and `format` targets, the FPGA targets (`zcu104`, `aup-zu3`) and the simulation parameters. The other `.core` files are in `hw/` (e.g. `hw/core_v_mcu.core`) and `tb/` (`tb/tb.core`).
 
 The top-level `Makefile` uses FuseSoC behind the scenes to build, simulate and lint the design. Build outputs are written to `build/x-heep_x-alp_x-alp_0.0.1/`. To write your own `.core` files, check the [FuseSoC documentation](https://fusesoc.readthedocs.io/en/stable/user/build_system/core_files.html).
 
@@ -50,6 +50,9 @@ All the flows are driven from the top-level `Makefile`. Run `make help` to see t
 | `verilator-run` | Run a simulation with waveforms |
 | `verilator-opt` | Run a simulation without waveforms (faster) |
 | `verilator-waves` | Open the last waveform with GTKWave |
+| `vivado-fpga` | Build the FPGA bitstream (see [Run on FPGA](../FPGA/RunOnFPGA.md)) |
+| `vivado-fpga-pgm` | Program the FPGA bitstream |
+| `fpga-picocom`, `fpga-openocd`, `fpga-gdb`, `fpga-gdb-dram` | Run and debug programs on the FPGA |
 | `format` | Format SystemVerilog and C/C++ files |
 | `lint` | Lint the design with Verible |
 | `vendor-update` | Update the vendored repositories |

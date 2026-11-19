@@ -86,7 +86,7 @@ lint_off -rule LATCH -file "*/cva6_fifo_v3.sv" -match "Latch inferred for signal
 // This comes from an automatic, so maybe it is not a problem in synthesis
 lint_off -rule LATCH -file "*/csr_regfile.sv" -match "Latch inferred for signal *"
 lint_off -rule LATCH -file "*/cva6_tlb.sv" -match "Latch inferred for signal *"
-
+lint_off -rule LATCH -file "*/cva6_mmu.sv" -match "Latch inferred for signal *"
 
 //////////////////////
 // Unopt

@@ -84,3 +84,7 @@ From GDB you can then use the usual commands, for example:
 ```
 
 When the program returns from `main()`, the simulation ends and the exit code is printed in the first shell.
+
+## Debugging on FPGA
+
+On the FPGA, OpenOCD connects to the JTAG of X-ALP through the ESL programmer instead of the remote bitbang server. See [Run on FPGA](../FPGA/RunOnFPGA.md#running-firmware-on-the-fpga).

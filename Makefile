@@ -11,7 +11,7 @@ mkfile_path := $(shell dirname "$(realpath $(firstword $(MAKEFILE_LIST)))")
 $(info Executing from: $(mkfile_path))
 
 # ============================================================================
-# Python Environment Setup
+# Environment Setup
 # ============================================================================
 VENVDIR ?= $(WORKDIR)/.venv
 REQUIREMENTS_TXT ?= util/python-requirements.txt docs/python-requirements.txt
@@ -29,6 +29,11 @@ else
   FUSESOC := $(PWD)/$(VENV)/fusesoc
   PYTHON := $(PWD)/$(VENV)/python
 endif
+
+FPGA_UART   := $(or $(wildcard /dev/serial/by-id/usb-FTDI_Quad_RS232-HS-if02-port0),$(FPGA_UART))
+UART_BAUD   ?= 256000
+OPENOCD_CFG ?= tb/core-v-mcu-xheep-programmer.cfg
+GDB         ?= $(RISCV_XALP)/bin/$(COMPILER_PREFIX)elf-gdb
 
 # ============================================================================
 # Build Configuration
@@ -323,6 +328,61 @@ verilator-opt:
 .PHONY: verilator-waves
 verilator-waves: .check-gtkwave
 	@gtkwave build/x-heep_x-alp_x-alp_0.0.1/sim-verilator/waveform.fst util/wave.gtkw
+
+# ============================================================================
+# FPGA Build and Run
+# ============================================================================
+
+## @section Vivado
+
+## Builds (synthesis and implementation) the bitstream for the FPGA version using Vivado
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+## @param FUSESOC_FLAGS=--flag=<flagname>
+.PHONY: vivado-fpga
+vivado-fpga:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+.PHONY: vivado-fpga-nobuild
+vivado-fpga-nobuild:
+	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --setup x-heep:x-alp:x-alp:0.0.1 $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
+
+## Loads the generated bitstream into the FPGA
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+.PHONY: vivado-fpga-pgm
+vivado-fpga-pgm:
+	@# Edalize's own `pgm` rule (fusesoc --run is a no-op without its pgm option);
+	@# -o keeps make from rebuilding the bitstream when a source is newer than it.
+	$(MAKE) -C build/$(subst :,_,$(XALP))/$(FPGA_BOARD)-vivado pgm -o $(subst :,_,$(XALP)).bit 2>&1 | tee programfpga.log
+
+## @section FPGA Debug
+
+## Opens the FPGA UART console with picocom (exit with ctrl+A, ctrl+Q)
+## @param FPGA_UART=<serial_device>
+## @param UART_BAUD=256000(default)
+.PHONY: fpga-picocom
+fpga-picocom:
+	@test -e "$(FPGA_UART)" || { \
+		printf "\033[0;31m✗ ERROR: UART device '$(FPGA_UART)' not found, set FPGA_UART=<device>\033[0m\n" >&2; \
+		exit 1; \
+	}
+	picocom -b $(UART_BAUD) -r -l --imap lfcrlf $(FPGA_UART)
+
+## Starts OpenOCD on the FPGA JTAG, GDB server on port 3333
+## @param OPENOCD_CFG=tb/core-v-mcu-xheep-programmer.cfg(default)
+.PHONY: fpga-openocd
+fpga-openocd:
+	openocd -f $(OPENOCD_CFG)
+
+## Loads and runs sw/build/main.spm.elf in the LLC scratchpad (needs fpga-openocd)
+.PHONY: fpga-gdb
+fpga-gdb:
+	$(GDB) sw/build/main.spm.elf -x util/fpga_init.gdb
+
+## Loads and runs sw/build/main.dram.elf in the external DRAM (needs fpga-openocd)
+.PHONY: fpga-gdb-dram
+fpga-gdb-dram:
+	$(GDB) sw/build/main.dram.elf -ex "target extended-remote :3333" -ex "monitor reset halt"
+
 
 # ============================================================================
 # Code Quality

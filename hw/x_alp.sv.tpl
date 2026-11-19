@@ -24,8 +24,8 @@ module x_alp (
     input  core_v_mcu_pkg::axi_mst_req_t ext_mst_req_i,
     output core_v_mcu_pkg::axi_mst_rsp_t ext_mst_rsp_o,
 
-    output core_v_mcu_pkg::axi_mst_req_t ext_llc_req_o,
-    input  core_v_mcu_pkg::axi_mst_rsp_t ext_llc_rsp_i,
+    output core_v_mcu_pkg::axi_llc_req_t ext_llc_req_o,
+    input  core_v_mcu_pkg::axi_llc_rsp_t ext_llc_rsp_i,
 
     output core_v_mcu_pkg::reg_req_t ext_reg_req_o,
     input  core_v_mcu_pkg::reg_rsp_t ext_reg_rsp_i,

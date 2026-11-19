@@ -56,7 +56,6 @@ filesets:
       - openhwgroup/cva6/core/cache_subsystem/wt_dcache_missunit.sv 
       - openhwgroup/cva6/core/cache_subsystem/wt_dcache_wbuffer.sv 
       - openhwgroup/cva6/core/cache_subsystem/wt_dcache.sv 
-      - openhwgroup/cva6/core/cache_subsystem/wt_l15_adapter.sv
       - openhwgroup/cva6/core/acc_dispatcher.sv 
       - openhwgroup/cva6/core/aes.sv 
       - openhwgroup/cva6/core/alu_wrapper.sv 
@@ -115,6 +114,7 @@ filesets:
   rtl_fpga:
     files:
     - openhwgroup/cva6/common/local/util/tc_sram_fpga_wrapper.sv
+    - pulp_platform/fpga-support/rtl/SyncSpRamBeNx64.sv
     file_type : systemVerilogSource
 
 
@@ -123,5 +123,5 @@ targets:
     filesets:
     - "!target_format ? (!target_lint ? (rtl))"
     - target_sim ? (sim_rtl)
-    - target_fpga ? (rtl_fpga)
+    - tool_vivado ? (rtl_fpga)
 

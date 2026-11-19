@@ -31,6 +31,12 @@ module axi_riscv_atomics_structs #(
   parameter int unsigned  RiscvWordWidth  = 0,
   parameter int unsigned  NAxiCuts        = 0,
   parameter int unsigned  AxiAddrLSB      = $clog2(AxiDataWidth/8),
+  parameter bit           FullBandwidth   = 1,
+  parameter bit           CutOupPopInpGnt = 0,
+  parameter int unsigned  NumReservations = 2**(AxiUserAsId ?
+            AxiUserIdMsb - AxiUserIdLsb + 1
+            : AxiIdWidth),
+
   parameter type          axi_req_t       = logic,
   parameter type          axi_rsp_t       = logic
 ) (
@@ -63,18 +69,21 @@ module axi_riscv_atomics_structs #(
   `AXI_ASSIGN_FROM_RESP(mst, axi_mst_rsp_i)
 
   axi_riscv_atomics_wrap #(
-    .AXI_ADDR_WIDTH     ( AxiAddrWidth    ),
-    .AXI_DATA_WIDTH     ( AxiDataWidth    ),
-    .AXI_ID_WIDTH       ( AxiIdWidth      ),
-    .AXI_USER_WIDTH     ( AxiUserWidth    ),
-    .AXI_MAX_READ_TXNS  ( AxiMaxReadTxns  ),
-    .AXI_MAX_WRITE_TXNS ( AxiMaxWriteTxns ),
-    .AXI_USER_AS_ID     ( AxiUserAsId     ),
-    .AXI_USER_ID_MSB    ( AxiUserIdMsb    ),
-    .AXI_USER_ID_LSB    ( AxiUserIdLsb    ),
-    .AXI_ADDR_LSB       ( AxiAddrLSB      ),
-    .RISCV_WORD_WIDTH   ( RiscvWordWidth  ),
-    .N_AXI_CUT          ( NAxiCuts        )
+    .AXI_ADDR_WIDTH      ( AxiAddrWidth    ),
+    .AXI_DATA_WIDTH      ( AxiDataWidth    ),
+    .AXI_ID_WIDTH        ( AxiIdWidth      ),
+    .AXI_USER_WIDTH      ( AxiUserWidth    ),
+    .AXI_MAX_READ_TXNS   ( AxiMaxReadTxns  ),
+    .AXI_MAX_WRITE_TXNS  ( AxiMaxWriteTxns ),
+    .AXI_USER_AS_ID      ( AxiUserAsId     ),
+    .AXI_USER_ID_MSB     ( AxiUserIdMsb    ),
+    .AXI_USER_ID_LSB     ( AxiUserIdLsb    ),
+    .AXI_ADDR_LSB        ( AxiAddrLSB      ),
+    .RISCV_WORD_WIDTH    ( RiscvWordWidth  ),
+    .N_AXI_CUT           ( NAxiCuts        ),
+    .FULL_BANDWIDTH      ( FullBandwidth   ),
+    .CUT_OUP_POP_INP_GNT ( CutOupPopInpGnt ),
+    .NUM_RESERVATIONS    ( NumReservations )
   ) i_axi_riscv_atomics_wrap (
     .clk_i,
     .rst_ni,

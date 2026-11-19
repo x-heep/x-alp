@@ -30,8 +30,8 @@ module core_v_mcu (
     input logic test_mode_i,
 
     // LLC External Interface
-    output core_v_mcu_pkg::axi_mst_req_t ext_llc_req_o,
-    input  core_v_mcu_pkg::axi_mst_rsp_t ext_llc_rsp_i,
+    output core_v_mcu_pkg::axi_llc_req_t ext_llc_req_o,
+    input  core_v_mcu_pkg::axi_llc_rsp_t ext_llc_rsp_i,
 
     // External Peripheral Interface
     output core_v_mcu_pkg::axi_slv_req_t ext_slv_req_o,
@@ -145,8 +145,8 @@ module core_v_mcu (
         .reg_resp_t      (reg_rsp_t),
         .slv_req_t       (axi_slv_req_t),
         .slv_resp_t      (axi_slv_rsp_t),
-        .mst_req_t       (axi_mst_req_t),
-        .mst_resp_t      (axi_mst_rsp_t),
+        .mst_req_t       (axi_llc_req_t),
+        .mst_resp_t      (axi_llc_rsp_t),
         .rule_full_t     (rule_t)
     ) u_axi_llc (
         .clk_i              (clk_i),

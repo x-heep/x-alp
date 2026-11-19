@@ -72,7 +72,7 @@ module testharness #(
     core_v_mcu_pkg::axi_slv_rsp_t ext_slv_rsp;
 
     // Memory interface
-    localparam int AddrWidth = $clog2(256) + 1;
+    localparam int AddrWidth = $clog2(256) + 3;  // 11-bit byte address for 2KB (256 words × 8B)
     logic                 tb_mem_req;
     logic [AddrWidth-1:0] tb_mem_addr;
     logic [         63:0] tb_mem_wdata;
@@ -85,8 +85,8 @@ module testharness #(
     localparam int unsigned DramWords = 32'd8192;  // 64 KiB at 64 bit/word
     localparam int unsigned DramAddrWidth = $clog2(DramWords * 8);
 
-    core_v_mcu_pkg::axi_mst_req_t                     ext_llc_req;
-    core_v_mcu_pkg::axi_mst_rsp_t                     ext_llc_rsp;
+    core_v_mcu_pkg::axi_llc_req_t                     ext_llc_req;
+    core_v_mcu_pkg::axi_llc_rsp_t                     ext_llc_rsp;
 
     logic                                             tb_dram_req;
     logic                         [DramAddrWidth-1:0] tb_dram_addr;
@@ -136,8 +136,8 @@ module testharness #(
     // Backs the LLC's cached region. Without it every cache miss stalls
     // forever, so LINKER=dram binaries never start.
     axi_to_mem #(
-        .axi_req_t   (core_v_mcu_pkg::axi_mst_req_t),
-        .axi_resp_t  (core_v_mcu_pkg::axi_mst_rsp_t),
+        .axi_req_t   (core_v_mcu_pkg::axi_llc_req_t),
+        .axi_resp_t  (core_v_mcu_pkg::axi_llc_rsp_t),
         .AddrWidth   (DramAddrWidth),
         .DataWidth   (64),
         .NumBanks    (1),
@@ -235,7 +235,7 @@ module testharness #(
         .rst_ni          (rst_ni),
         .req_i           (tb_mem_req),
         .we_i            (tb_mem_we),
-        .addr_i          ({2'b00, tb_mem_addr[AddrWidth-1:3]}),
+        .addr_i          (tb_mem_addr[AddrWidth-1:3]),
         .wdata_i         (tb_mem_wdata),
         .be_i            ('1),
         .pwrgate_ni      ('1),

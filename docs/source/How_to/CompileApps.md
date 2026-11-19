@@ -19,7 +19,7 @@ You can select the application, the memory layout, the compiler, etc. with the f
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `PROJECT` | `hello_world` | Folder name of the application in `sw/applications` |
-| `TARGET` | `sim` | Target platform; selects `sw/device/target/<TARGET>/`. Only `sim` is available |
+| `TARGET` | `sim` | Target platform; selects `sw/device/target/<TARGET>/`: `sim` or `zcu104` (see [Run on FPGA](../FPGA/RunOnFPGA.md)) |
 | `LINKER` | `spm` | Memory layout: `spm`, `dram` or `rom` (see [below](#memory-layouts)) |
 | `COMPILER` | `gcc` | `gcc` or `clang` |
 | `COMPILER_PREFIX` | `riscv32-corev-` | Toolchain prefix, e.g. `riscv32-corev-` or `riscv32-unknown-` |
