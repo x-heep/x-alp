@@ -5,7 +5,7 @@ X-ALP
 
 As in X-HEEP, the goal is to provide a ready-to-use system that you can extend with your own accelerators without modifying it, just instantiating it in your design. The whole platform is generated from a Python description (see :doc:`/Configuration/index`), and firmware is built with CMake and the RISC-V GCC or Clang toolchains.
 
-X-ALP is currently simulated with Verilator. You are welcome to explore the `X-ALP repository <https://github.com/x-heep/x-alp>`_.
+X-ALP is simulated with Verilator and can be implemented on Xilinx FPGAs (see :doc:`/FPGA/index`). You are welcome to explore the `X-ALP repository <https://github.com/x-heep/x-alp>`_.
 
 .. _architecture:
 
@@ -55,4 +55,5 @@ Index
    /Configuration/index
    /Extending/index
    /Testing/index
+   /FPGA/index
    /Peripherals/index
