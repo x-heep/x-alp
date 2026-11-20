@@ -45,6 +45,7 @@ class XAlp(System):
         "soc_ctrl",
         "uart",
         "axi_llc",
+        "dma",
     ]
     """Constant list of peripheral names available for X-ALP."""
 
@@ -112,7 +113,11 @@ class XAlp(System):
             bus.add_master(AxiMaster("debug_module"))
         for peripheral in self.get_peripherals():
             for i in range(peripheral.get_num_master_ports()):
-                bus.add_master(AxiMaster(f"{peripheral.get_name()}_{i}"))
+                if peripheral.get_name() == "dma":
+                    bus.add_master(AxiMaster("DMA_R"))
+                    bus.add_master(AxiMaster("DMA_W"))
+                else:
+                    bus.add_master(AxiMaster(f"{peripheral.get_name()}_{i}"))
         bus.add_master(AxiMaster("ext_master"))
 
         slaves = []

@@ -1,0 +1,19 @@
+{
+  name: "x_dma",
+  clock_primary: "clk_i"
+  bus_interfaces: [
+    { protocol: "reg_iface", direction: "device" }
+  ]
+  regwidth: "32",
+  registers: [
+    { name:     "STATUS"
+      desc:     "X-DMA Status reg"
+      swaccess: "rw"
+      hwaccess: "hro"
+      fields: [
+        { bits: "0", name: "OPERATIONAL", desc: "Operational FSM status" }
+      ]
+    }
+  ]
+}
+

@@ -6,6 +6,7 @@ filesets:
   subsystems_rtl:
     file_type: systemVerilogSource
     files:
+      - subsystems/dma_subsystem.sv
       - subsystems/memory_subsystem.sv
       - subsystems/cpu_subsystem.sv
       - subsystems/bus_subsystem.sv
@@ -33,6 +34,7 @@ filesets:
   
   ip_modules:
     depend:
+      - x-alp:ip:x-dma
       - x-alp:ip:boot_rom
       - x-heep:ip:soc_ctrl
       - x-heep:ip:fast_intr_ctrl

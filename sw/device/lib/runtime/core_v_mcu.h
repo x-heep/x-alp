@@ -70,6 +70,11 @@ extern "C" {
 #define AXI_LLC_SIZE 0x0000000000010000
 #define AXI_LLC_END_ADDRESS (AXI_LLC_BASE_ADDRESS + AXI_LLC_SIZE)
 
+#define DMA_BASE_ADDRESS 0x0000000020060000
+#define DMA_START_ADDRESS DMA_BASE_ADDRESS
+#define DMA_SIZE 0x0000000000010000
+#define DMA_END_ADDRESS (DMA_BASE_ADDRESS + DMA_SIZE)
+
 // Linker-defined base address symbols (from common.ldh). The *address* of each
 // symbol is the corresponding base address; use as &__base_<name>.
 #ifndef __ASSEMBLER__
@@ -82,6 +87,7 @@ extern char __base_ext_peripheral;
 extern char __base_fast_intr_ctrl;
 extern char __base_uart;
 extern char __base_axi_llc;
+extern char __base_dma;
 extern char __base_spm;
 extern char __base_dram;
 #endif // __ASSEMBLER__
