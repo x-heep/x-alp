@@ -41,6 +41,8 @@
     {from: "hw/vendor/pulp_platform_riscv_dbg_pkg.core", to: "pulp_platform_riscv_dbg_pkg.core"},
     {from: "hw/vendor/pulp_platform/tech_cells_generic", to: "pulp_platform/tech_cells_generic"},
     {from: "hw/vendor/pulp_platform_tech_cells_generic.core", to: "pulp_platform_tech_cells_generic.core"},
+    {from: "hw/vendor/pulp_platform/serial_link", to: "pulp_platform/serial_link"},
+    {from: "hw/vendor/pulp_platform_serial_link.core", to: "pulp_platform_serial_link.core"},
 
     {from: "hw/vendor/lowrisc/opentitan", to: "lowrisc/opentitan"},
   ],
