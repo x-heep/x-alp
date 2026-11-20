@@ -1,15 +1,29 @@
 #include "core_v_mcu.h"
+// #include "dma_structs.h"
 #include "printf.h"
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 
 #define DMA_BASE_ADDRESS 0x0000000020060000
 #define DMA_START_ADDRESS DMA_BASE_ADDRESS
 #define DMA_SIZE 0x0000000000010000
 #define DMA_END_ADDRESS (DMA_BASE_ADDRESS + DMA_SIZE)
+
+// FIXME this needs to be removed, dma_structs.h
+// cannot be imported for some reason.
+
+typedef struct dma_descriptor {
+
+  uint64_t src_addr; /*!< Source address for the DMA transfer */
+
+  uint64_t dst_addr; /*!< Destination address for the DMA transfer */
+
+  uint64_t next_desc_addr; /*!< Address of the next descriptor in the chain */
+
+  uint64_t flags; /*!< Flags for controlling the DMA transfer */
+
+} dma_descriptor;
 
 int32_t A[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
@@ -41,16 +55,24 @@ int main(int argc, char *argv[]) {
       return EXIT_FAILURE;
     }
   }
-
   printf("Starting DMA Test peripheral:\n");
   printf("DMA Start Address: 0x%lx\n", DMA_START_ADDRESS);
-  *dma_start_address = 0x1; // start the DMA transfer
-  *dma_start_address = 0x2; // start the DMA transfer
-  *dma_start_address = 0x3; // start the DMA transfer
 
-  //Data transfer hangs here.
-  printf("Reading back from DMA peripheral:\n");
-  printf("Data: 0x%lx\n", *dma_start_address);
+  dma_descriptor first = {
+      .src_addr = 0xCAFEBABE,
+      .dst_addr = 0xDEADBEEF,
+      .next_desc_addr = 0xDEADBABE, // no next descriptor
+      .flags = 0x1                  // start the transfer
+  };
+
+  *dma_start_address = (int64_t)&first; // start the DMA transfer
+  printf("Sent descriptor address to DMA: 0x%lx\n", *dma_start_address);
+  //*dma_start_address = 0x2; // start the DMA transfer
+  //*dma_start_address = 0x3; // start the DMA transfer
+
+  // Data transfer hangs here.
+  // printf("Reading back from DMA peripheral:\n");
+  // printf("Data: 0x%lx\n", *dma_start_address);
 
   return EXIT_SUCCESS;
 }
